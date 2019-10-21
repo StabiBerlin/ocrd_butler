@@ -1,0 +1,30 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+
+[dev-packages]
+bumpversion = "*"
+wheel = "*"
+watchdog = "*"
+flake8 = "*"
+tox = "*"
+coverage = "*"
+pytest = "*"
+pytest-runner = "*"
+PyInstaller = "*"
+Sphinx = "*"
+twine = "*"
+pylint = "*"
+ipdb = "*"
+
+[packages]
+ocrd_butler = {path = ".",editable = true}
+click = "*"
+flask = "==1.1.1"
+flask-restplus = "==0.13.0"
+celery = "==4.3.0"
+redis = "==3.3.11"
+flower = "*"
+kombu = "==4.6.3" # https://github.com/celery/kombu/issues/1063
+ocrd = "*"
+ocrd-tesserocr = "*"
