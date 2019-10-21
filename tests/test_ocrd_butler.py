@@ -7,7 +7,7 @@ import pytest
 
 from click.testing import CliRunner
 
-from ocrd_butler import ocrd_butler
+from ocrd_butler import app
 from ocrd_butler import cli
 
 

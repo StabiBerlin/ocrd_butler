@@ -1,0 +1,17 @@
+{
+    "examples": [
+        {
+            "id": "PPN74728721X",
+            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN74728721X.mets.xml",
+            "file_grp": "DEFAULT",
+            "tesseract_model": "deu"
+        }
+        ,
+        {
+            "id": "PPN80041750X",
+            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+            "file_grp": "DEFAULT",
+            "tesseract_model": "deu"
+        }
+    ]
+}

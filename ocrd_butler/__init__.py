@@ -8,6 +8,10 @@ __version__ = '0.1.0'
 
 
 from celery import Celery
+from ocrd_butler.util import get_config_json
+
+config_json = get_config_json()
+
 
 def make_celery(app_name=__name__):
     """
@@ -18,9 +22,9 @@ def make_celery(app_name=__name__):
     Returns:
         celery object
     """
-    redis_uri = "redis://localhost:6379"
     return Celery(app_name,
-                    backend=redis_uri,
-                    broker=redis_uri)
+                  backend=config_json['CELERY_RESULT_BACKEND_URL'],
+                  broker=config_json['CELERY_BROKER_URL'])
 
+# The base celery object of the app.
 celery = make_celery()

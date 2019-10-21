@@ -47,7 +47,8 @@ FLASK_APP=ocrd_butler/app.py flask run
 
 Start celery worker:
 .. code-block: bash
-TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery -A ocrd_butler.app.celery worker -E -l info
+TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
+# TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery -A ocrd_butler.app.celery worker -E -l info
 # TESSDATA_PREFIX=/usr/share/tessdata celery -A ocrd_butler.app.celery worker -E -l info
 
 --> If download fails - disable the proxy on local machines. Problems with network connections are due to the proxy by default.
@@ -60,6 +61,9 @@ flower --broker redis://redis.localhost:6379
 
 Flower monitor: http://localhost:5555
 
+Resources
+---------
+[Flask + Celery = how to.](https://medium.com/@frassetto.stefano/flask-celery-howto-d106958a15fe)
 
 Credits
 -------

@@ -8,99 +8,20 @@ import sys
 import subprocess
 import time
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Blueprint
 from flask_restplus import Api, Resource, fields
 
-from ocrd_butler.celery_utils import create_celery_app
+import ocrd_butler
+from ocrd_butler import factory
+from ocrd_butler.tasks import create_task
+from ocrd_butler.util import get_config_json
 
+flask_app = factory.create_app(celery=ocrd_butler.celery)
 
-flask_app = Flask(__name__)
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
-config_file_path = os.path.join(dir_path, "./config/config.json")
-config_file = os.path.abspath(config_file_path)
-try:
-    with open(config_file) as config_handle:
-        config_json = json.load(config_handle)
-        flask_app.config.update(config_json)
-        if not os.path.exists(flask_app.config["OCRD_BUTLER_RESULTS"]):
-            os.makedirs(flask_app.config["OCRD_BUTLER_RESULTS"])
-except FileNotFoundError as exc:
-    print ("Can't find configuration file '{}'. ({})".format(
-        config_file,
-        exc.__str__()))
-
-# celery configuration
-flask_app.config.update(
-    CELERY_RESULT_BACKEND_URL="redis://localhost:6379",
-    CELERY_BROKER_URL="redis://localhost:6379"
-)
-celery = create_celery_app(flask_app)
-
-@celery.task()
-def create_task(task):
-    # maybe create a unique id for a task?
-
-
-    # Create workspace
-    from ocrd.cli.workspace import WorkspaceCtx, workspace_clone
-    dst_dir = "{}/{}".format(flask_app.config["OCRD_BUTLER_RESULTS"], task["id"])
-    ctx = WorkspaceCtx(
-        directory = dst_dir,
-        mets_basename = "{}.xml".format(task["id"]),
-        automatic_backup = True
-    )
-    workspace = ctx.resolver.workspace_from_url(
-        task["mets_url"],
-        dst_dir=dst_dir,
-        mets_basename=ctx.mets_basename,
-        clobber_mets=True
-    )
-
-    for f in workspace.mets.find_files(fileGrp=task["file_grp"]):
-        if not f.local_filename:
-            workspace.download_file(f)
-
-    workspace.save_mets()
-
-
-    from ocrd_tesserocr.segment_region import TesserocrSegmentRegion
-    from ocrd_tesserocr.segment_line import TesserocrSegmentLine
-    from ocrd_tesserocr.segment_word import TesserocrSegmentWord
-    from ocrd_tesserocr.recognize import TesserocrRecognize
-    from ocrd.processor.base import run_processor
-
-    run_processor(TesserocrSegmentRegion,
-                  mets_url=task['mets_url'],
-                  workspace=workspace,
-                  input_file_grp="DEFAULT",
-                  output_file_grp="SEGMENTREGION")
-    run_processor(TesserocrSegmentLine,
-                  mets_url=task['mets_url'],
-                  workspace=workspace,
-                  input_file_grp="SEGMENTREGION",
-                  output_file_grp="SEGMENTLINE")
-    run_processor(TesserocrSegmentWord,
-                  mets_url=task['mets_url'],
-                  workspace=workspace,
-                  input_file_grp="SEGMENTLINE",
-                  output_file_grp="SEGMENTWORD")
-    # TODO: model has to be stored in a json file with the needed parameters
-    run_processor(TesserocrRecognize,
-                  mets_url=task['mets_url'],
-                  workspace=workspace,
-                  input_file_grp="SEGMENTWORD",
-                  output_file_grp="RECOGNIZE",
-                  parameter={
-                      "model": task['tesseract_model'],
-                      "overwrite_words": False,
-                      "textequiv_level": "line"
-                    })
-
-    return {
-        "task_id": task["id"],
-        "status": "Created"
-    }
+config_json = get_config_json()
+flask_app.config.update(config_json)
+if not os.path.exists(flask_app.config["OCRD_BUTLER_RESULTS"]):
+    os.makedirs(flask_app.config["OCRD_BUTLER_RESULTS"])
 
 # flask-restplus configuration
 app = Api(
@@ -113,27 +34,26 @@ name_space = app.namespace(
     "ocrd-tasks",
     description="Manage OCR-D Tasks")
 
-task_model = app.model("Task Model",
-            {
-                "id": fields.String(
-                        required = True,
-                        description="ID of the work",
-                        help="Can e.g. be a PPN or a SNP."),
-                "mets_url": fields.String(
-                        required = True,
-                        description="METS URL of the work",
-                        help="Full URL is required."),
-                "file_grp": fields.String(
-                        required = False,
-                        description="The file group in the METS file to start the process chain with.",
-                        help="Defaults to 'DEFAULT'.",
-                        default="DEFAULT"),
-                "tesseract_model": fields.String(
-                        required = False,
-                        description="The model used to do the OCR processing.",
-                        help="Defaults to 'deu'.",
-                        default='deu'),
-            })
+task_model = app.model("Task Model", {
+    "id": fields.String(
+            required = True,
+            description="ID of the work",
+            help="Can e.g. be a PPN or a SNP."),
+    "mets_url": fields.String(
+            required = True,
+            description="METS URL of the work",
+            help="Full URL is required."),
+    "file_grp": fields.String(
+            required = False,
+            description="The file group in the METS file to start the process chain with.",
+            help="Defaults to 'DEFAULT'.",
+            default="DEFAULT"),
+    "tesseract_model": fields.String(
+            required = False,
+            description="The model used to do the OCR processing.",
+            help="Defaults to 'deu'.",
+            default='deu'),
+})
 
 # get the status of a task
 # get the results of a task - this collect links to the resources like mets files, images, etc.
