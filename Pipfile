@@ -16,6 +16,7 @@ Sphinx = "*"
 twine = "*"
 pylint = "*"
 ipdb = "*"
+pdbpp = "*"
 
 [packages]
 ocrd_butler = {path = ".",editable = true}

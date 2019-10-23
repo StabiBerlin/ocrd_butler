@@ -17,7 +17,29 @@ from ocrd.processor.base import run_processor
 from ocrd_butler import celery
 from ocrd_butler.util import get_config_json
 
+chain_config = {
+    "TesserocrSegmentRegion": {
+        "class": TesserocrSegmentRegion,
+        "output_file_grp": "SEGMENTREGION"
+    },
+    "TesserocrSegmentLine": {
+        "class": TesserocrSegmentLine,
+        "output_file_grp": "SEGMENTLINE"
+    },
+    "TesserocrSegmentWord": {
+        "class": TesserocrSegmentWord,
+        "output_file_grp": "SEGMENTWORD"
+
+    },
+    "TesserocrRecognize":  {
+        "class": TesserocrRecognize,
+        "output_file_grp": "RECOGNIZE"
+
+    },
+}
+
 config_json = get_config_json()
+
 
 @celery.task()
 def create_task(task):
@@ -41,32 +63,66 @@ def create_task(task):
 
     workspace.save_mets()
 
-    # Run predefined processors.
-    run_processor(TesserocrSegmentRegion,
-                  mets_url=task['mets_url'],
-                  workspace=workspace,
-                  input_file_grp="DEFAULT",
-                  output_file_grp="SEGMENTREGION")
-    run_processor(TesserocrSegmentLine,
-                  mets_url=task['mets_url'],
-                  workspace=workspace,
-                  input_file_grp="SEGMENTREGION",
-                  output_file_grp="SEGMENTLINE")
-    run_processor(TesserocrSegmentWord,
-                  mets_url=task['mets_url'],
-                  workspace=workspace,
-                  input_file_grp="SEGMENTLINE",
-                  output_file_grp="SEGMENTWORD")
-    run_processor(TesserocrRecognize,
-                  mets_url=task['mets_url'],
-                  workspace=workspace,
-                  input_file_grp="SEGMENTWORD",
-                  output_file_grp="RECOGNIZE",
-                  parameter={
-                      "model": task['tesseract_model'],
+    chain = [
+        {"processor": "TesserocrSegmentRegion"},
+        {"processor": "TesserocrSegmentLine"},
+        {"processor": "TesserocrSegmentWord"},
+        {
+            "processor": "TesserocrRecognize",
+            "parameters": {
+                      "model": "task_tesseract_model",
                       "overwrite_words": False,
                       "textequiv_level": "line"
-                    })
+            }
+        }
+    ]
+
+    for index, step in enumerate(chain):
+        input_file_grp = "DEFAULT"
+        if index > 0:
+            input_file_grp = chain_config[chain[index-1]["processor"]]["output_file_grp"]
+
+        processor = chain_config[chain[index]["processor"]]
+
+        if 'parameters' in step:
+            for key, value in step["parameters"].items():
+                if type(value) is str and value.startswith("task_"):
+                    step["parameters"][key] = task[value[5:]]
+
+        run_processor(processor["class"],
+                    mets_url=task["mets_url"],
+                    workspace=workspace,
+                    input_file_grp=input_file_grp,
+                    output_file_grp=processor["output_file_grp"])
+
+
+
+    # Run predefined processors.
+    # run_processor(TesserocrSegmentRegion,
+    #               mets_url=task["mets_url"],
+    #               workspace=workspace,
+    #               input_file_grp="DEFAULT",
+    #               output_file_grp="SEGMENTREGION")
+    # run_processor(TesserocrSegmentLine,
+    #               mets_url=task["mets_url"],
+    #               workspace=workspace,
+    #               input_file_grp="SEGMENTREGION",
+    #               output_file_grp="SEGMENTLINE")
+    # run_processor(TesserocrSegmentWord,
+    #               mets_url=task["mets_url"],
+    #               workspace=workspace,
+    #               input_file_grp="SEGMENTLINE",
+    #               output_file_grp="SEGMENTWORD")
+    # run_processor(TesserocrRecognize,
+    #               mets_url=task["mets_url"],
+    #               workspace=workspace,
+    #               input_file_grp="SEGMENTWORD",
+    #               output_file_grp="RECOGNIZE",
+    #               parameter={
+    #                   "model": task["tesseract_model"],
+    #                   "overwrite_words": False,
+    #                   "textequiv_level": "line"
+    #                 })
 
     return {
         "task_id": task["id"],
@@ -92,17 +148,17 @@ def create_ocrd_workspace_process(task):
             output = subprocess.check_output([clone_workspace], shell=True, cwd=flask_app.config["OCRD_BUTLER_RESULTS"])
         except subprocess.CalledProcessError as exc:
             return {
-                "task_id": task['id'],
+                "task_id": task["id"],
                 "status": "error",
                 "error": exc.__str__()
             }
 
 @celery.task()
 def init_ocrd_workspace_process(task):
-    init_workspace = '{} workspace -d {} find --file-grp {} --download'.format(
+    init_workspace = "{} workspace -d {} find --file-grp {} --download".format(
                         ocrd_tool,
-                        task['id'],
-                        task['file_grp'])
+                        task["id"],
+                        task["file_grp"])
 
     flask_app = current_app # ???
 
@@ -110,7 +166,7 @@ def init_ocrd_workspace_process(task):
         output = subprocess.check_output([init_workspace], shell=True, cwd=flask_app.config["OCRD_BUTLER_RESULTS"])
     except subprocess.CalledProcessError as exc:
         return {
-            "task_id": task['id'],
+            "task_id": task["id"],
             "status": "error",
             "error": exc.__str__()
         }

@@ -4,12 +4,31 @@
 """Tests for `ocrd_butler` package."""
 
 import pytest
+from pytest import raises
+from celery.exceptions import Retry
+
+from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from ocrd_butler import app
 from ocrd_butler import cli
+from ocrd_butler.app import task_model
+from ocrd_butler.tasks import create_task
 
+
+@pytest.mark.celery(result_backend='redis://')
+@patch('ocrd_butler.tasks.create_task')
+def test_create_task(input):
+    """ Test our create_task task. (need better wording...)
+        This really creates the output.
+    """
+    task = create_task({
+            "id": "PPN80041750X",
+            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+            "file_grp": "DEFAULT",
+            "tesseract_model": "deu"
+        })
+    assert task == {'task_id': 'PPN80041750X', 'status': 'Created'}
 
 @pytest.fixture
 def response():

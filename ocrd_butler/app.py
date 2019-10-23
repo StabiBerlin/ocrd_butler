@@ -11,6 +11,8 @@ import time
 from flask import Flask, request, jsonify, Blueprint
 from flask_restplus import Api, Resource, fields
 
+from celery.signals import task_success
+
 import ocrd_butler
 from ocrd_butler import factory
 from ocrd_butler.tasks import create_task
@@ -134,6 +136,15 @@ class OcrdTaskClass(Resource):
 
         # worker_task = create_task.apply_async(args=[task], countdown=20)
         worker_task = create_task.delay(task)
+
+        @task_success.connect
+        def task_success_handler(sender=None, headers=None, body=None, **kwargs):
+            # information about task are located in headers for task messages
+            # using the task protocol version 2.
+            info = headers if 'task' in headers else body
+            print('task_success for task id {info[id]}'.format(
+                info=info,
+            ))
 
         return {
             "task_id": worker_task.id,
