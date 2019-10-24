@@ -66,6 +66,10 @@ task_model = app.model("Task Model", {
 # list tasks, all or filtered
 # delete tasks, all or filtered (safety?)
 
+# get predefined chains
+# get all usable processors
+# get default chain
+
 @name_space.route("/task/<string:id>")
 class OcrdTaskStatusClass(Resource):
     @app.doc(responses={ 200: 'OK', 400: 'Unknown task id', 500: 'Error' },
@@ -106,6 +110,10 @@ class OcrdTaskStatusClass(Resource):
             }
         return jsonify(response)
 
+
+# have a look to the wording in the context of a butler
+# do a butler "serve"?
+# take a butler a task or a job?
 
 @name_space.route("/task")
 class OcrdTaskClass(Resource):

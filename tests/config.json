@@ -1,0 +1,6 @@
+{
+    "CELERY_RESULT_BACKEND_URL": "redis://localhost:6379",
+    "CELERY_BROKER_URL": "redis://localhost:6379",
+    "OCRD_BUTLER_RESULTS": "/tmp/tests_ocrd_butler_results",
+    "tesseract_default_model": "deu"
+}

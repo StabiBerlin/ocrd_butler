@@ -8,38 +8,14 @@ import subprocess
 
 from ocrd.cli.workspace import WorkspaceCtx, workspace_clone
 
-from ocrd_tesserocr.segment_region import TesserocrSegmentRegion
-from ocrd_tesserocr.segment_line import TesserocrSegmentLine
-from ocrd_tesserocr.segment_word import TesserocrSegmentWord
-from ocrd_tesserocr.recognize import TesserocrRecognize
 from ocrd.processor.base import run_processor
 
 from ocrd_butler import celery
 from ocrd_butler.util import get_config_json
 
-chain_config = {
-    "TesserocrSegmentRegion": {
-        "class": TesserocrSegmentRegion,
-        "output_file_grp": "SEGMENTREGION"
-    },
-    "TesserocrSegmentLine": {
-        "class": TesserocrSegmentLine,
-        "output_file_grp": "SEGMENTLINE"
-    },
-    "TesserocrSegmentWord": {
-        "class": TesserocrSegmentWord,
-        "output_file_grp": "SEGMENTWORD"
-
-    },
-    "TesserocrRecognize":  {
-        "class": TesserocrRecognize,
-        "output_file_grp": "RECOGNIZE"
-
-    },
-}
+from ocrd_butler.chains import chain_config, tesserocr_chain
 
 config_json = get_config_json()
-
 
 @celery.task()
 def create_task(task):
@@ -63,26 +39,14 @@ def create_task(task):
 
     workspace.save_mets()
 
-    chain = [
-        {"processor": "TesserocrSegmentRegion"},
-        {"processor": "TesserocrSegmentLine"},
-        {"processor": "TesserocrSegmentWord"},
-        {
-            "processor": "TesserocrRecognize",
-            "parameters": {
-                      "model": "task_tesseract_model",
-                      "overwrite_words": False,
-                      "textequiv_level": "line"
-            }
-        }
-    ]
+    # steps could be saved along the other task information to get a more informational task
 
-    for index, step in enumerate(chain):
+    for index, step in enumerate(tesserocr_chain):
         input_file_grp = "DEFAULT"
         if index > 0:
-            input_file_grp = chain_config[chain[index-1]["processor"]]["output_file_grp"]
+            input_file_grp = chain_config[tesserocr_chain[index-1]["processor"]]["output_file_grp"]
 
-        processor = chain_config[chain[index]["processor"]]
+        processor = chain_config[tesserocr_chain[index]["processor"]]
 
         if 'parameters' in step:
             for key, value in step["parameters"].items():
@@ -95,34 +59,6 @@ def create_task(task):
                     input_file_grp=input_file_grp,
                     output_file_grp=processor["output_file_grp"])
 
-
-
-    # Run predefined processors.
-    # run_processor(TesserocrSegmentRegion,
-    #               mets_url=task["mets_url"],
-    #               workspace=workspace,
-    #               input_file_grp="DEFAULT",
-    #               output_file_grp="SEGMENTREGION")
-    # run_processor(TesserocrSegmentLine,
-    #               mets_url=task["mets_url"],
-    #               workspace=workspace,
-    #               input_file_grp="SEGMENTREGION",
-    #               output_file_grp="SEGMENTLINE")
-    # run_processor(TesserocrSegmentWord,
-    #               mets_url=task["mets_url"],
-    #               workspace=workspace,
-    #               input_file_grp="SEGMENTLINE",
-    #               output_file_grp="SEGMENTWORD")
-    # run_processor(TesserocrRecognize,
-    #               mets_url=task["mets_url"],
-    #               workspace=workspace,
-    #               input_file_grp="SEGMENTWORD",
-    #               output_file_grp="RECOGNIZE",
-    #               parameter={
-    #                   "model": task["tesseract_model"],
-    #                   "overwrite_words": False,
-    #                   "textequiv_level": "line"
-    #                 })
 
     return {
         "task_id": task["id"],
