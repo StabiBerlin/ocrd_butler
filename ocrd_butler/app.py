@@ -70,8 +70,59 @@ task_model = app.model("Task Model", {
 # get all usable processors
 # get default chain
 
+# have a look to the wording in the context of a butler
+# do a butler "serve"?
+# take a butler a task or a job?
+
+@name_space.route("/task")
+class Task(Resource):
+
+    @app.doc(responses={ 201: "Created", 400: "Missing parameter" })
+    @app.expect(task_model)
+    def post(self):
+        task = {}
+        try:
+            task["id"] = request.json["id"]
+        except KeyError as e:
+            name_space.abort(400, e.__doc__,
+                             status = "Missing parameter 'id'.",
+                             statusCode = "400")
+        try:
+            task["mets_url"] = request.json["mets_url"]
+        except KeyError as e:
+            name_space.abort(400, e.__doc__,
+                             status = "Missing parameter 'mets_url'.",
+                             statusCode = "400")
+
+        task["file_grp"] = request.json["file_grp"] if "file_grp" \
+            in request.json else task_model["file_grp"].default
+        task["tesseract_model"] = request.json["tesseract_model"] if "tesseract_model" \
+            in request.json else task_model["tesseract_model"].default
+
+        # worker_task = create_task.apply_async(args=[task], countdown=20)
+        worker_task = create_task.delay(task)
+
+        @task_success.connect
+        def task_success_handler(sender=None, headers=None, body=None, **kwargs):
+            # information about task are located in headers for task messages
+            # using the task protocol version 2.
+            info = headers if 'task' in headers else body
+            print('task_success for task id {info[id]}'.format(
+                info=info,
+            ))
+
+        import pdb; pdb.set_trace()
+        return {
+            "task_id": worker_task.id,
+            "state": worker_task.state,
+            # 'current': worker_task.info.get('current', 0),
+            # 'total': worker_task.info.get('total', 1),
+            # 'status': worker_task.info.get('status', '')
+        }
+
+
 @name_space.route("/task/<string:id>")
-class OcrdTaskStatusClass(Resource):
+class TaskList(Resource):
     @app.doc(responses={ 200: 'OK', 400: 'Unknown task id', 500: 'Error' },
              params={ 'id': 'id of the task' })
     def get(self, id):
@@ -109,56 +160,4 @@ class OcrdTaskStatusClass(Resource):
                 'status': str(task.info),  # this is the exception raised
             }
         return jsonify(response)
-
-
-# have a look to the wording in the context of a butler
-# do a butler "serve"?
-# take a butler a task or a job?
-
-@name_space.route("/task")
-class OcrdTaskClass(Resource):
-
-    @app.doc(responses={ 201: "Created", 400: "Missing parameter" })
-    @app.expect(task_model)
-    def post(self):
-
-        task = {}
-
-        try:
-            task["id"] = request.json["id"]
-        except KeyError as e:
-            name_space.abort(400, e.__doc__,
-                             status = "Missing parameter 'id'.",
-                             statusCode = "400")
-        try:
-            task["mets_url"] = request.json["mets_url"]
-        except KeyError as e:
-            name_space.abort(400, e.__doc__,
-                             status = "Missing parameter 'mets_url'.",
-                             statusCode = "400")
-
-        task["file_grp"] = request.json["file_grp"] if "file_grp" \
-            in request.json else task_model["file_grp"].default
-        task["tesseract_model"] = request.json["tesseract_model"] if "tesseract_model" \
-            in request.json else task_model["tesseract_model"].default
-
-        # worker_task = create_task.apply_async(args=[task], countdown=20)
-        worker_task = create_task.delay(task)
-
-        @task_success.connect
-        def task_success_handler(sender=None, headers=None, body=None, **kwargs):
-            # information about task are located in headers for task messages
-            # using the task protocol version 2.
-            info = headers if 'task' in headers else body
-            print('task_success for task id {info[id]}'.format(
-                info=info,
-            ))
-
-        return {
-            "task_id": worker_task.id,
-            "state": worker_task.state,
-            # 'current': worker_task.info.get('current', 0),
-            # 'total': worker_task.info.get('total', 1),
-            # 'status': worker_task.info.get('status', '')
-        }
 

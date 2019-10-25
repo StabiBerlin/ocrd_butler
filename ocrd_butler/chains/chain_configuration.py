@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+"""Our chain configuration and the predefined processor chains."""
+
 from ocrd_tesserocr.segment_region import TesserocrSegmentRegion
 from ocrd_tesserocr.segment_line import TesserocrSegmentLine
 from ocrd_tesserocr.segment_word import TesserocrSegmentWord
@@ -20,24 +24,11 @@ chain_config = {
     },
     "TesserocrRecognize":  {
         "class": TesserocrRecognize,
-        "output_file_grp": "RECOGNIZE"
-
-    },
-}
-
-
-# create different chains with a specific name and a description how (or for what) useful they seem
-# set one chain as default, if no chain or chain name was given while creating the task
-tesserocr_chain = [
-    {"processor": "TesserocrSegmentRegion"},
-    {"processor": "TesserocrSegmentLine"},
-    {"processor": "TesserocrSegmentWord"},
-    {
-        "processor": "TesserocrRecognize",
-        "parameters": {
-            "model": "task_tesseract_model",
+        "output_file_grp": "RECOGNIZE",
+        "parameter": {
+            "model": "deu",
             "overwrite_words": False,
             "textequiv_level": "line"
         }
-    }
-]
+    },
+}

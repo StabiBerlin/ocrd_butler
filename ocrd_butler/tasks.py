@@ -13,12 +13,18 @@ from ocrd.processor.base import run_processor
 from ocrd_butler import celery
 from ocrd_butler.util import get_config_json
 
-from ocrd_butler.chains import chain_config, tesserocr_chain
+from ocrd_butler.chains.chain_configuration import chain_config
+from ocrd_butler.chains.processor_chains import\
+    processor_chains, default_chain
 
 config_json = get_config_json()
 
 @celery.task()
 def create_task(task):
+    """ Create a task an run the given chain. """
+
+    chain = default_chain
+
     # Create workspace
     dst_dir = "{}/{}".format(config_json["OCRD_BUTLER_RESULTS"], task["id"])
     ctx = WorkspaceCtx(
@@ -40,25 +46,34 @@ def create_task(task):
     workspace.save_mets()
 
     # steps could be saved along the other task information to get a more informational task
+    for index, step in enumerate(chain["processors"]):
+        if index == 0:
+            input_file_grp = "DEFAULT"
+        else:
+            previous_processor = chain_config[list(chain["processors"][index-1])[0]]
+            input_file_grp = previous_processor["output_file_grp"]
 
-    for index, step in enumerate(tesserocr_chain):
-        input_file_grp = "DEFAULT"
-        if index > 0:
-            input_file_grp = chain_config[tesserocr_chain[index-1]["processor"]]["output_file_grp"]
+        processor_name = list(chain["processors"][index])[0]
+        processor = chain_config[processor_name]
 
-        processor = chain_config[tesserocr_chain[index]["processor"]]
-
-        if 'parameters' in step:
-            for key, value in step["parameters"].items():
-                if type(value) is str and value.startswith("task_"):
-                    step["parameters"][key] = task[value[5:]]
+        # Its possible to override the default parameters of the processor.
+        kwargs = {}
+        if "parameter" in processor:
+            kwargs["parameter"] = {}
+            if processor_name in task:
+                for key, value in processor["parameter"].items():
+                    if "parameter" in task[processor_name] and\
+                      key in task[processor_name]["parameter"]:
+                        kwargs["parameter"][key] = task[processor_name]["parameter"][key]
+                else:
+                    kwargs["parameter"][key] = value
 
         run_processor(processor["class"],
                     mets_url=task["mets_url"],
                     workspace=workspace,
                     input_file_grp=input_file_grp,
-                    output_file_grp=processor["output_file_grp"])
-
+                    output_file_grp=processor["output_file_grp"],
+                    **kwargs)
 
     return {
         "task_id": task["id"],
@@ -85,9 +100,16 @@ def create_ocrd_workspace_process(task):
         except subprocess.CalledProcessError as exc:
             return {
                 "task_id": task["id"],
-                "status": "error",
+                "status": "Error",
                 "error": exc.__str__()
             }
+
+    return {
+        "task_id": task["id"],
+        "status": "Created",
+        "output": str(output)
+    }
+
 
 @celery.task()
 def init_ocrd_workspace_process(task):
@@ -106,3 +128,9 @@ def init_ocrd_workspace_process(task):
             "status": "error",
             "error": exc.__str__()
         }
+
+    return {
+        "task_id": task["id"],
+        "status": "Created",
+        "output": str(output)
+    }
