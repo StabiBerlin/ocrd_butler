@@ -17,6 +17,8 @@ twine = "*"
 pylint = "*"
 ipdb = "*"
 pdbpp = "*"
+pytest-mock = "*"
+pytest-cov = "*"
 
 [packages]
 ocrd_butler = {path = ".",editable = true}
