@@ -1,18 +1,12 @@
-from flask_restplus import Api, Resource, fields
-from flask import current_app
+# -*- coding: utf-8 -*-
 
-# flask-restplus configuration
-app = Api(
-    app = current_app,
-    version="v1",
-    title="ORC-D Tasks",
-    description="OCR-D Tasks API")
+"""Restplus model definitions."""
 
-name_space = app.namespace(
-    "ocrd-tasks",
-    description="Manage OCR-D Tasks")
+from flask_restplus import fields
+from ocrd_butler.api.restplus import api
 
-task_model = app.model("Task Model", {
+
+task_model = api.model("Task Model", {
     "id": fields.String(
             required = True,
             description="ID of the work",
@@ -32,3 +26,5 @@ task_model = app.model("Task Model", {
             help="Defaults to 'deu'.",
             default='deu'),
 })
+
+

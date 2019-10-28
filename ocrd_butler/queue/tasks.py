@@ -19,6 +19,7 @@ from ocrd_butler.chains.processor_chains import\
 
 config_json = get_config_json()
 
+
 @celery.task()
 def create_task(task):
     """ Create a task an run the given chain. """

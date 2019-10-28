@@ -39,7 +39,8 @@ python setup.py develop
 
 Run the app:
 .. code-block: bash
-FLASK_APP=ocrd_butler/app.py flask run
+python ocrd_butler/app.py
+# FLASK_APP=ocrd_butler/app.py flask run
 # TESSDATA_PREFIX=/usr/share/tessdata FLASK_APP=ocrd_butler/app.py flask run
 # TESSDATA_PREFIX=/usr/share/tesseract-ocr/tessdata FLASK_APP=ocrd_butler/app.py flask run
 # TESSDATA_PREFIX=/usr/local/share/tessdata FLASK_APP=ocrd_butler/app.py flask run

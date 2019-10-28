@@ -4,17 +4,21 @@
 import os
 import sys
 import click
-from ocrd_butler.app import flask_app
+from ocrd_butler.app import flask_app, initialize_app, log
 from flask import Flask
 from flask.cli import FlaskGroup
 
-def app():
-    return flask_app
-
-@click.group(cls=FlaskGroup, create_app=app)
+@click.group(cls=FlaskGroup, create_app=flask_app)
 def main(args=None):
-    flask_app.run()
+    initialize_app(flask_app)
+    log.info('>>>>> Starting development server at http://{}/api/ <<<<<'.format(
+        flask_app.config['SERVER_NAME']))
+    # flask_app.run(debug=settings.FLASK_DEBUG)
+    # flask_app.run(debug=config_json["FLASK_DEBUG"])
+    flask_app.run(debug=False)
     return 0
+
+
 
 COV = None
 if os.environ.get('FLASK_COVERAGE'):

@@ -11,11 +11,11 @@ from ocrd_tesserocr.recognize import TesserocrRecognize
 chain_config = {
     "TesserocrSegmentRegion": {
         "class": TesserocrSegmentRegion,
-        "output_file_grp": "SEGMENTREGION"
+        "output_file_grp": "OCRD-SEGMENTREGION"
     },
     "TesserocrSegmentLine": {
         "class": TesserocrSegmentLine,
-        "output_file_grp": "SEGMENTLINE"
+        "output_file_grp": "OCRD-SEGMENTLINE"
     },
     "TesserocrSegmentWord": {
         "class": TesserocrSegmentWord,

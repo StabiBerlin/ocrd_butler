@@ -11,8 +11,8 @@ import pytest
 from pytest import raises
 from celery.exceptions import Retry
 
-from ocrd_butler.app import task_model
-from ocrd_butler.tasks import create_task
+from ocrd_butler.api.models import task_model
+from ocrd_butler.queue.tasks import create_task
 
 import ocrd
 
