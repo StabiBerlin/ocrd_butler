@@ -11,7 +11,7 @@ import pytest
 from pytest import raises
 from celery.exceptions import Retry
 
-from flask_restplus.fields import String
+from flask_restplus import fields
 
 from ocrd_butler.api.models import task_model
 from ocrd_butler.queue.tasks import create_task
@@ -36,7 +36,7 @@ def test_task_model():
     assert "tesseract_model" in task_model
 
     for field in task_model:
-        assert type(task_model[field]) == String
+        assert type(task_model[field]) == fields.String
 
 
 @pytest.mark.celery(result_backend='redis://')
