@@ -11,21 +11,33 @@ import pytest
 from pytest import raises
 from celery.exceptions import Retry
 
+from flask_restplus.fields import String
+
 from ocrd_butler.api.models import task_model
 from ocrd_butler.queue.tasks import create_task
 
 import ocrd
 
 task_config = {
-            "id": "PPN80041750X",
-            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
-            "file_grp": "DEFAULT",
-            "TesserocrRecognize": {
-                "parameter": {
-                    "model": "deu"
-                }
-            }
+    "id": "PPN80041750X",
+    "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+    "file_grp": "DEFAULT",
+    "TesserocrRecognize": {
+        "parameter": {
+            "model": "deu"
         }
+    }
+}
+
+def test_task_model():
+    assert "id" in task_model
+    assert "file_grp" in task_model
+    assert "mets_url" in task_model
+    assert "tesseract_model" in task_model
+
+    for field in task_model:
+        assert type(task_model[field]) == String
+
 
 @pytest.mark.celery(result_backend='redis://')
 def test_create_task(mocker):

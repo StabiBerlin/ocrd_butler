@@ -13,9 +13,8 @@ from ocrd.processor.base import run_processor
 from ocrd_butler import celery
 from ocrd_butler.util import get_config_json
 
-from ocrd_butler.chains.chain_configuration import chain_config
-from ocrd_butler.chains.processor_chains import\
-    processor_chains, default_chain
+from ocrd_butler.api.chain_config import chain_config
+from ocrd_butler.api.chains import processor_chains, default_chain
 
 config_json = get_config_json()
 

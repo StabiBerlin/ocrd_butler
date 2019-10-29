@@ -34,7 +34,6 @@ ns = api.namespace(
 # take a butler a task or a job?
 
 @ns.route("/task")
-@ns.route("/task/<string:id>")
 class Task(Resource):
 
     @api.doc(responses={ 201: "Created", 400: "Missing parameter" })
@@ -79,6 +78,9 @@ class Task(Resource):
             # 'status': worker_task.info.get('status', '')
         }
 
+
+@ns.route("/task/<string:id>")
+class TaskList(Resource):
 
     @api.doc(responses={ 200: 'OK', 400: 'Unknown task id', 500: 'Error' },
              params={ 'id': 'id of the task' })

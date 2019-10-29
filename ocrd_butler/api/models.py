@@ -26,5 +26,3 @@ task_model = api.model("Task Model", {
             help="Defaults to 'deu'.",
             default='deu'),
 })
-
-
