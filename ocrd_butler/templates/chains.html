@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+   <div class="container">
+        <div class="jumbotron">
+            <h1>Chains</h1>
+            <p>The current available chains</p>
+        </div>
+        <div class="col-md-12">
+            {# {{ chains }} #}
+            {% for chain in chains %}
+                <h3>{{ chain.name }}</h3>
+                <p>
+                    Description: {{ chain.description }}
+                    <br />
+                    processors: {{ chain.processors }}
+                </p>
+            {% endfor %}
+
+        </div>
+    </div>
+{% endblock %}

@@ -7,12 +7,12 @@ from ocrd_butler.api.restplus import api
 
 
 task_model = api.model("Task Model", {
-    "uuid": fields.String(
-        title="ID",
-        required = False,
-        description="UUID of the task",
-        help="We use the one from celery when we create this task."),
-    "id": fields.String(
+    # "uuid": fields.String(
+    #     title="ID",
+    #     required = False,
+    #     description="UUID of the task",
+    #     help="We use the one from celery when we create this task."),
+    "works_id": fields.String(
         title="Works ID",
         required = True,
         description="ID of the work",
@@ -37,11 +37,11 @@ task_model = api.model("Task Model", {
 })
 
 chain_model = api.model("Chain Model", {
-    "id": fields.String(
-        title="ID",
-        required = False,
-        description="ID of the id",
-        help="This will be created for you."),
+    # "id": fields.String(
+    #     title="ID",
+    #     required = False,
+    #     description="ID of the id",
+    #     help="This will be created for you."),
     "name": fields.String(
         title="Name",
         required = True,

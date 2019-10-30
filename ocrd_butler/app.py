@@ -9,6 +9,7 @@ import subprocess
 import time
 
 import logging.config
+from flask_bootstrap import Bootstrap
 
 from flask import Flask, request, jsonify, Blueprint
 
@@ -20,6 +21,9 @@ from ocrd_butler.util import get_config_json
 from ocrd_butler.api.restplus import api
 
 from ocrd_butler.database import db
+
+from ocrd_butler.frontend import frontend
+from ocrd_butler.frontend.nav import nav
 
 flask_app = factory.create_app(celery=ocrd_butler.celery)
 
@@ -39,13 +43,20 @@ def initialize_app(flask_app):
     from ocrd_butler.api.tasks import ns as task_namespace
     # configure_app(flask_app)
 
-    blueprint = Blueprint('api', __name__, url_prefix='/api')
-    api.init_app(blueprint)
+    blueprint_api = Blueprint('api', __name__, url_prefix='/api')
+    api.init_app(blueprint_api)
+    flask_app.register_blueprint(blueprint_api)
+
     api.add_namespace(task_namespace)
-    flask_app.register_blueprint(blueprint)
+
+    # Initialize frontend.
+    Bootstrap(flask_app)
+    nav.init_app(flask_app)
+    flask_app.register_blueprint(frontend)
 
     db.init_app(flask_app)
     db.create_all(app=flask_app)
+
 
 def main():
     initialize_app(flask_app)

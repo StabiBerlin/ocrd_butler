@@ -39,6 +39,15 @@ PROCESSORS_CONFIG = {
 
 PROCESSOR_NAMES = PROCESSORS_CONFIG.keys()
 
+PROCESSORS = []
+for name, config in PROCESSORS_CONFIG.items():
+    PROCESSORS.append({
+        "name": name,
+        "description": config["class"].__doc__,
+        "output-file-group": config["output_file_grp"],
+        "parameter": "" if "parameter" not in config else config["parameter"]
+    })
+
 
 ns = api.namespace("processors", description="The processors known by our butler.")
 
@@ -47,13 +56,4 @@ class Processors(Resource):
     """Shows the processor configuration."""
 
     def get(self):
-        processors = []
-        for name, config in PROCESSORS_CONFIG.items():
-            processors.append({
-                "name": name,
-                "description": config["class"].__doc__,
-                "output-file-group": config["output_file_grp"],
-                "parameter": "" if "parameter" not in config else config["parameter"]
-            })
-
-        return jsonify(processors)
+        return jsonify(PROCESSORS)

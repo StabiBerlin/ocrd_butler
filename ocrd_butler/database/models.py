@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from ocrd_butler.app import db
+from ocrd_butler.database import db
 
 
 class Task(db.Model):

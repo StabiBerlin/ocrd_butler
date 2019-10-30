@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+   <div class="container">
+        <div class="jumbotron">
+            <h1>Processors</h1>
+            <p>The current implemented processors</p>
+        </div>
+        <div class="col-md-12">
+            {# {{ processors|tojson }} #}
+            {% for processor in processors %}
+                <h3>{{ processor.name }}</h3>
+                <p>
+                    Description: {{ processor.description }}
+                    <br />
+                    Output file group: {{ processor["output-file-group"] }}
+                    <br />
+                    Paramter: {{ processor.parameter }}
+                </p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
