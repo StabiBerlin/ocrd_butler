@@ -14,7 +14,7 @@ from celery.exceptions import Retry
 from flask_restplus import fields
 
 from ocrd_butler.api.models import task_model
-from ocrd_butler.queue.tasks import create_task
+from ocrd_butler.execution.tasks import create_task
 
 import ocrd
 

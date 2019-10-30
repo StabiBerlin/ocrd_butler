@@ -13,7 +13,7 @@ from ocrd.processor.base import run_processor
 from ocrd_butler import celery
 from ocrd_butler.util import get_config_json
 
-from ocrd_butler.api.chain_config import chain_config
+from ocrd_butler.api.processors import PROCESSORS_CONFIG
 from ocrd_butler.api.chains import processor_chains, default_chain
 
 config_json = get_config_json()
@@ -50,11 +50,11 @@ def create_task(task):
         if index == 0:
             input_file_grp = "DEFAULT"
         else:
-            previous_processor = chain_config[list(chain["processors"][index-1])[0]]
+            previous_processor = PROCESSORS_CONFIG[list(chain["processors"][index-1])[0]]
             input_file_grp = previous_processor["output_file_grp"]
 
         processor_name = list(chain["processors"][index])[0]
-        processor = chain_config[processor_name]
+        processor = PROCESSORS_CONFIG[processor_name]
 
         # Its possible to override the default parameters of the processor.
         kwargs = {}

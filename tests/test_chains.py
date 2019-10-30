@@ -6,7 +6,8 @@ import pytest
 
 from flask_restplus import fields
 
-from ocrd_butler.api.chain_config import chain_config
+from ocrd_butler.api.processors import PROCESSOR_NAMES
+from ocrd_butler.api.processors import PROCESSORS_CONFIG
 from ocrd_butler.api.chains import processor_chains
 from ocrd_butler.api.models import chain_model
 
@@ -24,15 +25,14 @@ def test_chain_model():
             assert type(chain_model[field]) == fields.List
 
 
-def test_chains_configuration():
+def test_processor_names():
     """ Test our chain definition. """
-    processors = chain_config.keys()
-    assert "TesserocrSegmentRegion" in processors
-    assert "TesserocrSegmentLine" in processors
-    assert "TesserocrSegmentWord" in processors
-    assert "TesserocrRecognize" in processors
+    assert "TesserocrSegmentRegion" in PROCESSOR_NAMES
+    assert "TesserocrSegmentLine" in PROCESSOR_NAMES
+    assert "TesserocrSegmentWord" in PROCESSOR_NAMES
+    assert "TesserocrRecognize" in PROCESSOR_NAMES
 
-    assert chain_config["TesserocrRecognize"]["parameter"]["model"] == "deu"
+    assert PROCESSORS_CONFIG["TesserocrRecognize"]["parameter"]["model"] == "deu"
 
 
 def test_predefined_chains():

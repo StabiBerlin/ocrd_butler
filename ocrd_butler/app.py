@@ -12,11 +12,14 @@ import logging.config
 
 from flask import Flask, request, jsonify, Blueprint
 
+from flask_sqlalchemy import SQLAlchemy
+
 import ocrd_butler
 from ocrd_butler import factory
 from ocrd_butler.util import get_config_json
 from ocrd_butler.api.restplus import api
-from ocrd_butler.api.tasks import ns as task_namespace
+
+from ocrd_butler.database import db
 
 flask_app = factory.create_app(celery=ocrd_butler.celery)
 
@@ -29,8 +32,11 @@ logging_conf_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '..
 logging.config.fileConfig(logging_conf_path)
 log = logging.getLogger(__name__)
 
+# our database
+flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./test.db'
 
 def initialize_app(flask_app):
+    from ocrd_butler.api.tasks import ns as task_namespace
     # configure_app(flask_app)
 
     blueprint = Blueprint('api', __name__, url_prefix='/api')
@@ -38,7 +44,8 @@ def initialize_app(flask_app):
     api.add_namespace(task_namespace)
     flask_app.register_blueprint(blueprint)
 
-    # db.init_app(flask_app)
+    db.init_app(flask_app)
+    db.create_all(app=flask_app)
 
 def main():
     initialize_app(flask_app)

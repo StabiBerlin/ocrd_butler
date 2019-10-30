@@ -19,6 +19,7 @@ ipdb = "*"
 pdbpp = "*"
 pytest-mock = "*"
 pytest-cov = "*"
+pylint-flask = "*"
 
 [packages]
 ocrd_butler = {path = ".",editable = true}
@@ -29,5 +30,6 @@ celery = "==4.3.0"
 redis = "==3.3.11"
 flower = "*"
 kombu = "==4.6.3" # https://github.com/celery/kombu/issues/1063
-ocrd = "*"
-ocrd-tesserocr = "*"
+ocrd = "==1.0.1"
+ocrd-tesserocr = "==0.4.0"
+flask-sqlalchemy = "*"

@@ -10,11 +10,9 @@ from celery.signals import task_success
 from ocrd_butler.api.restplus import api
 from ocrd_butler.api.models import task_model
 
-from ocrd_butler.queue.tasks import create_task
+from ocrd_butler.execution.tasks import create_task
 
-ns = api.namespace(
-    "ocrd-tasks",
-    description="Manage OCR-D Tasks")
+ns = api.namespace("tasks", description="Manage OCR-D Tasks")
 
 # get the status of a task
 # get the results of a task - this collect links to the resources like mets files, images, etc.
@@ -119,3 +117,10 @@ class TaskList(Resource):
                 'status': str(task.info),  # this is the exception raised
             }
         return jsonify(response)
+
+
+    def put(self, id):
+        pass
+
+    def delete(self, id):
+        pass
