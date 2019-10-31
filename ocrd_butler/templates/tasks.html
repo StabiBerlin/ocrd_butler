@@ -24,7 +24,14 @@
                 {% for task in tasks %}
                 <tr>
                     <td>{{ task.id }}</td>
-                    <td>{{ task.work_id }}</td>
+                    <td>
+                        {% if task.work_id.startswith("PPN") %}
+                            <a href="https://digital.staatsbibliothek-berlin.de/werkansicht?PPN={{ task.work_id }}"
+                               target="_blank">{{ task.work_id }}</a>
+                        {% else %}
+                            {{ task.work_id }}
+                        {% endif %}
+                    </td>
                     <td><a href="{{ task.mets_url }}">{{ task.work_id }}.xml</a></td>
                     <td>{{ task.file_grp }}</td>
                     <td>{{ task.chain }}</td>
@@ -36,9 +43,9 @@
                     </td>
                     <td>
                         {% if task.result %}
-                            <a href="{{ task.result.xml }}" target="_blank">XML</a>
+                            <a href="{{ task.result.xml }}">XML</a>
                             <br />
-                            <a href="{{ task.result.txt }}" target="_blank">TXT</a>
+                            <a href="{{ task.result.txt }}">TXT</a>
                         {% endif %}
                 </tr>
                 {% endfor %}
