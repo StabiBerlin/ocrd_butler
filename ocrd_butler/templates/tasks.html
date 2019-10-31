@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+   <div class="container">
+        <div class="jumbotron">
+            <h1>Tasks</h1>
+            <p>The current tasks</p>
+        </div>
+        <div class="col-md-2">
+            <img width="100%%" src="{{url_for('static', filename='butler_tasks.png')}}" />
+        </div>
+        <div class="col-md-10">
+            {# {{ tasks }} #}
+            <table border class="cellpadding">
+                <tr>
+                    <th>ID</th>
+                    <th>Work ID</th>
+                    <th>METS</th>
+                    <th>Input file group</th>
+                    <th>Chain</th>
+                    <th>Worker (Status)</th>
+                    <th>Results</th>
+                </tr>
+                {% for task in tasks %}
+                <tr>
+                    <td>{{ task.id }}</td>
+                    <td>{{ task.work_id }}</td>
+                    <td><a href="{{ task.mets_url }}">{{ task.work_id }}.xml</a></td>
+                    <td>{{ task.file_grp }}</td>
+                    <td>{{ task.chain }}</td>
+                    <td><a href="http://localhost:5555/task/{{ task.worker_id }}"
+                           target="_blank">{{ task.worker_id }}</a>
+                        {% if task.result %}
+                            ({{ task.result.status }})
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if task.result %}
+                            <a href="{{ task.result.xml }}" target="_blank">XML</a>
+                            <br />
+                            <a href="{{ task.result.txt }}" target="_blank">TXT</a>
+                        {% endif %}
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    <style>
+        .cellpadding td, th {
+            padding: 10px;
+        }
+    </style>
+{% endblock %}

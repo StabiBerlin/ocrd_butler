@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Restplus task routess."""
+import json
 
 from flask import jsonify, request
 from flask_restplus import Api, Resource, fields
@@ -9,6 +10,11 @@ from celery.signals import task_success
 
 from ocrd_butler.api.restplus import api
 from ocrd_butler.api.models import task_model
+
+from ocrd_butler.database import db
+from ocrd_butler.database.models import Chain as db_model_Chain
+from ocrd_butler.database.models import Task as db_model_Task
+
 
 from ocrd_butler.execution.tasks import create_task
 
@@ -51,22 +57,38 @@ class Task(Resource):
                              status = "Missing parameter 'mets_url'.",
                              statusCode = "400")
 
+        try:
+            task["chain"] = request.json["chain"]
+        except KeyError as e:
+            ns.abort(400, e.__doc__,
+                             status = "Missing parameter 'chain'.",
+                             statusCode = "400")
+
         task["file_grp"] = request.json["file_grp"] if "file_grp" \
             in request.json else task_model["file_grp"].default
-        task["tesseract_model"] = request.json["tesseract_model"] if "tesseract_model" \
-            in request.json else task_model["tesseract_model"].default
+        # task["tesseract_model"] = request.json["tesseract_model"] if "tesseract_model" \
+        #     in request.json else task_model["tesseract_model"].default
+
+        # Check if the chain is known.
+        chain = db_model_Chain.query.filter_by(name=task["chain"]).first()
+        if chain is None:
+            ns.abort(400, "Don't know chain {}".format(task["chain"]),
+                     status="Unknown chain.",
+                     statusCode="400")
+        task["processors"] = json.loads(chain.processors)
 
         # worker_task = create_task.apply_async(args=[task], countdown=20)
         worker_task = create_task.delay(task)
+        # worker_task = create_task(task)
 
-        @task_success.connect
-        def task_success_handler(sender=None, headers=None, body=None, **kwargs):
-            # information about task are located in headers for task messages
-            # using the task protocol version 2.
-            info = headers if 'task' in headers else body
-            print('task_success for task id {info[id]}'.format(
-                info=info,
-            ))
+        db_task = db_model_Task(
+            work_id=task["id"],
+            mets_url=task["mets_url"],
+            file_grp=task["file_grp"],
+            worker_id=worker_task.id,
+            chain_id=chain.id)
+        db.session.add(db_task)
+        db.session.commit()
 
         return {
             "task_id": worker_task.id,

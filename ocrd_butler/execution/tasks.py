@@ -16,6 +16,8 @@ from ocrd_butler.util import get_config_json
 from ocrd_butler.api.processors import PROCESSORS_CONFIG
 from ocrd_butler.api.chains import processor_chains, default_chain
 
+# from ocrd_butler.database.models import Chain as db_model_Chain
+
 config_json = get_config_json()
 
 
@@ -23,14 +25,17 @@ config_json = get_config_json()
 def create_task(task):
     """ Create a task an run the given chain. """
 
-    chain = default_chain
+    # chain = default_chain
+    # chain = db_model_Chain.query.filter_by(name=task["chain"]).first()
+    # processors = json.loads(chain.processors)
+    processors = task["processors"]
 
     # Create workspace
     dst_dir = "{}/{}".format(config_json["OCRD_BUTLER_RESULTS"], task["id"])
     ctx = WorkspaceCtx(
-        directory = dst_dir,
-        mets_basename = "{}.xml".format(task["id"]),
-        automatic_backup = True
+        directory=dst_dir,
+        mets_basename="{}.xml".format(task["id"]),
+        automatic_backup=True
     )
     workspace = ctx.resolver.workspace_from_url(
         task["mets_url"],
@@ -46,37 +51,37 @@ def create_task(task):
     workspace.save_mets()
 
     # steps could be saved along the other task information to get a more informational task
-    for index, step in enumerate(chain["processors"]):
+    for index, processor_name in enumerate(processors):
         if index == 0:
-            input_file_grp = "DEFAULT"
+            input_file_grp = task["file_grp"]
         else:
-            previous_processor = PROCESSORS_CONFIG[list(chain["processors"][index-1])[0]]
+            previous_processor = PROCESSORS_CONFIG[processors[index-1]]
             input_file_grp = previous_processor["output_file_grp"]
 
-        processor_name = list(chain["processors"][index])[0]
         processor = PROCESSORS_CONFIG[processor_name]
 
         # Its possible to override the default parameters of the processor.
         kwargs = {}
-        if "parameter" in processor:
-            kwargs["parameter"] = {}
-            if processor_name in task:
-                for key, value in processor["parameter"].items():
-                    if "parameter" in task[processor_name] and\
-                      key in task[processor_name]["parameter"]:
-                        kwargs["parameter"][key] = task[processor_name]["parameter"][key]
-                else:
-                    kwargs["parameter"][key] = value
+        # if "parameter" in processor:
+        #     kwargs["parameter"] = {}
+        #     if processor_name in task:
+        #         for key, value in processor["parameter"].items():
+        #             if "parameter" in task[processor_name] and\
+        #               key in task[processor_name]["parameter"]:
+        #                 kwargs["parameter"][key] = task[processor_name]["parameter"][key]
+        #         else:
+        #             kwargs["parameter"][key] = value
 
         run_processor(processor["class"],
-                    mets_url=task["mets_url"],
-                    workspace=workspace,
-                    input_file_grp=input_file_grp,
-                    output_file_grp=processor["output_file_grp"],
-                    **kwargs)
+                      mets_url=task["mets_url"],
+                      workspace=workspace,
+                      input_file_grp=input_file_grp,
+                      output_file_grp=processor["output_file_grp"],
+                      **kwargs)
 
     return {
         "task_id": task["id"],
+        "result_dir": dst_dir,
         "status": "Created"
     }
 

@@ -1,10 +1,15 @@
 import json
+
+from ocrd_butler import celery
+
 from flask import Blueprint, render_template, flash, redirect, url_for, jsonify
 
 from ocrd_butler.frontend.nav import nav
 from ocrd_butler.api.processors import PROCESSORS
 
 from ocrd_butler.database.models import Chain as db_model_Chain
+from ocrd_butler.database.models import Task as db_model_Task
+
 
 frontend = Blueprint('frontend', __name__)
 
@@ -32,3 +37,34 @@ def chains():
     return render_template(
         'chains.html',
         chains=current_chains)
+
+@frontend.route('/tasks')
+def tasks():
+    results = db_model_Task.query.all()
+
+    current_tasks = []
+    for result in results:
+        task = {
+            "id": result.id,
+            "work_id": result.work_id,
+            "mets_url": result.mets_url,
+            "file_grp": result.file_grp,
+            "worker_id": result.worker_id,
+            "chain": result.chain.name,
+            "result": None
+        }
+
+        res = celery.AsyncResult(result.worker_id)
+        if res.ready() and res.successful():
+            task["result"] = {
+                "status": res.status,
+                "xml": "/download/xml/{}".format(result.worker_id),
+                "txt": "/download/txt/{}".format(result.worker_id),
+            }
+
+        current_tasks.append(task)
+
+
+    return render_template(
+        'tasks.html',
+        tasks=current_tasks)

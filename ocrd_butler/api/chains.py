@@ -18,12 +18,12 @@ ns = api.namespace("chains", description="Manage OCR-D processor chains")
 
 @ns.route("/chain")
 class ChainList(Resource):
-    """ foobar """
+    """ Add chains and list all of it. """
 
     @api.doc(responses={ 201: "Created", 400: "Missing parameter", 400: "Wrong parameter" })
     @api.expect(api_model_chain)
     def post(self):
-        """ foobar """
+        """ Add a new chain. """
 
         name = request.json.get("name")
         description = request.json.get("description")
@@ -47,7 +47,7 @@ class ChainList(Resource):
 
 @ns.route("/chain/<string:id>")
 class Chain(Resource):
-    """Holds getter and updater for chains."""
+    """Getter and updater for chains."""
     @api.doc(responses={ 200: "Created", 400: "Missing id" })
     def get(self, id):
 
