@@ -10,6 +10,11 @@ from ocrd_tesserocr.segment_line import TesserocrSegmentLine
 from ocrd_tesserocr.segment_word import TesserocrSegmentWord
 from ocrd_tesserocr.recognize import TesserocrRecognize
 
+from ocrd_kraken.binarize import KrakenBinarize
+from ocrd_kraken.segment import KrakenSegment
+from ocrd_kraken.ocr import KrakenOcr
+
+
 from ocrd_butler.api.restplus import api
 
 PROCESSORS_CONFIG = {
@@ -23,17 +28,29 @@ PROCESSORS_CONFIG = {
     },
     "TesserocrSegmentWord": {
         "class": TesserocrSegmentWord,
-        "output_file_grp": "SEGMENTWORD"
+        "output_file_grp": "OCRD-SEGMENTWORD"
 
     },
     "TesserocrRecognize":  {
         "class": TesserocrRecognize,
-        "output_file_grp": "RECOGNIZE",
+        "output_file_grp": "OCRD-RECOGNIZE",
         "parameter": {
             "model": "deu",
             "overwrite_words": False,
             "textequiv_level": "line"
         }
+    },
+    "KrakenBinarize":  {
+        "class": KrakenBinarize,
+        "output_file_grp": "OCRD-KRAKEN-BINARIZE",
+    },
+    "KrakenSegment":  {
+        "class": KrakenSegment,
+        "output_file_grp": "OCRD-KRAKEN-SEGMENT",
+    },
+    "KrakenOcr":  {
+        "class": KrakenOcr,
+        "output_file_grp": "OCRD-KRAKEN-OCR",
     },
 }
 

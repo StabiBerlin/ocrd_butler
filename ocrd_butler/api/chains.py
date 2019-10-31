@@ -32,8 +32,8 @@ class ChainList(Resource):
         for processor in processors:
             if processor not in PROCESSOR_NAMES:
                 ns.abort(400, "Wrong parameter",
-                             status = "Unknown processor \"{}\".".format(processor),
-                             statusCode = "400")
+                             status="Unknown processor \"{}\".".format(processor),
+                             statusCode="400")
 
         processors_serialized = json.dumps(processors)
         chain = db_model_Chain(name, description, processors_serialized)

@@ -46,21 +46,20 @@ chain_model = api.model("Chain Model", {
     #     help="This will be created for you."),
     "name": fields.String(
         title="Name",
-        required = True,
+        required=True,
         description="A unique name for the chain",
         help="Be creative."),
     "description": fields.String(
         title="Descrition",
-        required = False,
+        required=False,
         description="Some more information what the chain is for and should accomplish.",
         help="Be as elaborative as needed."),
     "processors": fields.List(
         fields.String,
         title="Processors",
-        required = True,
+        required=True,
         min_items=1,
         unique=True,
         description="The processor to be used.",
-        help="The processors will be executed in the given order."
-    ),
+        help="The processors will be executed in the given order."),
 })
