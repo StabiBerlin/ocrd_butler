@@ -81,6 +81,7 @@ Ideas
     a UI to run against the choosen one.
 - maybe the PROCESSORS can be dynamically generated out of the ocrd_tools.json of the
   installed packages.
+- switch to RabbitMQ instead of Redis as broker to be consistent with Kitodo.
 
 TODOs
 -----
