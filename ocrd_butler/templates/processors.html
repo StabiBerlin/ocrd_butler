@@ -6,7 +6,10 @@
             <h1>Processors</h1>
             <p>The current implemented processors</p>
         </div>
-        <div class="col-md-12">
+        <div class="col-md-2">
+            <img width="100%%" src="{{url_for('static', filename='butler_processors.png')}}" />
+        </div>
+        <div class="col-md-10">
             {# {{ processors|tojson }} #}
             {% for processor in processors %}
                 <h3>{{ processor.name }}</h3>

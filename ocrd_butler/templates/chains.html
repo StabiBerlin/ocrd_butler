@@ -6,14 +6,22 @@
             <h1>Chains</h1>
             <p>The current available chains</p>
         </div>
-        <div class="col-md-12">
+        <div class="col-md-2">
+            <img width="100%%" src="{{url_for('static', filename='butler_chains.png')}}" />
+        </div>
+        <div class="col-md-10">
             {# {{ chains }} #}
             {% for chain in chains %}
                 <h3>{{ chain.name }}</h3>
                 <p>
-                    Description: {{ chain.description }}
-                    <br />
-                    processors: {{ chain.processors }}
+                    <h4>Description</h4>
+                    {{ chain.description }}
+
+                    <h4>Processors</h4>
+                    {% for processor in chain.processors %}
+                        {{ processor }}
+                        <br />
+                    {% endfor %}
                 </p>
             {% endfor %}
 
