@@ -66,6 +66,30 @@ Resources
 ---------
 [Flask + Celery = how to.](https://medium.com/@frassetto.stefano/flask-celery-howto-d106958a15fe)
 
+Ideas
+-----
+
+- Excecution times of tasks
+- input and output filegroups are not always from the previous processor
+  - could be more complicated - maybe we get it from the ocrd-tools.json
+- forms with json-schema (directly builded from ocrd_tools.json?
+- dinglehopper:
+  - If there are Ground Truth data it could be placed in a configured folder
+    on the server with the data as page xml files inside a folder id named with the
+    work id. Then we show a button to start a run against this data.
+    Otherwise we can search for all other tasks with the same work_id and present
+    a UI to run against the choosen one.
+- maybe the PROCESSORS can be dynamically generated out of the ocrd_tools.json of the
+  installed packages.
+
+TODOs
+-----
+- tasks have to updated with:
+  - start and end times
+  - tags
+  - description / notes
+
+
 Credits
 -------
 
