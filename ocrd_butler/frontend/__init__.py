@@ -66,7 +66,7 @@ def tasks():
             "chain": result.chain.name,
             "result": None
         }
-        foo
+
         res = celery.AsyncResult(result.worker_id)
         if res.ready() and res.successful():
             task["result"] = {
