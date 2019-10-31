@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        <div class="jumbotron">
+            <h1>Sorry, but I can't find what you are looking for...</h1>
+        </div>
+        <div>
+            <img style="display:block;margin:0 auto;" width="33%%" src="{{url_for('.static', filename='not-found.jpg')}}" />
+        </div>
+        <br />
+        <div class="jumbotron">
+            <a href="{{ url_for('frontend.index') }}">... so maybe you start again?</a>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        <div class="jumbotron">
+            <h1>Sir, nobody expected this error!</h1>
+        </div>
+        {% if error %}
+            <div class="jumbotron">
+                {{ error }}
+                <br /><br />
+                {{ exception }}
+                <br /><br />
+                {{ traceback }}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

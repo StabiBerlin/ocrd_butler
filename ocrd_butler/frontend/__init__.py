@@ -17,6 +17,19 @@ frontend = Blueprint('frontend', __name__)
 def index():
     return render_template('index.html')
 
+@frontend.app_errorhandler(404)
+def not_found(err):
+    return render_template("404.html", error=err)
+
+@frontend.app_errorhandler(500)
+def handle_500(err):
+    import traceback
+    return render_template(
+        '500.html',
+        error=err,
+        exception=err.original_exception,
+        traceback=traceback.format_exc()), 500
+
 @frontend.route('/processors')
 def processors():
     return render_template(
@@ -53,7 +66,7 @@ def tasks():
             "chain": result.chain.name,
             "result": None
         }
-
+        foo
         res = celery.AsyncResult(result.worker_id)
         if res.ready() and res.successful():
             task["result"] = {
