@@ -73,6 +73,7 @@ def tasks():
             "file_grp": result.file_grp,
             "worker_id": result.worker_id,
             "chain": result.chain.name,
+            "parameter": result.parameter,
             "result": None
         }
 
@@ -97,7 +98,7 @@ def download(worker_id):
     res = celery.AsyncResult(worker_id)
     config_json = get_config_json()
     dst_dir = "{}/{}".format(config_json["OCRD_BUTLER_RESULTS"], res.result["task_id"])
-    page_xml_dir = os.path.join(dst_dir, "RECOGNIZE")
+    page_xml_dir = os.path.join(dst_dir, "OCRD-RECOGNIZE")
 
     fulltext = ""
 
@@ -136,7 +137,7 @@ def download_zip(worker_id):
     res = celery.AsyncResult(worker_id)
     config_json = get_config_json()
     dst_dir = "{}/{}".format(config_json["OCRD_BUTLER_RESULTS"], res.result["task_id"])
-    page_xml_dir = os.path.join(dst_dir, "RECOGNIZE")
+    page_xml_dir = os.path.join(dst_dir, "OCRD-RECOGNIZE")
     base_path = pathlib.Path(page_xml_dir)
 
     data = io.BytesIO()

@@ -18,6 +18,7 @@
                     <th>METS</th>
                     <th>Input file group</th>
                     <th>Chain</th>
+                    <th>Parameter</th>
                     <th>Worker (Status)</th>
                     <th>Results</th>
                 </tr>
@@ -35,6 +36,7 @@
                     <td><a href="{{ task.mets_url }}">{{ task.work_id }}.xml</a></td>
                     <td>{{ task.file_grp }}</td>
                     <td>{{ task.chain }}</td>
+                    <td>{{ task.parameter }}</td>
                     <td><a href="http://localhost:5555/task/{{ task.worker_id }}"
                            target="_blank">{{ task.worker_id }}</a>
                         {% if task.result %}

@@ -62,15 +62,14 @@ def create_task(task):
 
         # Its possible to override the default parameters of the processor.
         kwargs = {}
-        # if "parameter" in processor:
-        #     kwargs["parameter"] = {}
-        #     if processor_name in task:
-        #         for key, value in processor["parameter"].items():
-        #             if "parameter" in task[processor_name] and\
-        #               key in task[processor_name]["parameter"]:
-        #                 kwargs["parameter"][key] = task[processor_name]["parameter"][key]
-        #         else:
-        #             kwargs["parameter"][key] = value
+        if "parameter" in processor:
+            kwargs["parameter"] = {}
+            for key, value in processor["parameter"].items():
+                if "parameter" in task and processor_name in task["parameter"] and\
+                    key in task["parameter"][processor_name]:
+                    kwargs["parameter"][key] = task["parameter"][processor_name][key]
+                else:
+                    kwargs["parameter"][key] = value
 
         run_processor(processor["class"],
                       mets_url=task["mets_url"],

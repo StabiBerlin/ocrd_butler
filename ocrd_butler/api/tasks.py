@@ -76,17 +76,18 @@ class Task(Resource):
                      status="Unknown chain.",
                      statusCode="400")
         task["processors"] = json.loads(chain.processors)
+        task["parameter"] = request.json["parameter"] if "parameter" in request.json else ""
 
         # worker_task = create_task.apply_async(args=[task], countdown=20)
         worker_task = create_task.delay(task)
-        # worker_task = create_task(task)
 
         db_task = db_model_Task(
             work_id=task["id"],
             mets_url=task["mets_url"],
             file_grp=task["file_grp"],
             worker_id=worker_task.id,
-            chain_id=chain.id)
+            chain_id=chain.id,
+            parameter=json.dumps(task["parameter"]))
         db.session.add(db_task)
         db.session.commit()
 

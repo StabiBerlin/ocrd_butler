@@ -10,16 +10,18 @@ class Task(db.Model):
     mets_url = db.Column(db.String(255))
     file_grp = db.Column(db.String(63))
     worker_id = db.Column(db.String(63))
+    parameter = db.Column(db.String(4095))
 
     chain_id = db.Column(db.Integer, db.ForeignKey('chains.id'))
     chain = db.relationship("Chain", backref=db.backref("chains", lazy="dynamic"))
 
-    def __init__(self, work_id, mets_url, file_grp, worker_id, chain_id):
+    def __init__(self, work_id, mets_url, file_grp, worker_id, chain_id, parameter):
         self.work_id = work_id
         self.mets_url = mets_url
         self.file_grp = file_grp
         self.worker_id = worker_id
         self.chain_id = chain_id
+        self.parameter = parameter
 
     def __repr__(self):
         return "<Task %r for %r>" % (self.id, self.work_id)
