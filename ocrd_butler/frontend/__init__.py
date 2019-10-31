@@ -96,10 +96,8 @@ def tasks():
 def download(worker_id):
     # TODO: we have to have the result (destination) dir in the result of the worker
     res = celery.AsyncResult(worker_id)
-    config_json = get_config_json()
-    dst_dir = "{}/{}".format(config_json["OCRD_BUTLER_RESULTS"], res.result["task_id"])
+    dst_dir = "{}".format(res.result["result_dir"])
     page_xml_dir = os.path.join(dst_dir, "OCRD-RECOGNIZE")
-
     fulltext = ""
 
     namespace = {'page_2009-03-16': 'http://schema.primaresearch.org/PAGE/gts/pagecontent/2009-03-16',
@@ -135,8 +133,7 @@ def download(worker_id):
 def download_zip(worker_id):
     # TODO: we have to have the result (destination) dir in the result of the worker
     res = celery.AsyncResult(worker_id)
-    config_json = get_config_json()
-    dst_dir = "{}/{}".format(config_json["OCRD_BUTLER_RESULTS"], res.result["task_id"])
+    dst_dir = "{}".format(res.result["result_dir"])
     page_xml_dir = os.path.join(dst_dir, "OCRD-RECOGNIZE")
     base_path = pathlib.Path(page_xml_dir)
 

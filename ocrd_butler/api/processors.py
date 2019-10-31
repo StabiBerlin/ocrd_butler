@@ -37,20 +37,34 @@ PROCESSORS_CONFIG = {
         "parameter": {
             "model": "deu",
             "overwrite_words": False,
-            "textequiv_level": "line"
+            "textequiv_level": "line",
         }
     },
     "KrakenBinarize":  {
         "class": KrakenBinarize,
         "output_file_grp": "OCRD-KRAKEN-BINARIZE",
+        "parameter": {
+            "level-of-operation": "page",
+        }
     },
     "KrakenSegment":  {
         "class": KrakenSegment,
         "output_file_grp": "OCRD-KRAKEN-SEGMENT",
+        "parameter": {
+            "text_direction": "horizontal-lr",
+            "script_detect": False,
+            "maxcolseps": 2,
+            "scale": 0,
+            "black_colseps": False,
+            "white_colseps": False,
+        }
     },
     "KrakenOcr":  {
         "class": KrakenOcr,
         "output_file_grp": "OCRD-KRAKEN-OCR",
+        "parameter": {
+            "lines-json": "bar",
+        }
     },
 }
 

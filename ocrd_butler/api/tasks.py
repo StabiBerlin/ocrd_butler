@@ -48,21 +48,21 @@ class Task(Resource):
             task["id"] = request.json["id"]
         except KeyError as e:
             ns.abort(400, e.__doc__,
-                             status = "Missing parameter 'id'.",
-                             statusCode = "400")
+                             status="Missing parameter 'id'.",
+                             statusCode="400")
         try:
             task["mets_url"] = request.json["mets_url"]
         except KeyError as e:
             ns.abort(400, e.__doc__,
-                             status = "Missing parameter 'mets_url'.",
-                             statusCode = "400")
+                             status="Missing parameter 'mets_url'.",
+                             statusCode="400")
 
         try:
             task["chain"] = request.json["chain"]
         except KeyError as e:
             ns.abort(400, e.__doc__,
-                             status = "Missing parameter 'chain'.",
-                             statusCode = "400")
+                             status="Missing parameter 'chain'.",
+                             statusCode="400")
 
         task["file_grp"] = request.json["file_grp"] if "file_grp" \
             in request.json else task_model["file_grp"].default
@@ -80,6 +80,7 @@ class Task(Resource):
 
         # worker_task = create_task.apply_async(args=[task], countdown=20)
         worker_task = create_task.delay(task)
+        # worker_task = create_task(task)
 
         db_task = db_model_Task(
             work_id=task["id"],

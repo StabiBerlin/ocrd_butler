@@ -5,6 +5,7 @@
 from flask import current_app
 import os
 import subprocess
+import uuid
 
 from ocrd.cli.workspace import WorkspaceCtx, workspace_clone
 
@@ -31,7 +32,9 @@ def create_task(task):
     processors = task["processors"]
 
     # Create workspace
-    dst_dir = "{}/{}".format(config_json["OCRD_BUTLER_RESULTS"], task["id"])
+    dst_dir = "{}/{}-{}".format(config_json["OCRD_BUTLER_RESULTS"],
+                                task["id"],
+                                uuid.uuid1().__str__())
     ctx = WorkspaceCtx(
         directory=dst_dir,
         mets_basename="{}.xml".format(task["id"]),
