@@ -8,16 +8,13 @@ import logging.config
 from flask import Blueprint
 from flask_bootstrap import Bootstrap
 
-import ocrd_butler
-from ocrd_butler import make_celery
-from ocrd_butler import factory
+from ocrd_butler import factory, make_celery
 from ocrd_butler.api.restplus import api
+from ocrd_butler.config import DevelopmentConfig
 from ocrd_butler.database import db
 
 from ocrd_butler.frontend import frontend
 from ocrd_butler.frontend.nav import nav
-
-from ocrd_butler.config import DevelopmentConfig
 
 config = DevelopmentConfig()
 flask_app = factory.create_app(
