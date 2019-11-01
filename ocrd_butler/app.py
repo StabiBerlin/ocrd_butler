@@ -2,24 +2,16 @@
 
 """Main module."""
 
-import json
 import os
-import sys
-import subprocess
-import time
-
 import logging.config
+
+from flask import Blueprint
 from flask_bootstrap import Bootstrap
-
-from flask import Flask, request, jsonify, Blueprint
-
-from flask_sqlalchemy import SQLAlchemy
 
 import ocrd_butler
 from ocrd_butler import factory
 from ocrd_butler.util import get_config_json
 from ocrd_butler.api.restplus import api
-
 from ocrd_butler.database import db
 
 from ocrd_butler.frontend import frontend
@@ -39,29 +31,32 @@ log = logging.getLogger(__name__)
 # our database
 flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./test.db'
 
-def initialize_app(flask_app):
+def initialize_app(app):
+    """Prepare our app with the needed blueprints and database."""
     from ocrd_butler.api.tasks import ns as task_namespace
-    # configure_app(flask_app)
+    # configure_app(app)
 
     blueprint_api = Blueprint('api', __name__, url_prefix='/api')
     api.init_app(blueprint_api)
-    flask_app.register_blueprint(blueprint_api)
+    app.register_blueprint(blueprint_api)
 
     api.add_namespace(task_namespace)
 
     # Initialize frontend.
-    Bootstrap(flask_app)
-    nav.init_app(flask_app)
-    flask_app.register_blueprint(frontend)
+    Bootstrap(app)
+    nav.init_app(app)
+    app.register_blueprint(frontend)
 
-    db.init_app(flask_app)
-    db.create_all(app=flask_app)
+    db.init_app(app)
+    db.create_all(app=app)
 
+initialize_app(flask_app)
 
 def main():
-    initialize_app(flask_app)
-    log.info('>>>>> Starting development server at http://{}/api/ <<<<<'.format(
-        flask_app.config['SERVER_NAME']))
+    """What should I do, when I'm called directly?"""
+    # initialize_app(flask_app)
+    log.info("> Starting development server at http://%s/api/ <<<<<" %
+             flask_app.config['SERVER_NAME'])
     # flask_app.run(debug=settings.FLASK_DEBUG)
     # flask_app.run(debug=config_json["FLASK_DEBUG"])
     flask_app.run(debug=False)
