@@ -20,6 +20,7 @@ pdbpp = "*"
 pytest-mock = "*"
 pytest-cov = "*"
 pylint-flask = "*"
+flask-testing = "*"
 
 [packages]
 ocrd_butler = {path = ".",editable = true}

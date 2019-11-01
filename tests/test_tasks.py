@@ -2,10 +2,9 @@
 
 """Testing the tasks for `ocrd_butler` package."""
 
-from os import listdir
-from os.path import isfile, join
+import glob
+import os
 import shutil
-
 
 import pytest
 from pytest import raises
@@ -18,64 +17,95 @@ from ocrd_butler.execution.tasks import create_task
 
 import ocrd
 
-task_config = {
+from flask_testing import TestCase
+from flask import Flask
+
+from ocrd_butler.factory import create_app
+from ocrd_butler.database import db
+from ocrd_butler.config import TestingConfig
+
+task_tesseract_config = {
     "id": "PPN80041750X",
     "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
     "file_grp": "DEFAULT",
-    "TesserocrRecognize": {
-        "parameter": {
+    # "chain": "Tesseract One",
+    "processors": [
+        "TesserocrSegmentRegion",
+        "TesserocrSegmentLine",
+        "TesserocrSegmentWord",
+        "TesserocrRecognize"
+    ],
+    "parameter": {
+        "TesserocrRecognize": {
             "model": "deu"
         }
     }
 }
 
-def test_task_model():
-    assert "id" in task_model
-    assert "file_grp" in task_model
-    assert "mets_url" in task_model
-    assert "tesseract_model" in task_model
+class TasksTest(TestCase):
 
-    for field in task_model:
-        assert type(task_model[field]) == fields.String
+    def create_app(self):
+        app = create_app(config=TestingConfig)
+        return app
 
+    def setUp(self):
+        db.create_all()
 
-@pytest.mark.celery(result_backend='redis://')
-def test_create_task(mocker):
-    """ Test our create_task task.
-        This really creates the output.
-    """
-    # https://github.com/pytest-dev/pytest-mock/ # -> its not working. why? dunno yet.
-    mocker.patch("ocrd.processor.base.run_processor")
-    task = create_task(task_config)
-    task
-    # ocrd.processor.base.run_processor.assert_called()
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
 
+    def clearTestDir(self):
+        config = TestingConfig()
+        test_dirs = glob.glob("%s/*" % config.OCRD_BUTLER_RESULTS)
+        for test_dir in test_dirs:
+            shutil.rmtree(test_dir, ignore_errors=True)
 
-def test_task_results(tmp_dir):
-    # result_dir = join(tmp_dir, 'PPN80041750X')
-    result_dir = join("/tmp/ocrd_butler_results", "PPN80041750X", "RECOGNIZE")
-    shutil.rmtree(result_dir, ignore_errors=True)
+    def test_task_model(self):
+        assert "works_id" in task_model # TODO: should be work_id
+        assert "file_grp" in task_model
+        assert "mets_url" in task_model
+        assert "chain" in task_model
+        assert "parameter" in task_model
 
-    task = create_task(task_config)
-    assert task == {'task_id': 'PPN80041750X', 'status': 'Created'}
+        for field in task_model:
+            assert isinstance(task_model[field], fields.String)
 
-    result_files = [f for f in listdir(result_dir)]
-    with open(join(result_dir, result_files[1])) as result_file:
-        text = result_file.read()
-        assert '<pc:Unicode>Wittenberg:</pc:Unicode>' in text
+    @pytest.mark.celery(result_backend='redis://')
+    def test_create_task(self):
+        """ Test our create_task task.
+            This really creates the output.
+        """
+        # https://github.com/pytest-dev/pytest-mock/ # -> its not working. why? dunno yet.
+        # mocker.patch("ocrd.processor.base.run_processor")
+        # ocrd.processor.base.run_processor.assert_called()
 
-def test_task_results_with_model(tmp_dir):
-    # result_dir = join(tmp_dir, 'PPN80041750X')
-    result_dir = join("/tmp/ocrd_butler_results", "PPN80041750X", "RECOGNIZE")
-    shutil.rmtree(result_dir, ignore_errors=True)
+    def test_task_results_deu(self):
+        task = create_task(task_tesseract_config)
 
-    task_config_deu = task_config
-    task_config_deu["TesserocrRecognize"]["parameter"]["model"] = "frk"
+        assert task["task_id"] == "PPN80041750X"
+        assert task["status"] == "Created"
+        assert task["result_dir"].startswith("/tmp/ocrd_butler_results_testing/PPN80041750X")
 
-    task = create_task(task_config)
-    assert task == {'task_id': 'PPN80041750X', 'status': 'Created'}
+        ocr_results = os.path.join(task["result_dir"], "OCRD-RECOGNIZE")
+        result_files = [f for f in os.listdir(ocr_results)]
+        with open(os.path.join(ocr_results, result_files[1])) as result_file:
+            text = result_file.read()
+            assert '<pc:Unicode>Wittenberg:</pc:Unicode>' in text
 
-    result_files = [f for f in listdir(result_dir)]
-    with open(join(result_dir, result_files[1])) as result_file:
-        text = result_file.read()
-        assert '<pc:Unicode>Wietenberg;</pc:Unicode>' in text
+        # self.clearTestDir()
+
+    def test_task_results_frk(self):
+        task_config_frk = task_tesseract_config
+        task_config_frk["parameter"]["TesserocrRecognize"]["model"] = "frk"
+
+        task = create_task(task_config_frk)
+        assert task["task_id"] == "PPN80041750X"
+        assert task["status"] == "Created"
+        assert task["result_dir"].startswith("/tmp/ocrd_butler_results_testing/PPN80041750X")
+
+        ocr_results = os.path.join(task["result_dir"], "OCRD-RECOGNIZE")
+        result_files = [f for f in os.listdir(ocr_results)]
+        with open(os.path.join(ocr_results, result_files[1])) as result_file:
+            text = result_file.read()
+            assert '<pc:Unicode>Wietenberg;</pc:Unicode>' in text

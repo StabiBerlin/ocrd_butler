@@ -16,16 +16,11 @@ from ocrd_butler import celery
 from ocrd_butler.api.processors import PROCESSORS_CONFIG
 from ocrd_butler.api.chains import processor_chains, default_chain
 
-# from ocrd_butler.database.models import Chain as db_model_Chain
-
 
 @celery.task()
 def create_task(task):
     """ Create a task an run the given chain. """
 
-    # chain = default_chain
-    # chain = db_model_Chain.query.filter_by(name=task["chain"]).first()
-    # processors = json.loads(chain.processors)
     processors = task["processors"]
 
     # Create workspace

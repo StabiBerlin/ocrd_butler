@@ -21,4 +21,6 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     DEBUG = True
-    DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    OCRD_BUTLER_RESULTS = "/tmp/ocrd_butler_results_testing"
+

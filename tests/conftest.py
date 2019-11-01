@@ -5,7 +5,7 @@
 import pytest
 import os
 
-from ocrd_butler.util import get_config_json
+from ocrd_butler.config import TestingConfig
 
 def pytest_configure(config):
     """Register additional pytest configuration."""
@@ -20,12 +20,8 @@ def pytest_configure(config):
 
 @pytest.fixture
 def config():
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    config_file_path = os.path.join(dir_path, "./config.json")
-    config_file = os.path.abspath(config_file_path)
-    config = get_config_json(config_file=config_file)
+    config = TestingConfig()
     return config
-
 
 @pytest.fixture
 def tmp_dir(config):

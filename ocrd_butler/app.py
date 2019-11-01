@@ -21,38 +21,15 @@ flask_app = factory.create_app(
     celery=make_celery(config=config),
     config=config)
 
-if not os.path.exists(flask_app.config["OCRD_BUTLER_RESULTS"]):
-    os.makedirs(flask_app.config["OCRD_BUTLER_RESULTS"])
-
 
 logging_conf_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '../logging.conf'))
 logging.config.fileConfig(logging_conf_path)
 log = logging.getLogger(__name__)
 
 
-def initialize_app(app):
-    """Prepare our app with the needed blueprints and database."""
-    from ocrd_butler.api.tasks import ns as task_namespace
-    # configure_app(app)
 
-    log.info("> Starting development server at http://%s/api/ <<<<<" %
-             app.config["SERVER_NAME"])
 
-    blueprint_api = Blueprint('api', __name__, url_prefix='/api')
-    api.init_app(blueprint_api)
-    app.register_blueprint(blueprint_api)
-
-    api.add_namespace(task_namespace)
-
-    # Initialize frontend.
-    Bootstrap(app)
-    nav.init_app(app)
-    app.register_blueprint(frontend)
-
-    db.init_app(app)
-    db.create_all(app=app)
-
-initialize_app(flask_app)
+# factory.initialize_app(flask_app)
 
 def main():
     """What should I do, when I'm called directly?"""

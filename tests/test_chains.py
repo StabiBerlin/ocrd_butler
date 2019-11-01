@@ -13,7 +13,6 @@ from ocrd_butler.api.models import chain_model
 
 
 def test_chain_model():
-    assert "id" in chain_model
     assert "name" in chain_model
     assert "description" in chain_model
     assert "processors" in chain_model
