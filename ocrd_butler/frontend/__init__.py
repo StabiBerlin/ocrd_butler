@@ -17,8 +17,6 @@ from ocrd_butler.api.processors import PROCESSORS
 from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 
-from ocrd_butler.util import get_config_json
-
 
 frontend = Blueprint('frontend', __name__)
 

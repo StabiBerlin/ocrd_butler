@@ -1,7 +1,0 @@
-{
-    "CELERY_RESULT_BACKEND_URL": "redis://localhost:6379",
-    "CELERY_BROKER_URL": "redis://localhost:6379",
-    "OCRD_BIN": "/home/j23d/projects/ocr-d/.venv-py3/bin",
-    "OCRD_BUTLER_RESULTS": "/tmp/ocrd_butler_results",
-    "tesseract_default_model": "deu"
-}

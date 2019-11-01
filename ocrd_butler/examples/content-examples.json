@@ -1,0 +1,81 @@
+{
+    "examples": [
+        {
+            "id": "PPN74728721X",
+            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN74728721X.mets.xml",
+            "file_grp": "DEFAULT",
+            "TesserocrRecognize": {
+                "parameter": {
+                    "model": "deu"
+                }
+            }
+        }
+        ,
+        {
+            "name": "Tesseract One",
+            "description": "Chain with only tesseract processors",
+            "processors": [
+                "TesserocrSegmentRegion",
+                "TesserocrSegmentLine",
+                "TesserocrSegmentWord",
+                "TesserocrRecognize"
+            ]
+        }
+        ,
+        {
+            "name": "Kraken One",
+            "description": "Chain with only kraken processors",
+            "processors": [
+                "KrakenBinarize",
+                "KrakenSegment",
+                "KrakenOcr"
+            ]
+        }
+        ,
+        {
+            "id": "PPN80041750X",
+            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+            "file_grp": "DEFAULT",
+            "chain": "Tesseract One"
+        }
+        ,
+        {
+            "id": "PPN80041750X",
+            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+            "file_grp": "DEFAULT",
+            "chain": "Tesseract One",
+            "parameter": {
+                "TesserocrRecognize": {
+                    "model": "frk"
+                }
+            }
+        }
+        ,
+        {
+            "id": "PPN777647508",
+            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN777647508.mets.xml",
+            "file_grp": "DEFAULT",
+            "chain": "Tesseract One",
+            "parameter": {
+                "TesserocrRecognize": {
+                    "model": "Fraktur"
+                }
+            }
+        }
+        ,
+        {
+            "id": "PPN80041750X",
+            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+            "file_grp": "DEFAULT",
+            "chain": "Kraken One"
+        }
+        ,
+        {
+            "id": "PPN1006038434",
+            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN1006038434.mets.xml",
+            "file_grp": "DEFAULT",
+            "chain": "Tesseract One"
+        }
+
+    ]
+}

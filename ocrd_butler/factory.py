@@ -10,7 +10,7 @@ from ocrd_butler.celery_utils import init_celery
 PKG_NAME = os.path.dirname(os.path.realpath(__file__)).split("/")[-1]
 
 
-def create_app(app_name=PKG_NAME, **kwargs):
+def create_app(app_name=PKG_NAME, config=None, **kwargs):
     """
     Creates a flask application.
 
@@ -19,7 +19,16 @@ def create_app(app_name=PKG_NAME, **kwargs):
     Returns:
         flask object
     """
-    ocrd_butler = Flask(app_name)
+    app = Flask(app_name)
+
+    # Update the app configuration.
+    if config is not None:
+        app.config.from_object(config)
+
+    # Supress flask_sqlalchemy warning.
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
     if kwargs.get("celery"):
-        init_celery(kwargs.get("celery"), ocrd_butler)
-    return ocrd_butler
+        init_celery(kwargs.get("celery"), app)
+
+    return app

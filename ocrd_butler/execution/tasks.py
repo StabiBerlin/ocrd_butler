@@ -12,14 +12,11 @@ from ocrd.cli.workspace import WorkspaceCtx, workspace_clone
 from ocrd.processor.base import run_processor
 
 from ocrd_butler import celery
-from ocrd_butler.util import get_config_json
 
 from ocrd_butler.api.processors import PROCESSORS_CONFIG
 from ocrd_butler.api.chains import processor_chains, default_chain
 
 # from ocrd_butler.database.models import Chain as db_model_Chain
-
-config_json = get_config_json()
 
 
 @celery.task()
@@ -32,7 +29,7 @@ def create_task(task):
     processors = task["processors"]
 
     # Create workspace
-    dst_dir = "{}/{}-{}".format(config_json["OCRD_BUTLER_RESULTS"],
+    dst_dir = "{}/{}-{}".format(current_app.config["OCRD_BUTLER_RESULTS"],
                                 task["id"],
                                 uuid.uuid1().__str__())
     ctx = WorkspaceCtx(

@@ -8,12 +8,10 @@ __version__ = '0.1.0'
 
 
 from celery import Celery
-from ocrd_butler.util import get_config_json
-
-config_json = get_config_json()
+from ocrd_butler.config import ProductionConfig
 
 
-def make_celery(app_name=__name__):
+def make_celery(app_name=__name__, config=None):
     """
     Creates a celery application.
 
@@ -22,9 +20,12 @@ def make_celery(app_name=__name__):
     Returns:
         celery object
     """
+    if config is None:
+        config = ProductionConfig()
+
     return Celery(app_name,
-                  backend=config_json['CELERY_RESULT_BACKEND_URL'],
-                  broker=config_json['CELERY_BROKER_URL'])
+                  backend=config.CELERY_RESULT_BACKEND_URL,
+                  broker=config.CELERY_BROKER_URL)
 
 # The base celery object of the app.
 celery = make_celery()
