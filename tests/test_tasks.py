@@ -8,18 +8,14 @@ import shutil
 
 import pytest
 from pytest import raises
+from flask_testing import TestCase
+
 from celery.exceptions import Retry
 
 from flask_restplus import fields
 
 from ocrd_butler.api.models import task_model
 from ocrd_butler.execution.tasks import create_task
-
-import ocrd
-
-from flask_testing import TestCase
-from flask import Flask
-
 from ocrd_butler.factory import create_app
 from ocrd_butler.database import db
 from ocrd_butler.config import TestingConfig
@@ -88,7 +84,7 @@ class TasksTest(TestCase):
         assert task["result_dir"].startswith("/tmp/ocrd_butler_results_testing/PPN80041750X")
 
         ocr_results = os.path.join(task["result_dir"], "OCRD-RECOGNIZE")
-        result_files = [f for f in os.listdir(ocr_results)]
+        result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[1])) as result_file:
             text = result_file.read()
             assert '<pc:Unicode>Wittenberg:</pc:Unicode>' in text
@@ -105,7 +101,7 @@ class TasksTest(TestCase):
         assert task["result_dir"].startswith("/tmp/ocrd_butler_results_testing/PPN80041750X")
 
         ocr_results = os.path.join(task["result_dir"], "OCRD-RECOGNIZE")
-        result_files = [f for f in os.listdir(ocr_results)]
+        result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[1])) as result_file:
             text = result_file.read()
             assert '<pc:Unicode>Wietenberg;</pc:Unicode>' in text
