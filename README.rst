@@ -32,31 +32,42 @@ REST API to run tasks for OCR-D.
 Development installation
 ------------------------
 
+Needed packages for Debian 10 installation:
+
+* libleptonica-dev
+* libtesseract-dev
+
+https://github.com/tmbdev/clstm
+* scons
+* libprotobuf-dev
+* protobuf-compiler
+* libpng-dev
+* libeigen3-dev
+* swig
+
 Install in development mode:
+
 .. code-block: bash
 pipenv install
 python setup.py develop
 
 Run the app:
+
 .. code-block: bash
-python ocrd_butler/app.py
-# FLASK_APP=ocrd_butler/app.py flask run
-# TESSDATA_PREFIX=/usr/share/tessdata FLASK_APP=ocrd_butler/app.py flask run
-# TESSDATA_PREFIX=/usr/share/tesseract-ocr/tessdata FLASK_APP=ocrd_butler/app.py flask run
-# TESSDATA_PREFIX=/usr/local/share/tessdata FLASK_APP=ocrd_butler/app.py flask run
+FLASK_APP=ocrd_butler/app.py flask run
 
 
 Start celery worker:
+
 .. code-block: bash
 TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
-# TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery -A ocrd_butler.app.celery worker -E -l info
-# TESSDATA_PREFIX=/usr/share/tessdata celery -A ocrd_butler.app.celery worker -E -l info
 
---> If download fails - disable the proxy on local machines. Problems with network connections are due to the proxy by default.
+If download of METS files fail - disable the proxy on local machines. There are, as always, problems with network connections due to the proxy.
 
 Swagger docs: http://localhost:5000
 
 Start flower monitor:
+
 .. code-block: bash
 flower --broker redis://redis.localhost:6379
 
