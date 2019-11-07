@@ -10,11 +10,6 @@ from ocrd_tesserocr.segment_line import TesserocrSegmentLine
 from ocrd_tesserocr.segment_word import TesserocrSegmentWord
 from ocrd_tesserocr.recognize import TesserocrRecognize
 
-from ocrd_kraken.binarize import KrakenBinarize
-from ocrd_kraken.segment import KrakenSegment
-from ocrd_kraken.ocr import KrakenOcr
-
-
 from ocrd_butler.api.restplus import api
 
 PROCESSORS_CONFIG = {
@@ -39,33 +34,7 @@ PROCESSORS_CONFIG = {
             "overwrite_words": False,
             "textequiv_level": "line",
         }
-    },
-    "KrakenBinarize":  {
-        "class": KrakenBinarize,
-        "output_file_grp": "OCRD-KRAKEN-BINARIZE",
-        "parameter": {
-            "level-of-operation": "page",
-        }
-    },
-    "KrakenSegment":  {
-        "class": KrakenSegment,
-        "output_file_grp": "OCRD-KRAKEN-SEGMENT",
-        "parameter": {
-            "text_direction": "horizontal-lr",
-            "script_detect": False,
-            "maxcolseps": 2,
-            "scale": 0,
-            "black_colseps": False,
-            "white_colseps": False,
-        }
-    },
-    "KrakenOcr":  {
-        "class": KrakenOcr,
-        "output_file_grp": "OCRD-KRAKEN-OCR",
-        "parameter": {
-            "lines-json": "bar",
-        }
-    },
+    }
 }
 
 PROCESSOR_NAMES = PROCESSORS_CONFIG.keys()
