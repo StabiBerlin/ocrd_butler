@@ -10,6 +10,8 @@ from ocrd_tesserocr.segment_line import TesserocrSegmentLine
 from ocrd_tesserocr.segment_word import TesserocrSegmentWord
 from ocrd_tesserocr.recognize import TesserocrRecognize
 
+from ocrd_calamari.recognize import CalamariRecognize
+
 from ocrd_butler.api.restplus import api
 
 PROCESSORS_CONFIG = {
@@ -34,7 +36,15 @@ PROCESSORS_CONFIG = {
             "overwrite_words": False,
             "textequiv_level": "line",
         }
-    }
+    },
+    "CalamariRecognize":  {
+        "class": CalamariRecognize,
+        "output_file_grp": "OCRD-CALAMARI-RECOGNIZE",
+        "parameter": {
+            "checkpoint": "/opt/calamari_models/fraktur_historical/0.ckpt.json",
+            "voter": "confidence_voter_default_ctc"
+        }
+    },
 }
 
 PROCESSOR_NAMES = PROCESSORS_CONFIG.keys()

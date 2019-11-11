@@ -23,12 +23,10 @@
         }
         ,
         {
-            "name": "Kraken One",
-            "description": "Chain with only kraken processors",
+            "name": "Calamari One",
+            "description": "Chain with only calamari processors",
             "processors": [
-                "KrakenBinarize",
-                "KrakenSegment",
-                "KrakenOcr"
+                "CalamariRecognize"
             ]
         }
         ,
@@ -37,6 +35,13 @@
             "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
             "file_grp": "DEFAULT",
             "chain": "Tesseract One"
+        }
+        ,
+        {
+            "id": "PPN80041750X",
+            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+            "file_grp": "DEFAULT",
+            "chain": "Calamari One"
         }
         ,
         {

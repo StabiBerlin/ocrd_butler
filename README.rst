@@ -47,20 +47,31 @@ https://github.com/tmbdev/clstm
 
 Install in development mode:
 
+
+We need to install the master branch of pipenv to get manylinux2010 included
+to be able to lock the dependency functool32 of ocrd_calamari.
+
 .. code-block: bash
-pipenv install
-python setup.py develop
+
+    ╰─$ pip install --user git+https://github.com/pypa/pipenv.git@master
+
+.. code-block: bash
+
+    ╰─$ pipenv install
+    ╰─$ python setup.py develop
 
 Run the app:
 
 .. code-block: bash
-FLASK_APP=ocrd_butler/app.py flask run
+
+    FLASK_APP=ocrd_butler/app.py flask run
 
 
 Start celery worker:
 
 .. code-block: bash
-TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
+
+    TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
 
 If download of METS files fail - disable the proxy on local machines. There are, as always, problems with network connections due to the proxy.
 
@@ -69,7 +80,8 @@ Swagger docs: http://localhost:5000
 Start flower monitor:
 
 .. code-block: bash
-flower --broker redis://redis.localhost:6379
+
+    flower --broker redis://redis.localhost:6379
 
 Flower monitor: http://localhost:5555
 

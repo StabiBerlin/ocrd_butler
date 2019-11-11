@@ -38,6 +38,24 @@ task_tesseract_config = {
     }
 }
 
+task_tesseract_with_calamari_rec_config = {
+    "id": "PPN80041750X",
+    "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+    "file_grp": "DEFAULT",
+    # "chain": "Tesseract One",
+    "processors": [
+        # "TesserocrSegmentRegion",
+        # "TesserocrSegmentLine",
+        # "TesserocrSegmentWord",
+        "CalamariRecognize"
+    ],
+    "parameter": {
+        "TesserocrRecognize": {
+            "model": "deu"
+        }
+    }
+}
+
 class TasksTest(TestCase):
 
     def create_app(self):
@@ -105,3 +123,22 @@ class TasksTest(TestCase):
         with open(os.path.join(ocr_results, result_files[1])) as result_file:
             text = result_file.read()
             assert '<pc:Unicode>Wietenberg;</pc:Unicode>' in text
+
+    def test_task_results_cal(self):
+        """TODO: Currently no results, using /opt/calamari_models/fraktur_historical/0.ckpt.json
+           as checkpoint file.
+        """
+        task_config_cal = task_tesseract_with_calamari_rec_config
+
+        task = create_task(task_config_cal)
+        assert task["task_id"] == "PPN80041750X"
+        assert task["status"] == "Created"
+        assert task["result_dir"].startswith("/tmp/ocrd_butler_results_testing/PPN80041750X")
+
+        ocr_results = os.path.join(task["result_dir"], "OCRD-CALAMARI-RECOGNIZE")
+        result_files = os.listdir(ocr_results)
+        with open(os.path.join(ocr_results, result_files[1])) as result_file:
+            text = result_file.read()
+            assert '/FILE_0001_DEFAULT.jpg' in text
+
+
