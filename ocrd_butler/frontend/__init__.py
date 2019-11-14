@@ -5,6 +5,8 @@ import zipfile
 import io
 import pathlib
 
+from json2html import json2html
+
 from flask import Blueprint, render_template, flash, redirect, url_for, jsonify, Response, send_file
 
 import xml.etree.ElementTree as ET
@@ -12,13 +14,19 @@ import xml.etree.ElementTree as ET
 from ocrd_butler import celery
 
 from ocrd_butler.frontend.nav import nav
-from ocrd_butler.api.processors import PROCESSORS
+from ocrd_butler.api.processors import PROCESSORS_VIEW
 
 from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 
-
 frontend = Blueprint("frontend", __name__)
+
+@frontend.context_processor
+def utility_processor():
+    return dict(json2html=json2html,
+                type=type,
+                list=list,
+                dict=dict)
 
 @frontend.route("/")
 def index():
@@ -45,7 +53,7 @@ def processors():
     """Define the page presenting the integrated processors."""
     return render_template(
         "processors.html",
-        processors=PROCESSORS)
+        processors=PROCESSORS_VIEW)
 
 @frontend.route("/chains")
 def chains():

@@ -18,6 +18,7 @@ logging_conf_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '..
 logging.config.fileConfig(logging_conf_path)
 log = logging.getLogger(__name__)
 
+
 def main():
     """What should I do, when I'm called directly?"""
     log.info("> Starting development server at http://%s/api/ <<<<<" %

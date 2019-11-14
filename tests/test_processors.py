@@ -8,6 +8,8 @@ import requests
 from flask_testing import TestCase
 
 from ocrd_calamari.recognize import CalamariRecognize
+from ocrd_tesserocr.recognize import TesserocrRecognize
+from ocrd_tesserocr.segment_region import TesserocrSegmentRegion
 
 from ocrd_butler.factory import create_app
 from ocrd_butler.api.processors import PROCESSORS_CONFIG
@@ -27,6 +29,26 @@ class ProcessorsTests(TestCase):
 
     def tearDown(self):
         pass
+
+    def test_tesserocr_integration(self):
+        """Check if ocr_tesserocr is importable."""
+        assert "TesserocrRecognize" in PROCESSORS_CONFIG
+        assert "TesserocrRecognize" in PROCESSOR_NAMES
+        assert PROCESSORS_CONFIG["TesserocrRecognize"]["class"] == TesserocrRecognize
+        assert "TesserocrSegmentRegion" in PROCESSORS_CONFIG
+        assert PROCESSORS_CONFIG["TesserocrSegmentRegion"]["class"] == TesserocrSegmentRegion
+        assert "TesserocrSegmentLine" in PROCESSORS_CONFIG
+        assert "TesserocrSegmentWord" in PROCESSORS_CONFIG
+        assert "TesserocrCrop" in PROCESSORS_CONFIG
+        assert "TesserocrDeskew" in PROCESSORS_CONFIG
+        assert "TesserocrBinarize" in PROCESSORS_CONFIG
+
+    def test_tesserocr_information(self):
+        """Check if tesserocr processor is visible."""
+        response = self.client.get("/processors")
+        self.assert200(response)
+        self.assert_template_used("processors.html")
+        assert b'TesserocrDeskew' in response.data
 
     def test_calamari_integration(self):
         """Check if ocr_calamari is importable."""

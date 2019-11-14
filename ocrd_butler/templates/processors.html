@@ -14,11 +14,19 @@
             {% for processor in processors %}
                 <h3>{{ processor.name }}</h3>
                 <p>
-                    Description: {{ processor.description }}
-                    <br />
-                    Output file group: {{ processor["output-file-group"] }}
-                    <br />
-                    Paramter: {{ processor.parameter }}
+                    {% for key, value in processor.items() %}
+                        {{ key.capitalize() }}:
+
+                        {% if type(value) == list %}
+                            {{ ", ".join(value) }}
+                        {% elif type(value) == dict %}
+                            {{ json2html.convert(value) | safe }}
+                        {% else %}
+                            {{ value }}
+                        {% endif %}
+
+                        <br />
+                    {% endfor %}
                 </p>
             {% endfor %}
         </div>
