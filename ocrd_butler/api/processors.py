@@ -41,16 +41,19 @@ for package in PROCESSOR_PACKAGES:
 
 PROCESSOR_NAMES = PROCESSORS_CONFIG.keys()
 
+# We prepare an usable action configuration from the config itself.
 PROCESSORS_ACTION = copy.deepcopy(PROCESSORS_CONFIG)
 for name, config in PROCESSORS_ACTION.items():
-    for tool_name, tool_config in config["tools"]:
-        parameters = {}
-        for p_name, p_values in tool_config["parameters"]:
-            # TODO: Convert parameter definitions to inputs with
-            #       defaults or predefined values from the config
-            #       itself.
-            pass
-        tool_config["parameters"] = parameters
+    parameters = {}
+    if "parameters" in config:
+        for p_name, p_values in config["parameters"].items():
+            if "default" in p_values:
+                parameters[p_name] = p_values["default"]
+    config["parameters"] = parameters
+    # Just take the first in-/output file group for now.
+    # TODO: This is also connected to the choosen paramters.
+    config["input_file_grp"] = config["input_file_grp"][0]
+    config["output_file_grp"] = config["output_file_grp"][0]
 
 PROCESSORS_VIEW = []
 for name, config in PROCESSORS_CONFIG.items():

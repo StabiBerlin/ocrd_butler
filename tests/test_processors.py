@@ -13,6 +13,7 @@ from ocrd_tesserocr.segment_region import TesserocrSegmentRegion
 
 from ocrd_butler.factory import create_app
 from ocrd_butler.api.processors import PROCESSORS_CONFIG
+from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.api.processors import PROCESSOR_NAMES
 # from ocrd_butler.api.processors import PROCESSORS
 from ocrd_butler.config import TestingConfig
@@ -49,6 +50,14 @@ class ProcessorsTests(TestCase):
         self.assert200(response)
         self.assert_template_used("processors.html")
         assert b'TesserocrDeskew' in response.data
+
+    def test_tesserocr_parameters(self):
+        """Check if ocr_tesserocr is importable."""
+        parameters = PROCESSORS_ACTION["TesserocrRecognize"]["parameters"]
+        assert "textequiv_level" in parameters
+        assert parameters["textequiv_level"] == "line"
+        assert parameters["overwrite_words"] == False
+        assert "model" not in parameters
 
     def test_calamari_integration(self):
         """Check if ocr_calamari is importable."""

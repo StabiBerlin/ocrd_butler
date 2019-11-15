@@ -13,7 +13,7 @@ from ocrd.processor.base import run_processor
 
 from ocrd_butler import celery
 
-from ocrd_butler.api.processors import PROCESSORS_CONFIG
+from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.api.chains import processor_chains, default_chain
 
 
@@ -50,21 +50,21 @@ def create_task(task):
         if index == 0:
             input_file_grp = task["file_grp"]
         else:
-            previous_processor = PROCESSORS_CONFIG[processors[index-1]]
+            previous_processor = PROCESSORS_ACTION[processors[index-1]]
             input_file_grp = previous_processor["output_file_grp"]
 
-        processor = PROCESSORS_CONFIG[processor_name]
+        processor = PROCESSORS_ACTION[processor_name]
 
         # Its possible to override the default parameters of the processor.
         kwargs = {}
         if "parameters" in processor:
-            kwargs["parameters"] = {}
+            kwargs["parameter"] = {}
             for key, value in processor["parameters"].items():
                 if "parameters" in task and processor_name in task["parameters"] and\
                     key in task["parameters"][processor_name]:
-                    kwargs["parameters"][key] = task["parameters"][processor_name][key]
+                    kwargs["parameter"][key] = task["parameters"][processor_name][key]
                 else:
-                    kwargs["parameters"][key] = value
+                    kwargs["parameter"][key] = value
 
         run_processor(processor["class"],
                       mets_url=task["mets_url"],

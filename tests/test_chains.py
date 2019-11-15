@@ -7,7 +7,7 @@ import pytest
 from flask_restplus import fields
 
 from ocrd_butler.api.processors import PROCESSOR_NAMES
-from ocrd_butler.api.processors import PROCESSORS_CONFIG
+from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.api.chains import processor_chains
 from ocrd_butler.api.models import chain_model
 
@@ -31,7 +31,7 @@ def test_processor_names():
     assert "TesserocrSegmentWord" in PROCESSOR_NAMES
     assert "TesserocrRecognize" in PROCESSOR_NAMES
 
-    assert PROCESSORS_CONFIG["TesserocrRecognize"]["parameter"]["model"] == "deu"
+    # assert PROCESSORS_ACTION["TesserocrRecognize"]["parameters"]["model"] == "deu"
 
 
 def test_predefined_chains():
