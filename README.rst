@@ -74,7 +74,7 @@ Start celery worker:
 
 If download of METS files fail - disable the proxy on local machines. There are, as always, problems with network connections due to the proxy.
 
-Swagger docs: http://localhost:5000
+Swagger docs: http://localhost:5000/api
 
 Start flower monitor:
 

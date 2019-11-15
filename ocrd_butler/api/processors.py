@@ -23,8 +23,8 @@ from ocrd_butler.util import camel_case_split
 PROCESSORS_CONFIG = {}
 
 PROCESSOR_PACKAGES = [
+    "ocrd_tesserocr",
     "ocrd_calamari",
-    "ocrd_tesserocr"
 ]
 
 for package in PROCESSOR_PACKAGES:

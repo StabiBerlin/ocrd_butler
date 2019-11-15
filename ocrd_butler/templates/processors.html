@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-   <div class="container">
+   <div class="container processors">
         <div class="jumbotron">
             <h1>Processors</h1>
-            <p>The current implemented processors</p>
+            <p>Sir, the following processors are currently implemented. Please choose wisely and build your chains.</p>
         </div>
         <div class="col-md-2">
             <img width="100%%" src="{{url_for('static', filename='butler_processors.png')}}" />
@@ -12,22 +12,23 @@
         <div class="col-md-10">
             {# {{ processors|tojson }} #}
             {% for processor in processors %}
-                <h3>{{ processor.name }}</h3>
-                <p>
+                <h2>{{ processor.name }}</h2>
+                <table>
                     {% for key, value in processor.items() %}
-                        {{ key.capitalize() }}:
-
-                        {% if type(value) == list %}
-                            {{ ", ".join(value) }}
-                        {% elif type(value) == dict %}
-                            {{ json2html.convert(value) | safe }}
-                        {% else %}
-                            {{ value }}
-                        {% endif %}
-
-                        <br />
+                    <tr>
+                        <td>{{ key.capitalize() }}</td>
+                        <td>
+                            {% if type(value) == list %}
+                                {{ ", ".join(value) }}
+                            {% elif type(value) == dict %}
+                                {{ json2html.convert(value) | safe }}
+                            {% else %}
+                                {{ value }}
+                            {% endif %}
+                        </td>
                     {% endfor %}
-                </p>
+                    </tr>
+                </table>
             {% endfor %}
         </div>
     </div>
