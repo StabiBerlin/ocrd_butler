@@ -1,32 +1,33 @@
 {
     "examples": [
         {
-            "id": "PPN74728721X",
-            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN74728721X.mets.xml",
-            "file_grp": "DEFAULT",
-            "TesserocrRecognize": {
-                "parameter": {
-                    "model": "deu"
-                }
-            }
-        }
-        ,
-        {
-            "name": "Tesseract One",
+            "name": "Tesseract",
             "description": "Chain with only tesseract processors",
             "processors": [
-                "TesserocrSegmentRegion",
-                "TesserocrSegmentLine",
-                "TesserocrSegmentWord",
-                "TesserocrRecognize"
+                "ocrd-tesserocr-segment-region",
+                "ocrd-tesserocr-segment-line",
+                "ocrd-tesserocr-segment-word",
+                "ocrd-tesserocr-recognize"
             ]
         }
         ,
         {
-            "name": "Calamari One",
-            "description": "Chain with only calamari processors",
+            "name": "Tesseract - Calamari",
+            "description": "Chain with tesserocr preps and calamari recognize",
             "processors": [
-                "CalamariRecognize"
+                "ocrd-tesserocr-segment-region",
+                "ocrd-tesserocr-segment-line",
+                "ocrd-tesserocr-segment-word",
+                "ocrd-calamari-recognize"
+            ]
+        }
+        ,
+        {
+            "name": "Olena - Calamari",
+            "description": "Chain with olena binarization and calamari recognize",
+            "processors": [
+                "ocrd-olena-binarize",
+                "ocrd-calamari-recognize"
             ]
         }
         ,
@@ -34,24 +35,24 @@
             "id": "PPN80041750X",
             "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
             "file_grp": "DEFAULT",
-            "chain": "Tesseract One"
+            "chain": "Tesseract"
         }
         ,
         {
             "id": "PPN80041750X",
             "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
             "file_grp": "DEFAULT",
-            "chain": "Calamari One"
+            "chain": "Tesseract - Calamari"
         }
         ,
         {
             "id": "PPN80041750X",
             "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
             "file_grp": "DEFAULT",
-            "chain": "Tesseract One",
+            "chain": "Tesseract - Calamari",
             "parameter": {
-                "TesserocrRecognize": {
-                    "model": "frk"
+                "ocrd-calamari-recognize": {
+                    "model": "GT4HistOCR_2000000"
                 }
             }
         }
