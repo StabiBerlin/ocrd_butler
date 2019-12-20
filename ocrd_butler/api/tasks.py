@@ -79,8 +79,8 @@ class Task(Resource):
         task["parameter"] = request.json["parameter"] if "parameter" in request.json else ""
 
         # worker_task = create_task.apply_async(args=[task], countdown=20)
-        worker_task = create_task.delay(task)
-        # worker_task = create_task(task)
+        #worker_task = create_task.delay(task)
+        worker_task = create_task(task)
 
         db_task = db_model_Task(
             work_id=task["id"],
