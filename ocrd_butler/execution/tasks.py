@@ -9,7 +9,7 @@ import uuid
 
 from ocrd.cli.workspace import WorkspaceCtx, workspace_clone
 
-from ocrd.processor.base import run_processor
+from ocrd.processor.base import run_cli
 
 from ocrd_butler import celery
 
@@ -65,13 +65,13 @@ def create_task(task):
                     kwargs["parameter"][key] = task["parameters"][processor_name][key]
                 else:
                     kwargs["parameter"][key] = value
-
-        run_processor(processor["class"],
-                      mets_url=task["mets_url"],
-                      workspace=workspace,
-                      input_file_grp=input_file_grp,
-                      output_file_grp=processor["output_file_grp"],
-                      **kwargs)
+        #import ipdb;ipdb.set_trace() 
+        run_cli(processor["executable"],
+                mets_url=task["mets_url"],
+                workspace=workspace,
+                input_file_grp=input_file_grp,
+                output_file_grp=processor["output_file_grp"],
+                **kwargs)
 
     return {
         "task_id": task["id"],
