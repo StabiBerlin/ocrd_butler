@@ -21,6 +21,7 @@
                     <th>Parameter</th>
                     <th>Worker (Status)</th>
                     <th>Results</th>
+                    <th>Delete Task</th>
                 </tr>
                 {% for task in tasks %}
                 <tr>
@@ -49,6 +50,8 @@
                             <br />
                             <a href="{{ task.result.txt }}">TXT</a>
                         {% endif %}
+                    </td>
+                    <td><a href="/task/delete/{{ task.id }}">X</a></td>
                 </tr>
                 {% endfor %}
             </table>

@@ -48,10 +48,15 @@ class ChainList(Resource):
 @ns.route("/chain/<string:id>")
 class Chain(Resource):
     """Getter and updater for chains."""
-    @api.doc(responses={ 200: "Created", 400: "Missing id" })
+    @api.doc(responses={ 200: "Found", 400: "Missing id" })
     def get(self, id):
 
         chain = db_model_Chain.query.filter_by(id=id).first()
+
+        if chain is None:
+            return jsonify({
+                "message": "Can't find a chain with the id '{0}'.".format(id)
+            })
 
         return jsonify({
             "id": chain.id,
@@ -64,7 +69,15 @@ class Chain(Resource):
         pass
 
     def delete(self, id):
-        pass
+        res = db_model_Chain.query.filter_by(id=id)
+        chain = res.first()
+        message = "Deleted chain {0} ({1})".format(chain.name, chain.id)
+        res.delete()
+        db.session.commit()
+
+        return jsonify({
+            "message": message
+        })
 
 
 

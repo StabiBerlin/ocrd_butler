@@ -16,26 +16,25 @@ from ocrd_butler.util import camel_case_split
 PROCESSORS_CONFIG = {}
 
 DIRECT_SCRIPTS = [
-    "../ocrd_all/ocrd_olena",
-    "../ocrd_all/ocrd_tesserocr"
+    "/home/j23d/projects/ocrd/ocrd_all/ocrd_olena",
+    # "/home/j23d/projects/ocrd/ocrd_all/ocrd_tesserocr"
 ]
 PROCESSOR_PACKAGES = [
-    #"ocrd_tesserocr", # Segmentation fault while importing the package
+    "ocrd_tesserocr", # Segmentation fault while importing the package
     "ocrd_calamari",
     "ocrd_segment",
-    "ocrd_ocropy",
+    # "ocrd_ocropy",
     "ocrd_keraslm",
-    "ocrd_kraken",
+    # "ocrd_kraken",
     "ocrd_anybaseocr",
-    
 ]
 
 for package in DIRECT_SCRIPTS:
     ocrd_tool_file = os.path.abspath(os.path.join(package, "ocrd-tool.json"))
-    
+
     if not os.path.exists(ocrd_tool_file):
         continue
-    
+
     with open(ocrd_tool_file) as fh:
         ocrd_tool = json.load(fh)
 
@@ -48,12 +47,18 @@ for package in PROCESSOR_PACKAGES:
     ocrd_tool_file = os.path.abspath(os.path.join(m_path, "ocrd-tool.json"))
     if not os.path.exists(ocrd_tool_file):
         ocrd_tool_file = os.path.abspath(os.path.join(m_path, "..", "ocrd-tool.json"))
+    if not os.path.exists(ocrd_tool_file):
+        # ocrd_keraslm
+        ocrd_tool_file = os.path.abspath(os.path.join(m_path, "wrapper", "ocrd-tool.json"))
+
+    if not os.path.exists(ocrd_tool_file):
+        print ("Can't find ocrd-tools.json from {0}, giving up.".format(package))
+        continue
+
     with open(ocrd_tool_file) as fh:
         ocrd_tool = json.load(fh)
 
-    if not os.path.exists(ocrd_tool_file):
-        continue
-    
+
     for name, config in ocrd_tool["tools"].items():
         PROCESSORS_CONFIG[name] = config
 

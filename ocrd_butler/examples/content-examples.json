@@ -1,6 +1,23 @@
 {
     "examples": [
         {
+            "name": "Test",
+            "description": "Chain with only tesseract processors",
+            "processors": [
+                "ocrd-tesserocr-segment-region"
+            ]
+        }
+        ,
+        {
+            "name": "Test2",
+            "description": "Chain with only tesseract processors",
+            "processors": [
+                "ocrd-tesserocr-segment-region",
+                "ocrd-tesserocr-segment-line"
+            ]
+        }
+        ,
+        {
             "name": "Tesseract",
             "description": "Chain with only tesseract processors",
             "processors": [

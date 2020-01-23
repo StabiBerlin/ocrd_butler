@@ -14,8 +14,10 @@ import xml.etree.ElementTree as ET
 from ocrd_butler import celery
 
 from ocrd_butler.frontend.nav import nav
+from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.api.processors import PROCESSORS_VIEW
 
+from ocrd_butler.database import db
 from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 
@@ -71,20 +73,23 @@ def chains():
         "chains.html",
         chains=current_chains)
 
-@frontend.route('/tasks')
-def tasks():
-    """Define the page presenting the created tasks."""
+
+def current_tasks():
     results = db_model_Task.query.all()
 
     current_tasks = []
+
     for result in results:
+
+        chain = db_model_Chain.query.filter_by(id=result.chain_id).first()
+
         task = {
             "id": result.id,
             "work_id": result.work_id,
             "mets_url": result.mets_url,
             "file_grp": result.file_grp,
             "worker_id": result.worker_id,
-            "chain": result.chain.name,
+            "chain": chain,
             "parameter": result.parameter,
             "result": None
         }
@@ -99,18 +104,40 @@ def tasks():
 
         current_tasks.append(task)
 
+    return current_tasks
+
+
+@frontend.route('/tasks')
+def tasks():
+    """Define the page presenting the created tasks."""
+
     return render_template(
         "tasks.html",
-        tasks=current_tasks)
+        tasks=current_tasks())
+
+
+@frontend.route('/task/delete/<int:task_id>')
+def task_delete(task_id):
+    db_model_Task.query.filter_by(id=task_id).delete()
+    db.session.commit()
+
+    return redirect("/tasks", code=302)
 
 
 @frontend.route("/download/txt/<string:worker_id>")
 def download_txt(worker_id):
     """Define route to download the results as text."""
     # TODO: we have to have the result (destination) dir in the result of the worker
-    res = celery.AsyncResult(worker_id)
-    dst_dir = "{}".format(res.result["result_dir"])
-    page_xml_dir = os.path.join(dst_dir, "OCRD-RECOGNIZE")
+    result = celery.AsyncResult(worker_id)
+    dst_dir = "{}".format(result.result["result_dir"])
+
+    # Get the output group of the last step in the chain of the task.
+    task = db_model_Task.query.filter_by(worker_id=result.id).first()
+    chain = db_model_Chain.query.filter_by(id=task.chain_id).first()
+    last_step = json.loads(chain.processors)[-1]
+    last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+
+    page_xml_dir = os.path.join(dst_dir, last_output)
     fulltext = ""
 
     namespace = {
@@ -138,7 +165,7 @@ def download_txt(worker_id):
         mimetype="text/txt",
         headers={
             "Content-Disposition":
-            "attachment;filename=fulltext_%s.txt" % res.result["task_id"]
+            "attachment;filename=fulltext_%s.txt" % result.result["task_id"]
         }
     )
 
@@ -147,9 +174,16 @@ def download_txt(worker_id):
 def download_xml_zip(worker_id):
     """Define route to download the page xml results as zip file."""
     # TODO: we have to have the result (destination) dir in the result of the worker
-    res = celery.AsyncResult(worker_id)
-    dst_dir = "{}".format(res.result["result_dir"])
-    page_xml_dir = os.path.join(dst_dir, "OCRD-RECOGNIZE")
+    result = celery.AsyncResult(worker_id)
+    dst_dir = "{}".format(result.result["result_dir"])
+
+    # Get the output group of the last step in the chain of the task.
+    task = db_model_Task.query.filter_by(worker_id=result.id).first()
+    chain = db_model_Chain.query.filter_by(id=task.chain_id).first()
+    last_step = json.loads(chain.processors)[-1]
+    last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+
+    page_xml_dir = os.path.join(dst_dir, last_output)
     base_path = pathlib.Path(page_xml_dir)
 
     data = io.BytesIO()
@@ -162,5 +196,5 @@ def download_xml_zip(worker_id):
         data,
         mimetype="application/zip",
         as_attachment=True,
-        attachment_filename="ocr_page_xml_%s.zip" % res.result["task_id"]
+        attachment_filename="ocr_page_xml_%s.zip" % result.result["task_id"]
     )

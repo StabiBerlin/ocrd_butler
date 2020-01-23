@@ -32,37 +32,31 @@ REST API to run tasks for OCR-D.
 Development installation
 ------------------------
 
-Needed packages for Debian 10 installation:
+We rely on the excellent installation repository `ocrd_all`_. Please check it out for installation.
 
-* libleptonica-dev
-* libtesseract-dev
+If your in the need to install it on a Debian 10 system (as we are), consider the following:
 
-https://github.com/tmbdev/clstm (currently not needed until update of ocrd_kraken)
-* scons
-* libprotobuf-dev
-* protobuf-compiler
-* libpng-dev
-* libeigen3-dev
-* swig
+*
 
 Install in development mode:
 
 
-We need to install the master branch of pipenv to get manylinux2010 included to be able to lock the dependency functool32 of ocrd_calamari.
-
-.. code-block:: bash
-
-    ╰─$ pip install --user git+https://github.com/pypa/pipenv.git@master
-
-.. code-block:: bash
-
-    ╰─$ pipenv install
-    ╰─$ python setup.py develop
+#We need to install the master branch of pipenv to get manylinux2010 included to be able to lock the dependency #functool32 of ocrd_calamari.
+#
+#.. code-block:: bash
+#
+#    ╰─$ pip install --user git+https://github.com/pypa/pipenv.git@master
+#
+#.. code-block:: bash
+#
+#    ╰─$ pipenv install
+#    ╰─$ python setup.py develop
 
 Run the app:
 
 .. code-block:: bash
 
+    ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata FLASK_APP=ocrd_butler/app.py flask run
     ╰─$ FLASK_APP=ocrd_butler/app.py flask run
 
 
@@ -71,6 +65,7 @@ Start celery worker:
 .. code-block:: bash
 
     ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
+    ╰─$ celery worker -A ocrd_butler.celery_worker.celery -E -l info
 
 If download of METS files fail - disable the proxy on local machines. There are, as always, problems with network connections due to the proxy.
 
@@ -80,7 +75,7 @@ Start flower monitor:
 
 .. code-block:: bash
 
-    ╰─$ flower --broker redis://redis.localhost:6379
+    ╰─$ flower --broker redis://localhost:6379
 
 Flower monitor: http://localhost:5555
 
@@ -131,3 +126,4 @@ based on `audreyr/cookiecutter-pypackage`_.
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`elgertam/cookiecutter-pipenv`: https://github.com/elgertam/cookiecutter-pipenv
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+.. _`ocrd_all`: https://github.com/OCR-D/ocrd_all

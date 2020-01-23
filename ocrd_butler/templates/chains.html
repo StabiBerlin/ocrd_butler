@@ -12,7 +12,7 @@
         <div class="col-md-10">
             {# {{ chains }} #}
             {% for chain in chains %}
-                <h3>{{ chain.name }}</h3>
+                <h3>{{ chain.name }} ({{ chain.id }})</h3>
                 <p>
                     <h4>Description</h4>
                     {{ chain.description }}
