@@ -1,23 +1,6 @@
 {
     "examples": [
         {
-            "name": "Test",
-            "description": "Chain with only tesseract processors",
-            "processors": [
-                "ocrd-tesserocr-segment-region"
-            ]
-        }
-        ,
-        {
-            "name": "Test2",
-            "description": "Chain with only tesseract processors",
-            "processors": [
-                "ocrd-tesserocr-segment-region",
-                "ocrd-tesserocr-segment-line"
-            ]
-        }
-        ,
-        {
             "name": "Tesseract",
             "description": "Chain with only tesseract processors",
             "processors": [
@@ -44,15 +27,46 @@
             "description": "Chain with olena binarization and calamari recognize",
             "processors": [
                 "ocrd-olena-binarize",
+                "ocrd-tesserocr-segment-region",
+                "ocrd-tesserocr-segment-line",
                 "ocrd-calamari-recognize"
             ]
+        }
+        ,
+        {
+            "id": "PPN729167801",
+            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN729167801.mets.xml",
+            "file_grp": "DEFAULT",
+            "chain": "Tesseract - Calamari",
+            "parameter": {
+                "ocrd-calamari-recognize": {
+                    "checkpoint": "/home/j23d/projects/ocrd_butler/calamari_models/*ckpt.json"
+                }
+            }
+        }
+        ,
+        {
+            "id": "PPN729167801",
+            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN729167801.mets.xml",
+            "file_grp": "DEFAULT",
+            "chain": "Tesseract",
+            "parameter": {
+                "ocrd-tesserocr-recognize": {
+                    "model": "GT4HistOCR_2000000"
+                }
+            }
         }
         ,
         {
             "id": "PPN80041750X",
             "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
             "file_grp": "DEFAULT",
-            "chain": "Tesseract"
+            "chain": "Tesseract",
+            "parameter": {
+                "ocrd-tesserocr-recognize": {
+                    "model": "GT4HistOCR_2000000"
+                }
+            }
         }
         ,
         {
@@ -69,7 +83,7 @@
             "chain": "Tesseract - Calamari",
             "parameter": {
                 "ocrd-calamari-recognize": {
-                    "model": "GT4HistOCR_2000000"
+                    "checkpoint": "/home/j23d/projects/ocrd/calamari_models/*ckpt.json"
                 }
             }
         }
