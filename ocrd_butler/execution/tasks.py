@@ -56,19 +56,14 @@ def create_task(task):
         processor = PROCESSORS_ACTION[processor_name]
 
         # Its possible to override the default parameters of the processor.
-        kwargs = {}
-        parameter = ""
+        kwargs = { "parameter": {} }
         if "parameters" in processor:
-            kwargs["parameter"] = {}
-            for key, value in processor["parameters"].items():
-                if "parameters" in task and processor_name in task["parameters"] and\
-                    key in task["parameters"][processor_name]:
-                    kwargs["parameter"][key] = task["parameters"][processor_name][key]
-                else:
-                    kwargs["parameter"][key] = value
+            kwargs["parameter"] = processor["parameters"]
+        if "parameter" in task and processor_name in task["parameter"]:
+            kwargs["parameter"].update(task["parameter"][processor_name])
             # parameter = ', '.join("{!s}={!r}".format(key,val) for (key,val) in kwargs["parameter"].items())
             # kwargs["parameter"]["clobber_mets"] = True
-            parameter = json.dumps(kwargs["parameter"])
+        parameter = json.dumps(kwargs["parameter"])
 
         ret = run_cli(processor["executable"],
                 mets_url=task["mets_url"],
