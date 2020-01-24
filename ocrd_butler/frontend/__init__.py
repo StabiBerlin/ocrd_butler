@@ -1,13 +1,16 @@
 import os
+from datetime import datetime
+from datetime import timedelta
 import json
 import glob
 import zipfile
 import io
 import pathlib
+import requests
 
 from json2html import json2html
 
-from flask import Blueprint, render_template, flash, redirect, url_for, jsonify, Response, send_file
+from flask import Blueprint, render_template, flash, redirect, url_for, jsonify, Response, send_file, current_app
 
 import xml.etree.ElementTree as ET
 
@@ -73,6 +76,13 @@ def chains():
         "chains.html",
         chains=current_chains)
 
+@frontend.route('/chain/delete/<int:chain_id>')
+def delete_chain(chain_id):
+    # TODO: Move functionality to api.
+    db_model_Chain.query.filter_by(id=chain_id).delete()
+    db.session.commit()
+
+    return redirect("/chains", code=302)
 
 def current_tasks():
     results = db_model_Task.query.all()
@@ -91,16 +101,45 @@ def current_tasks():
             "worker_id": result.worker_id,
             "chain": chain,
             "parameter": result.parameter,
-            "result": None
+            "result": {
+                "status": "",
+                "ready": False,
+                "xml": "",
+                "text": "",
+                "received": "",
+                "started": "",
+                "succeeded": "",
+                "runtime": ""
+            }
         }
 
         res = celery.AsyncResult(result.worker_id)
+        task["result"]["status"] = res.status,
+        task["result"]["ready"] = res.status == "SUCCESS",
+
         if res.ready() and res.successful():
-            task["result"] = {
-                "status": res.status,
+            task["result"].update({
                 "xml": "/download/xml/{}".format(result.worker_id),
                 "txt": "/download/txt/{}".format(result.worker_id),
-            }
+            })
+
+        backend_res = requests.get("http://localhost:5555/api/task/info/{0}".format(
+            result.worker_id
+        ))
+        if backend_res.status_code == 200:
+            info = json.loads(backend_res.content)
+            task["result"].update({
+                "received": datetime.fromtimestamp(info["received"])
+            })
+            if not info["state"] == "PENDING":
+                task["result"].update({
+                    "started": datetime.fromtimestamp(info["started"])
+                })
+            if info["state"] == "SUCCESS":
+                task["result"].update({
+                    "succeeded": datetime.fromtimestamp(info["succeeded"]),
+                    "runtime": timedelta(seconds=info["runtime"])
+                })
 
         current_tasks.append(task)
 
@@ -118,6 +157,7 @@ def tasks():
 
 @frontend.route('/task/delete/<int:task_id>')
 def task_delete(task_id):
+    # TODO: Move functionality to api.
     db_model_Task.query.filter_by(id=task_id).delete()
     db.session.commit()
 
@@ -198,3 +238,11 @@ def download_xml_zip(worker_id):
         as_attachment=True,
         attachment_filename="ocr_page_xml_%s.zip" % result.result["task_id"]
     )
+
+@frontend.app_template_filter('format_date')
+def _jinja2_filter_format_date(date, fmt="%d.%m.%Y, %H:%M"):
+    return date.strftime(fmt)
+
+@frontend.app_template_filter('format_delta')
+def _jinja2_filter_format_delta(delta):
+    return delta.__str__()

@@ -3,13 +3,17 @@
 {% block content %}
    <div class="container">
         <div class="jumbotron">
-            <h1>Tasks</h1>
-            <p>The current tasks</p>
+            <div class="container">
+                <div class="col-md-10">
+                    <h1>Tasks</h1>
+                    <p>The current tasks</p>
+                </div>
+                <div class="col-md-2">
+                    <img width="100%%" src="{{url_for('static', filename='butler_tasks.png')}}" />
+                </div>
+            </div>
         </div>
-        <div class="col-md-2">
-            <img width="100%%" src="{{url_for('static', filename='butler_tasks.png')}}" />
-        </div>
-        <div class="col-md-10">
+        <div class="col-md-12">
             {# {{ tasks }} #}
             <table border class="cellpadding">
                 <tr>
@@ -20,6 +24,7 @@
                     <th>Chain</th>
                     <th>Parameter</th>
                     <th>Worker (Status)</th>
+                    <th>Times</th>
                     <th>Results</th>
                     <th>Delete Task</th>
                 </tr>
@@ -46,12 +51,27 @@
                     </td>
                     <td>
                         {% if task.result %}
+                            {% if task.result.started %}
+                                Started: {{ task.result.started | format_date }}
+                            {% endif %}
+                            {% if task.result.succeeded %}
+                                <br />
+                                Succeeded: {{ task.result.succeeded | format_date }}
+                            {% endif %}
+                            {% if task.result.runtime %}
+                                <br />
+                                Runtime: {{ task.result.runtime | format_delta }}
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if task.result %}
                             <a href="{{ task.result.xml }}">XML</a>
                             <br />
                             <a href="{{ task.result.txt }}">TXT</a>
                         {% endif %}
                     </td>
-                    <td><a href="/task/delete/{{ task.id }}">X</a></td>
+                    <td><a href="/task/delete/{{ task.id }}">x</a></td>
                 </tr>
                 {% endfor %}
             </table>
