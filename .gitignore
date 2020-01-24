@@ -107,3 +107,5 @@ ENV/
 .vscode/settings.json
 
 ocrd_butler/tmp
+ocrd_butler/flower.db
+ocrd_butler/development.db
