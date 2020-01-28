@@ -93,6 +93,8 @@ Resources
 Ideas
 -----
 
+- Persistent tasks via flower (db and persistent option not working?) or transfer to own db?
+- Form frontend for tasks and chains.
 - Start date / Excecution times of tasks
 - input and output filegroups are not always from the previous processor
   - could be more complicated - maybe we get it from the ocrd-tools.json
