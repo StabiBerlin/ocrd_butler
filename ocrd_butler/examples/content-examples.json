@@ -58,7 +58,7 @@
         }
         ,
         {
-            "id": "PPN80041750X",
+            "id": "PPN80041750X-t",
             "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
             "file_grp": "DEFAULT",
             "chain": "Tesseract",
@@ -70,18 +70,38 @@
         }
         ,
         {
-            "id": "PPN80041750X",
-            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
-            "file_grp": "DEFAULT",
-            "chain": "Tesseract - Calamari"
-        }
-        ,
-        {
-            "id": "PPN80041750X",
+            "id": "PPN80041750X-tc",
             "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
             "file_grp": "DEFAULT",
             "chain": "Tesseract - Calamari",
             "parameter": {
+                "ocrd-calamari-recognize": {
+                    "checkpoint": "/home/j23d/projects/ocrd/calamari_models/*ckpt.json"
+                }
+            }
+        }
+        ,
+        {
+            "id": "PPN80041750X-oo",
+            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+            "file_grp": "DEFAULT",
+            "chain": "Foo",
+            "parameter": {
+                "ocrd-olena-binarize": {
+                    "impl": "sauvola-ms-split"
+                }
+            }
+        }
+        ,
+        {
+            "id": "PPN80041750X-oc",
+            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+            "file_grp": "DEFAULT",
+            "chain": "Olena - Calamari",
+            "parameter": {
+                "ocrd-olena-binarize": {
+                    "impl": "sauvola-ms-split"
+                },
                 "ocrd-calamari-recognize": {
                     "checkpoint": "/home/j23d/projects/ocrd/calamari_models/*ckpt.json"
                 }
@@ -99,20 +119,5 @@
                 }
             }
         }
-        ,
-        {
-            "id": "PPN80041750X",
-            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
-            "file_grp": "DEFAULT",
-            "chain": "Kraken One"
-        }
-        ,
-        {
-            "id": "PPN1006038434",
-            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN1006038434.mets.xml",
-            "file_grp": "DEFAULT",
-            "chain": "Tesseract One"
-        }
-
     ]
 }
