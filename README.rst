@@ -110,6 +110,8 @@ Ideas
 - switch to RabbitMQ instead of Redis as broker to be consistent with Kitodo?
 - Use processor groups to be able to build forms with these presented.
 
+- Check if ocrd-olena-binarize fail with another name for a METS file in a workspace then mets.xml.
+
 TODOs
 -----
 - tasks have to updated with:
