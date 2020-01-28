@@ -5,29 +5,29 @@
 import os
 import json
 import copy
-import inspect
 
 from flask import jsonify
 from flask_restplus import Resource
 
 from ocrd_butler.api.restplus import api
-from ocrd_butler.util import camel_case_split
+
 
 PROCESSORS_CONFIG = {}
 
 DIRECT_SCRIPTS = [
     "/home/j23d/projects/ocrd/ocrd_all/ocrd_olena",
-    # "/home/j23d/projects/ocrd/ocrd_all/ocrd_tesserocr"
+    "/home/j23d/projects/ocrd/ocrd_all/dinglehopper",
 ]
+
+
 PROCESSOR_PACKAGES = [
-    "ocrd_tesserocr", # Segmentation fault while importing the package
+    "ocrd_tesserocr",
     "ocrd_calamari",
     "ocrd_segment",
-    # "ocrd_ocropy",
     "ocrd_keraslm",
-    # "ocrd_kraken",
     "ocrd_anybaseocr",
 ]
+
 
 for package in DIRECT_SCRIPTS:
     ocrd_tool_file = os.path.abspath(os.path.join(package, "ocrd-tool.json"))
@@ -40,6 +40,7 @@ for package in DIRECT_SCRIPTS:
 
     for name, config in ocrd_tool["tools"].items():
         PROCESSORS_CONFIG[name] = config
+
 
 for package in PROCESSOR_PACKAGES:
     module = __import__(package, fromlist=["config", "cli"])
@@ -66,6 +67,7 @@ for package in PROCESSOR_PACKAGES:
 
 PROCESSOR_NAMES = PROCESSORS_CONFIG.keys()
 
+
 # We prepare an usable action configuration from the config itself.
 PROCESSORS_ACTION = copy.deepcopy(PROCESSORS_CONFIG)
 for name, config in PROCESSORS_ACTION.items():
@@ -81,24 +83,31 @@ for name, config in PROCESSORS_ACTION.items():
         config["input_file_grp"] = config["input_file_grp"][0]
     except KeyError:
         pass
-    try:
-        config["output_file_grp"] = config["output_file_grp"][0]
-    except KeyError:
-        pass
+    # TODO: Move this fixed setting to a configuration like place. (tbi)
+    if name == "ocrd-olena-binarize":
+        config["output_file_grp"] = "OCR-D-IMG-BINPAGE"
+    else:
+        try:
+            config["output_file_grp"] = config["output_file_grp"][0]
+        except KeyError:
+            pass
+
 
 PROCESSORS_VIEW = []
 for name, config in PROCESSORS_CONFIG.items():
     processor = {"name": name}
     the_config = copy.deepcopy(config)
-    #del the_config["class"]
     processor.update(the_config)
     PROCESSORS_VIEW.append(processor)
 
-ns = api.namespace("processors", description="The processors known by our butler.")
 
-@ns.route("/processors")
+NS = api.namespace("processors", description="The processors known by our butler.")
+
+
+@NS.route("/processors")
 class Processors(Resource):
     """Shows the processor configuration."""
 
     def get(self):
+        """Returns the processor informations as JSON data."""
         return jsonify(PROCESSORS_VIEW)
