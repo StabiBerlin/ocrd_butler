@@ -1,15 +1,21 @@
 {% extends "base.html" %}
 
-{% block content %}
-   <div class="container">
+{% block app_content %}
+   <div class="container chains">
+
         <div class="jumbotron">
-            <h1>Chains</h1>
-            <p>The current available chains</p>
+            <div class="container">
+                <div class="col-md-10">
+                    <h1>Chains</h1>
+                    <p>Madam/Sir, here you find the current available chains.</p>
+                </div>
+                <div class="col-md-2">
+                    <img width="100%%" src="{{url_for('static', filename='butler_chains.png')}}" />
+                </div>
+            </div>
         </div>
-        <div class="col-md-2">
-            <img width="100%%" src="{{url_for('static', filename='butler_chains.png')}}" />
-        </div>
-        <div class="col-md-10">
+
+        <div class="col-md-12">
             {# {{ chains }} #}
             {% for chain in chains %}
                 <h3>{{ chain.name }} (<a title="Delete chain." href="/chain/delete/{{ chain.id }}">x</a>)</h3>

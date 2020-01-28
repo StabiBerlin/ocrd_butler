@@ -1,19 +1,30 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block app_content %}
    <div class="container processors">
+
         <div class="jumbotron">
-            <h1>Processors</h1>
-            <p>Sir, the following processors are currently implemented. Please choose wisely and build your chains.</p>
+            <div class="container">
+                <div class="col-md-10">
+                    <h1>Processors</h1>
+                    <p>Madam/Sir, the following processors are currently implemented.
+                    <br/>You can expand every one to get more information.</p>
+                </div>
+                <div class="col-md-2">
+                    <img width="100%%" src="{{url_for('static', filename='butler_processors.png')}}" />
+                </div>
+            </div>
         </div>
-        <div class="col-md-2">
-            <img width="100%%" src="{{url_for('static', filename='butler_processors.png')}}" />
-        </div>
-        <div class="col-md-10">
+
+        <div class="col-md-12">
             {# {{ processors|tojson }} #}
             {% for processor in processors %}
-                <h2>{{ processor.name }}</h2>
-                <table>
+                <h2>{{ processor.name }} <a name="table-{{ processor.name }}" style="cursor:nesw-resize;"
+                    onclick="javascript:;jQuery('.table-{{ processor.name }}').toggle('fast');window.location.hash='table-{{ processor.name }}';">
+                    +
+                    </a>
+                </h2>
+                <table style="display:none;" class="table-{{ processor.name }}">
                     {% for key, value in processor.items() %}
                     <tr>
                         <td>{{ key.capitalize() }}</td>

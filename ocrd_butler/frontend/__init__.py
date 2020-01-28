@@ -123,10 +123,16 @@ def current_tasks():
                 "txt": "/download/txt/{}".format(result.worker_id),
             })
 
-        backend_res = requests.get("http://localhost:5555/api/task/info/{0}".format(
-            result.worker_id
-        ))
-        if backend_res.status_code == 200:
+        backend_res = None
+        try:
+            backend_res = requests.get("http://localhost:5555/api/task/info/{0}".format(
+                result.worker_id
+            ))
+        except Exception as ex:
+            # HTTPConnectionPool(host='localhost', port=5555): Max retries exceeded with url: /api/task/info/829f8ae4-fb10-4b7b-9d92-0d820776183e (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7fe1a9a9bd68>: Failed to establish a new connection: [Errno 111] Connection refused',))
+            pass
+
+        if backend_res is not None and backend_res.status_code == 200:
             info = json.loads(backend_res.content)
             task["result"].update({
                 "received": datetime.fromtimestamp(info["received"])

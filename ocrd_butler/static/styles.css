@@ -1,6 +1,33 @@
+.color1 { color: #ffffff}
+.color2 { color: #e0d08e}
+.color3 { color: #ceb54e}
+.color4 { color: #c8ab37}
+.color5 { color: #000000}
+.color6 { color: #d9c677}
+.color7 { color: #f1e9cb}
+
+body {
+    background-color: #e0d08e;
+    color: #000;
+}
+body a {
+    color: #666;
+}
+.jumbotron,
+.navbar {
+    background-color: #f1e9cb;
+}
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:hover,
+.navbar-default .navbar-nav > li > a:hover {
+    background-color: #d9c677;
+}
+
+
+
 table {
     border: 1px solid #C3C3C3;
-    background-color: #FFFFFF;
+    background-color: #f1e9cb;
     width: 100%;
     text-align: left;
     border-collapse: collapse;

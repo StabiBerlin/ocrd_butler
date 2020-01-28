@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block app_content %}
    <div class="container">
         <div class="jumbotron">
             <div class="container">
                 <div class="col-md-10">
                     <h1>Tasks</h1>
-                    <p>The current tasks</p>
+                    <p>Madam/Sir, here you find the current tasks.</p>
                 </div>
                 <div class="col-md-2">
                     <img width="100%%" src="{{url_for('static', filename='butler_tasks.png')}}" />
@@ -15,6 +15,7 @@
         </div>
         <div class="col-md-12">
             {# {{ tasks }} #}
+            <form method="POST" url=".">
             <table border class="cellpadding">
                 <tr>
                     <th>ID</th>
@@ -26,11 +27,13 @@
                     <th>Worker (Status)</th>
                     <th>Times</th>
                     <th>Results</th>
-                    <th>Delete Task</th>
+                    <th>Delete</th>
                 </tr>
                 {% for task in tasks %}
                 <tr>
-                    <td>{{ task.id }}</td>
+                    <td>{{ task.id }}
+                        <!--<input type="checkbox" name="id" value="{{ task.id }}" />-->
+                    </td>
                     <td>
                         {% if task.work_id.startswith("PPN") %}
                             <a href="https://digital.staatsbibliothek-berlin.de/werkansicht?PPN={{ task.work_id }}"
@@ -39,7 +42,7 @@
                             {{ task.work_id }}
                         {% endif %}
                     </td>
-                    <td><a href="{{ task.mets_url }}">{{ task.work_id }}.xml</a></td>
+                    <td><a href="{{ task.mets_url }}">XML</a></td>
                     <td>{{ task.file_grp }}</td>
                     <td>{{ task.chain }}</td>
                     <td>{{ task.parameter }}</td>
@@ -65,7 +68,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if task.result %}
+                        {% if task.result.succeeded %}
                             <a href="{{ task.result.xml }}">XML</a>
                             <br />
                             <a href="{{ task.result.txt }}">TXT</a>
@@ -75,6 +78,8 @@
                 </tr>
                 {% endfor %}
             </table>
+            <!--<button type="submit">do dinglehopping</button>-->
+            </form>
         </div>
     </div>
     <style>

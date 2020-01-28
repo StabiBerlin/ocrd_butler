@@ -1,16 +1,23 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block app_content %}
 <div class="container">
     <div class="jumbotron">
         <div class="container">
-            <div class="col-md-9">
-                <h1>Welcome Madam/Sir!</h1>
-                <h2>How can I help you today?</h2>
+            <div class="row">
+                <div class="col-md-9">
+                    <h1>Welcome Madam/Sir!</h1>
+                    <h2>How can I help you today?</h2>
+                </div>
+                <div class="col-md-3">
+                    <img width="100%%" src="{{url_for('static', filename='butler.png')}}" />
+                </div>
             </div>
-            <div class="col-md-3">
-                <img width="100%%" src="{{url_for('static', filename='butler.png')}}" />
-            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <p>With this tool you can process tasks in the ecosystem of the <a href="https://github.com/OCR-D" target="_blank">OCR-D</a> project.</p>
         </div>
     </div>
 </div>
