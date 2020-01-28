@@ -28,7 +28,7 @@ def create_app(app_name=PKG_NAME, config=None, **kwargs):
     Returns:
         flask object
     """
-    app = Flask(app_name)
+    app = Flask(app_name, static_url_path='/flask-static')
 
     # Update the app configuration.
     if config is None:
