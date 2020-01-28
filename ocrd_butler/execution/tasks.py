@@ -23,6 +23,8 @@ from ocrd_butler.api.chains import processor_chains
 def create_task(task):
     """ Create a task an run the given chain. """
     processors = task["processors"]
+    # mets_basename = "{}.xml".format(task["id"])
+    mets_basename = "mets.xml"
 
     # Create workspace
     dst_dir = "{}/{}-{}".format(current_app.config["OCRD_BUTLER_RESULTS"],
@@ -33,7 +35,7 @@ def create_task(task):
     workspace = resolver.workspace_from_url(
         task["mets_url"],
         dst_dir=dst_dir,
-        mets_basename="{}.xml".format(task["id"]),
+        mets_basename=mets_basename,
         clobber_mets=True
     )
 
@@ -65,14 +67,17 @@ def create_task(task):
             # kwargs["parameter"]["clobber_mets"] = True
         parameter = json.dumps(kwargs["parameter"])
 
-        ret = run_cli(processor["executable"],
-                mets_url=task["mets_url"],
-                resolver=resolver,
-                workspace=workspace,
-                log_level="DEBUG",
-                input_file_grp=input_file_grp,
-                output_file_grp=processor["output_file_grp"],
-                parameter=parameter)
+        # run_cli(processor["executable"], mets_url=task["mets_url"], resolver=resolver, workspace=workspace, log_level="DEBUG", input_file_grp=input_file_grp, output_file_grp=processor["output_file_grp"],parameter=parameter)
+        mets_url = "{}/mets.xml".format(dst_dir)
+        run_cli(
+            processor["executable"],
+            mets_url=mets_url,
+            resolver=resolver,
+            workspace=workspace,
+            log_level="DEBUG",
+            input_file_grp=input_file_grp,
+            output_file_grp=processor["output_file_grp"],
+            parameter=parameter)
 
         # returncode = run_cli(
         #     task.executable,
