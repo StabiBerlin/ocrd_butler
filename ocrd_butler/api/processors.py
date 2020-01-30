@@ -15,8 +15,8 @@ from ocrd_butler.api.restplus import api
 PROCESSORS_CONFIG = {}
 
 DIRECT_SCRIPTS = [
-    "/home/j23d/projects/ocrd/ocrd_all/ocrd_olena",
-    "/home/j23d/projects/ocrd/ocrd_all/dinglehopper",
+    "/srv/ocrd_all/ocrd_olena",
+    "/srv/ocrd_all/dinglehopper",
 ]
 
 
