@@ -37,7 +37,10 @@ def create_app(app_name=PKG_NAME, config=None, **kwargs):
         app.config.from_object(config)
 
     # Supress flask_sqlalchemy warning.
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    # For CSRF and flash
+    app.secret_key ="foobar"
 
     if kwargs.get("celery"):
         init_celery(kwargs.get("celery"), app)

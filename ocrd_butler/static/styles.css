@@ -75,10 +75,30 @@ table tfoot td {
 table tfoot .links {
     text-align: right;
 }
-table tfoot .links a{
+table tfoot .links a {
     display: inline-block;
     background: #A1A1A1;
     color: #FFFFFF;
     padding: 2px 8px;
     border-radius: 5px;
+}
+
+.cellpadding td, th {
+    padding: 10px;
+}
+
+#new-chain,
+#new-task {
+    cursor: nesw-resize;
+}
+.new-chain-form,
+.new-task-form {
+    position: absolute;
+    width: 100%;
+    background-color:#eee;
+    padding: 3em;
+    display: none;
+}
+#ms-processors {
+    width: auto;
 }

@@ -10,7 +10,10 @@ import requests
 
 from json2html import json2html
 
-from flask import Blueprint, render_template, flash, redirect, url_for, jsonify, Response, send_file, current_app
+from flask import Blueprint, render_template, flash, redirect, url_for, jsonify, Response, send_file, current_app, request
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextField, SubmitField, SelectField, SelectMultipleField, TextAreaField
+from wtforms.validators import DataRequired, Length, URL
 
 import xml.etree.ElementTree as ET
 
@@ -19,6 +22,7 @@ from ocrd_butler import celery
 from ocrd_butler.frontend.nav import nav
 from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.api.processors import PROCESSORS_VIEW
+from ocrd_butler.api.processors import PROCESSOR_NAMES
 
 from ocrd_butler.database import db
 from ocrd_butler.database.models import Chain as db_model_Chain
@@ -60,10 +64,35 @@ def processors():
         "processors.html",
         processors=PROCESSORS_VIEW)
 
+class NewChainForm(FlaskForm):
+    """Contact form."""
+    name = StringField('Name', [
+        DataRequired(),
+        Length(min=4, message=("Your name has to be at least 4 letters."))])
+    description = StringField('Description', [DataRequired()])
+    processors = SelectMultipleField('Processors for chain')
+    submit = SubmitField('Create new chain')
+
+@frontend.route("/new-chain", methods=['POST'])
+def new_chain():
+    data = json.dumps({
+        "name": request.form.get("name"),
+        "description": request.form.get("description"),
+        "processors": request.form.getlist("processors")
+    })
+    headers = {"Content-Type": "application/json"}
+    requests.post("{}api/chains/chain".format(request.host_url), data=data, headers=headers)
+    flash("New chain created.")
+    return redirect("/chains", code=302)
+
+
 @frontend.route("/chains")
 def chains():
     """Define the page presenting the configured chains."""
     results = db_model_Chain.query.all()
+    new_chain_form = NewChainForm(csrf_enabled=False)
+    p_choices = [(name, name) for name in PROCESSOR_NAMES]
+    new_chain_form.processors.choices = p_choices
 
     current_chains = [{
         "id": c.id,
@@ -74,7 +103,8 @@ def chains():
 
     return render_template(
         "chains.html",
-        chains=current_chains)
+        chains=current_chains,
+        form=new_chain_form)
 
 @frontend.route('/chain/delete/<int:chain_id>')
 def delete_chain(chain_id):
@@ -83,6 +113,7 @@ def delete_chain(chain_id):
     db.session.commit()
 
     return redirect("/chains", code=302)
+
 
 def current_tasks():
     results = db_model_Task.query.all()
@@ -151,14 +182,52 @@ def current_tasks():
 
     return current_tasks
 
+class NewTaskForm(FlaskForm):
+    """Contact form."""
+    task_id = StringField("Task ID", [
+        DataRequired(),
+        Length(min=4, message=("The task has to be at least 4 letters."))])
+    mets_url = StringField("METS URL",
+                validators=[
+                    DataRequired(message="Please enter an URL to a METS file."),
+                    URL(message="Please enter a valid URL to a METS file.")
+                ])
+    input_file_grp = StringField("Input file group (defaults to 'DEFAULT')")
+    chain = SelectField('Chain',
+                validators=[
+                    DataRequired(message="Please choose a chain.")
+                ])
+    parameter = TextAreaField('Parameter')
+    submit = SubmitField('Create new task')
+
+@frontend.route("/new-task", methods=['POST'])
+def new_task():
+    # TODO: Adjust task model works_id => id!
+    data = json.dumps({
+        "id": request.form.get("task_id"),
+        "mets_url": request.form.get("mets_url"),
+        "file_grp": request.form.get("input_file_grp"),
+        "chain": request.form.get("chain"),
+        "parameter": request.form.get("parameter")
+    })
+    headers = {"Content-Type": "application/json"}
+    requests.post("{}api/tasks/task".format(request.host_url), data=data, headers=headers)
+    flash("New task created.")
+    return redirect("/tasks", code=302)
+
 
 @frontend.route('/tasks')
 def tasks():
     """Define the page presenting the created tasks."""
+    # new_task_form = NewTaskForm(csrf_enabled=False)
+    new_task_form = NewTaskForm()
+    chains = db_model_Chain.query.all()
+    new_task_form.chain.choices = [(chain.name, chain.name) for chain in chains]
 
     return render_template(
         "tasks.html",
-        tasks=current_tasks())
+        tasks=current_tasks(),
+        form=new_task_form)
 
 
 @frontend.route('/task/delete/<int:task_id>')

@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 
+{% block scripts %}
+    {{super()}}
+    <script src="{{url_for('static', filename='butler.js')}}"></script>
+{% endblock scripts %}
+
 {% block app_content %}
    <div class="container">
         <div class="jumbotron">
@@ -13,8 +18,39 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-12">
-            {# {{ tasks }} #}
+        <div class="col-md-11">
+
+            <div class="new-task-form">
+                <form action="/new-task" method="post">
+                    {{ form.task_id.label }}
+                    <br />
+                    {{ form.task_id() }}
+                    <br />
+                    <br />
+                    {{ form.mets_url.label }}
+                    <br />
+                    {{ form.mets_url() }}
+                    <br />
+                    <br />
+                    {{ form.input_file_grp.label }}
+                    <br />
+                    {{ form.input_file_grp() }}
+                    <br />
+                    <br />
+                    {{ form.chain.label }}
+                    <br />
+                    {{ form.chain() }}
+                    <br />
+                    <br />
+                    {{ form.parameter.label }}
+                    <br />
+                    {{ form.parameter() }}
+                    <br />
+                    <br />
+                    {{ form.submit() }}
+                </form>
+            </div>
+
             <form method="POST" url=".">
             <table border class="cellpadding">
                 <tr>
@@ -81,10 +117,12 @@
             <!--<button type="submit">do dinglehopping</button>-->
             </form>
         </div>
+
+        <div class="col-md-1">
+            <button id="new-task">New Task</button>
+        </div>
+
     </div>
-    <style>
-        .cellpadding td, th {
-            padding: 10px;
-        }
-    </style>
+
+
 {% endblock %}
