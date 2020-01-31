@@ -11,17 +11,23 @@
             <div class="container">
                 <div class="col-md-10">
                     <h1>Tasks</h1>
-                    <p>Madam/Sir, here you find the current tasks.</p>
+                    <p>Madam/Sir, please find the currently available tasks here.</p>
                 </div>
                 <div class="col-md-2">
                     <img width="100%%" src="{{url_for('static', filename='butler_tasks.png')}}" />
                 </div>
             </div>
         </div>
-        <div class="col-md-11">
+
+        <div class="col-md-2">
+            <button id="new-task" type="button" class="btn">Add a new task</button>
+        </div>
+
+        <div class="col-md-10">
 
             <div class="new-task-form">
                 <form action="/new-task" method="post">
+                  <div class="form-group">  
                     {{ form.task_id.label }}
                     <br />
                     {{ form.task_id() }}
@@ -48,11 +54,12 @@
                     <br />
                     <br />
                     {{ form.submit() }}
+                  </div>
                 </form>
             </div>
 
             <form method="POST" url=".">
-            <table border class="cellpadding">
+            <table class="table">
                 <tr>
                     <th>ID</th>
                     <th>Work ID</th>
@@ -116,10 +123,6 @@
             </table>
             <!--<button type="submit">do dinglehopping</button>-->
             </form>
-        </div>
-
-        <div class="col-md-1">
-            <button id="new-task">New Task</button>
         </div>
 
     </div>
