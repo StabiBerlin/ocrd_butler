@@ -10,5 +10,5 @@ nav.register_element('frontend_top', Navbar(
     View('Chains', 'frontend.chains'),
     View('Tasks', 'frontend.tasks'),
     Link('API', dest='/api'),
-    Link('Queue Backend', dest='/flower'),
+    Link('Queue Backend', dest='/flower/'),
 ))
