@@ -215,12 +215,17 @@ class NewTaskForm(FlaskForm):
 @frontend.route("/new-task", methods=['POST'])
 def new_task():
     # TODO: Adjust task model works_id => id!
+    parameter = request.form.get("parameter")
+
+    if parameter:
+        parameter = json.loads(parameter)
+
     data = json.dumps({
         "id": request.form.get("task_id"),
         "mets_url": request.form.get("mets_url"),
-        "file_grp": request.form.get("input_file_grp"),
+        "file_grp": request.form.get("input_file_grp") or "DEFAULT",
         "chain": request.form.get("chain"),
-        "parameter": request.form.get("parameter")
+        "parameter": parameter
     })
     headers = {"Content-Type": "application/json"}
     requests.post("{}api/tasks/task".format(request.host_url), data=data, headers=headers)
