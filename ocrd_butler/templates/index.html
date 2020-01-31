@@ -10,7 +10,7 @@
                     <h2>How can I help you today?</h2>
                     <p>With this tool you can process tasks in the ecosystem of the <a href="https://github.com/OCR-D" target="_blank">OCR-D</a> project.</p>
                     <p>You can explore the currently installed <a href="/processors">ORCD processors</a> and take a look at the <a href="/chains">Chains</a> that were built with these processors.</p>
-                    <p>Currently there is no form to create chains and tasks directly in the UI.<br />But you can use the swagger interface of the <a href="/api" target="_blank">API</a> behind this site.</p>
+                    <p>You can use the forms to create chains and tasks directly in the UI. But you also can use the swagger interface of the <a href="/api" target="_blank">API</a> behind this site.</p>
                 </div>
                 <div class="col-md-3">
                     <img width="100%%" src="{{url_for('static', filename='butler.png')}}" />
@@ -20,18 +20,9 @@
     </div>
     <div class="row">
         <div class="col-md-12">
-            <p>With this tool you can process tasks in the ecosystem of the <a href="https://github.com/OCR-D" target="_blank">OCR-D</a> project.</p>
-            <p>You can explore the currently installed <a href="/processors">ORCD processors</a> and have a look to the already defined <a href="/chains">Chains</a> that are build with these processors.</p>
-
-            <p></p>
-
-            <p>You can use the forms to create chains and tasks directly in the UI. But you also can use the swagger interface of the <a href="/api" target="_blank">API</a> behind this site.</p>
-
-            <p></p>
 
             <p>On the other hand you can use the api to create chains and tasks programatically.</p>
 
-            <h2>Examples</h2>
             <h3>Chains</h3>
             <p><pre><code>
     curl -X POST -H "Content-Type: application/json" http://ocrd-butler.sbb.berlin/api/chains/chain -d '{
