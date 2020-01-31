@@ -82,7 +82,7 @@
                     <td>{{ task.file_grp }}</td>
                     <td>{{ task.chain }}</td>
                     <td>{{ task.parameter }}</td>
-                    <td><a href="http://localhost:5555/task/{{ task.worker_id }}"
+                    <td><a href="{{ task.flower_url }}"
                            target="_blank">{{ task.worker_id }}</a>
                         {% if task.result %}
                             ({{ task.result.status }})

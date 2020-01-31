@@ -165,18 +165,30 @@ def current_tasks():
 
         if backend_res is not None and backend_res.status_code == 200:
             info = json.loads(backend_res.content)
-            task["result"].update({
-                "received": datetime.fromtimestamp(info["received"])
-            })
-            if not info["state"] == "PENDING":
+
+            if "received" in info and info["received"] is not None:
                 task["result"].update({
-                    "started": datetime.fromtimestamp(info["started"])
+                    "received": datetime.fromtimestamp(info["received"])
                 })
-            if info["state"] == "SUCCESS":
-                task["result"].update({
-                    "succeeded": datetime.fromtimestamp(info["succeeded"]),
-                    "runtime": timedelta(seconds=info["runtime"])
-                })
+
+            if "started" in info and info["started"] is not None:
+                if not info["state"] == "PENDING":
+                    task["result"].update({
+                        "started": datetime.fromtimestamp(info["started"])
+                    })
+
+            if "succeeded" in info and info["succeeded"] is not None:
+                if info["state"] == "SUCCESS":
+                    task["result"].update({
+                        "succeeded": datetime.fromtimestamp(info["succeeded"]),
+                        "runtime": timedelta(seconds=info["runtime"])
+                    })
+
+        task["flower_url"] = "{0}{1}task/{2}".format(
+            request.host_url.replace("5000", "5555"), # A bit hacky, but for devs on localhost.
+            "flower/" if not "localhost:5000" in request.host_url else "",
+            task["worker_id"]
+        )
 
         current_tasks.append(task)
 

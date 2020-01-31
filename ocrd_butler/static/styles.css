@@ -98,6 +98,7 @@ table tfoot .links a {
     background-color:#eee;
     padding: 3em;
     display: none;
+    z-index: 1;
 }
 #ms-processors {
     width: auto;
