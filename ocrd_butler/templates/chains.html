@@ -20,7 +20,7 @@
             <div class="container">
                 <div class="col-md-10">
                     <h1>Chains</h1>
-                    <p>Madam/Sir, here you find the current available chains.</p>
+                    <p>Madam/Sir, please find the currently available chains here.</p>
                 </div>
                 <div class="col-md-2">
                     <img width="100%%" src="{{url_for('static', filename='butler_chains.png')}}" />
@@ -28,10 +28,15 @@
             </div>
         </div>
 
-        <div class="col-md-11">
+        <div class="col-md-2">
+            <button id="new-chain" type="button" class="btn">Add a new chain</button>
+        </div>
+
+        <div class="col-md-10">
 
             <div class="new-chain-form">
                 <form action="/new-chain" method="post">
+                  <div class="form-group">  
                     {{ form.name.label }}
                     <br />
                     {{ form.name() }}
@@ -48,6 +53,7 @@
                     <br />
                     <br />
                     {{ form.submit() }}
+                  </div>
                 </form>
             </div>
 
@@ -66,10 +72,6 @@
                 </p>
             {% endfor %}
 
-        </div>
-
-        <div class="col-md-1">
-            <button id="new-chain">New Chain</button>
         </div>
 
     </div>
