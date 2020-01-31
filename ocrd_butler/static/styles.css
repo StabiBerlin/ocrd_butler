@@ -1,48 +1,102 @@
-.color1 { color: #ffffff}
-.color2 { color: #e0d08e}
-.color3 { color: #ceb54e}
-.color4 { color: #c8ab37}
-.color5 { color: #000000}
-.color6 { color: #d9c677}
-.color7 { color: #f1e9cb}
 
+/* color scheme, fonts, navigation */
 body {
-    background-color: #e0d08e;
+    background-color: #E6CF8A;
     color: #000;
 }
+
 body a {
-    color: #666;
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
 }
-.jumbotron,
-.navbar {
-    background-color: #f1e9cb;
+
+nav .container-fluid {
+    height: 50px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
 }
+
+.h1, h1 {
+    margin-top: 0;
+}
+
+.h2, h2 {
+    font-size: 30px;
+    margin: 20px 0 30px 0;
+}
+
+.jumbotron, .navbar {
+    background-color: #FAEABB;
+}
+
+.navbar-default {
+    position: relative;
+    height: 90px;
+    border-color: transparent;
+    background: #FAEABB url('/flask-static/OCR-Dbutler.svg') no-repeat;
+    background-position: right 20px bottom 15px;
+}
+
 .navbar-default .navbar-nav > .active > a,
 .navbar-default .navbar-nav > .active > a:hover,
 .navbar-default .navbar-nav > li > a:hover {
+    background-color: #CCAD52;
+    color: #fff;
+}
+
+.navbar-default .navbar-brand {
+    color: #000;
+    font-size: 16px;
+}
+
+.navbar-default .navbar-brand:focus, .navbar-default .navbar-brand:hover {
+    color: #000;
     background-color: #d9c677;
 }
 
+.navbar-default .navbar-nav>li>a {
+    color: #000;
+    font-size: 16px;
+}
 
+.jumbotron .h1, .jumbotron h1 {
+    font-size: 50px;
+}
+
+.jumbotron p {
+    font-size: 20px;
+    font-weight: 400;
+    margin: 20px 0 0 0;
+}
+
+/* tables */
+.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+    border-top: inherit;
+}
 
 table {
     border: 1px solid #C3C3C3;
     background-color: #f1e9cb;
     width: 100%;
-    
     text-align: left;
     border-collapse: collapse;
 }
+
 table td, table th {
     border: 1px solid #AAAAAA;
     padding: 8px 5px;
 }
+
 table tbody td {
     font-size: 13px;
 }
+
 table tr:nth-child(even) {
     background: #EEEEEE;
 }
+
 table thead {
     background: #C3C3C3;
     background: -moz-linear-gradient(top, #d2d2d2 0%, #c9c9c9 66%, #C3C3C3 100%);
@@ -50,13 +104,15 @@ table thead {
     background: linear-gradient(to bottom, #d2d2d2 0%, #c9c9c9 66%, #C3C3C3 100%);
     border-bottom: 2px solid #444444;
 }
+
 table thead th {
     font-size: 15px;
     font-weight: bold;
     color: #FFFFFF;
     border-left: 2px solid #C3C3C3;
-  }
-  table thead th:first-child {
+}
+
+table thead th:first-child {
     border-left: none;
 }
 
@@ -70,12 +126,15 @@ table tfoot {
     background: linear-gradient(to bottom, #eaeaea 0%, #e5e5e5 66%, #E3E3E3 100%);
     border-top: 2px solid #444444;
 }
+
 table tfoot td {
     font-size: 14px;
 }
+
 table tfoot .links {
     text-align: right;
 }
+
 table tfoot .links a {
     display: inline-block;
     background: #A1A1A1;
@@ -83,24 +142,33 @@ table tfoot .links a {
     padding: 2px 8px;
     border-radius: 5px;
 }
+/**/
 
-.cellpadding td, th {
-    padding: 10px;
-}
-
-#new-chain,
-#new-task {
+/**/
+#new-chain, #new-task {
     cursor: nesw-resize;
 }
-.new-chain-form,
-.new-task-form {
-    position: absolute;
+
+.new-chain-form, .new-task-form {
+    /*position: absolute;*/
     width: 100%;
-    background-color:#eee;
-    padding: 3em;
+    background-color:#FAEFCD;
+    padding: 2em;
+    margin-bottom: 2em;
     display: none;
     z-index: 1;
 }
+
 #ms-processors {
     width: auto;
 }
+/**/
+
+/* unclear */
+.color1 { color: #ffffff}
+.color2 { color: #e0d08e}
+.color3 { color: #ceb54e}
+.color4 { color: #c8ab37}
+.color5 { color: #000000}
+.color6 { color: #d9c677}
+.color7 { color: #f1e9cb}
