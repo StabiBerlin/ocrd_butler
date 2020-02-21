@@ -4,9 +4,9 @@ import json
 
 from flask import jsonify, request
 
-from flask_restplus import Resource
+from flask_restx import Resource
 
-from ocrd_butler.api.restplus import api
+from ocrd_butler.api.restx import api
 from ocrd_butler.api.models import chain_model as api_model_chain
 from ocrd_butler.api.processors import PROCESSOR_NAMES
 

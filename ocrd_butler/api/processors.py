@@ -7,9 +7,9 @@ import json
 import copy
 
 from flask import jsonify
-from flask_restplus import Resource
+from flask_restx import Resource
 
-from ocrd_butler.api.restplus import api
+from ocrd_butler.api.restx import api
 
 
 PROCESSORS_CONFIG = {}

@@ -9,7 +9,7 @@ from flask import Blueprint
 
 from flask_bootstrap import Bootstrap
 
-from ocrd_butler.api.restplus import api
+from ocrd_butler.api.restx import api
 from ocrd_butler.celery_utils import init_celery
 from ocrd_butler.database import db
 from ocrd_butler.frontend import frontend

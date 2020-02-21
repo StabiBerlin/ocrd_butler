@@ -4,7 +4,7 @@
 
 import pytest
 
-from flask_restplus import fields
+from flask_restx import fields
 
 from ocrd_butler.api.processors import PROCESSOR_NAMES
 from ocrd_butler.api.processors import PROCESSORS_ACTION

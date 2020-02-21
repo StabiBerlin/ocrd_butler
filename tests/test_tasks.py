@@ -12,7 +12,7 @@ from flask_testing import TestCase
 
 from celery.exceptions import Retry
 
-from flask_restplus import fields
+from flask_restx import fields
 
 from ocrd_butler.api.models import task_model
 from ocrd_butler.execution.tasks import create_task

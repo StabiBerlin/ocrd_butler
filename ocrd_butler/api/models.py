@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""Restplus model definitions."""
+"""Restx model definitions."""
 
-from flask_restplus import fields
-from ocrd_butler.api.restplus import api
+from flask_restx import fields
+from ocrd_butler.api.restx import api
 
 
 task_model = api.model("Task Model", {

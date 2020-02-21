@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-"""Restplus task routess."""
+"""Restx task routess."""
 import json
 
 from flask import jsonify, request
-from flask_restplus import Api, Resource, fields
+from flask_restx import Api, Resource, fields
 
 from celery.signals import task_success
 
-from ocrd_butler.api.restplus import api
+from ocrd_butler.api.restx import api
 from ocrd_butler.api.models import task_model
 
 from ocrd_butler.database import db
