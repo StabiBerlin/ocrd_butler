@@ -65,6 +65,10 @@ def create_task(task):
             kwargs["parameter"].update(task["parameter"][processor_name])
             # parameter = ', '.join("{!s}={!r}".format(key,val) for (key,val) in kwargs["parameter"].items())
             # kwargs["parameter"]["clobber_mets"] = True
+
+        # TODO: If https://github.com/OCR-D/core/pull/444 won't get merged,
+        # we have to use a temp file for the parameter as ocrd/core breaks
+        # with long json string.
         parameter = json.dumps(kwargs["parameter"])
 
         # run_cli(processor["executable"], mets_url=task["mets_url"], resolver=resolver, workspace=workspace, log_level="DEBUG", input_file_grp=input_file_grp, output_file_grp=processor["output_file_grp"],parameter=parameter)

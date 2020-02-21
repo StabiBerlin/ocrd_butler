@@ -26,11 +26,13 @@ def test_chain_model():
 
 def test_processor_names():
     """ Test our chain definition. """
-    assert "TesserocrSegmentRegion" in PROCESSOR_NAMES
-    assert "TesserocrSegmentLine" in PROCESSOR_NAMES
-    assert "TesserocrSegmentWord" in PROCESSOR_NAMES
-    assert "TesserocrRecognize" in PROCESSOR_NAMES
-
+    assert "ocrd-olena-binarize" in PROCESSOR_NAMES
+    assert "ocrd-tesserocr-recognize" in PROCESSOR_NAMES
+    assert "ocrd-dinglehopper" in PROCESSOR_NAMES
+    assert "ocrd-calamari-recognize" in PROCESSOR_NAMES
+    assert "ocrd-segment-repair" in PROCESSOR_NAMES
+    assert "ocrd-keraslm-rate" in PROCESSOR_NAMES
+    assert "ocrd-anybaseocr-binarize" in PROCESSOR_NAMES
     # assert PROCESSORS_ACTION["TesserocrRecognize"]["parameters"]["model"] == "deu"
 
 

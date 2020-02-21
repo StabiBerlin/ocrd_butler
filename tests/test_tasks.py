@@ -20,19 +20,22 @@ from ocrd_butler.factory import create_app
 from ocrd_butler.database import db
 from ocrd_butler.config import TestingConfig
 
+
+CURRENT_DIR = os.path.dirname(__file__)
+
 task_tesseract_config = {
     "id": "PPN80041750X",
     "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
     "file_grp": "DEFAULT",
     # "chain": "Tesseract One",
     "processors": [
-        "TesserocrSegmentRegion",
-        "TesserocrSegmentLine",
-        "TesserocrSegmentWord",
-        "TesserocrRecognize"
+        "ocrd-tesserocr-segment-region",
+        "ocrd-tesserocr-segment-line",
+        "ocrd-tesserocr-segment-word",
+        "ocrd-tesserocr-recognize"
     ],
-    "parameters": {
-        "TesserocrRecognize": {
+    "parameter": {
+        "ocrd-tesserocr-recognize": {
             "model": "deu"
         }
     }
@@ -42,16 +45,15 @@ task_tesseract_with_calamari_rec_config = {
     "id": "PPN80041750X",
     "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
     "file_grp": "DEFAULT",
-    # "chain": "Tesseract One",
     "processors": [
-        # "TesserocrSegmentRegion",
-        # "TesserocrSegmentLine",
-        # "TesserocrSegmentWord",
-        "CalamariRecognize"
+        "ocrd-tesserocr-segment-region",
+        "ocrd-tesserocr-segment-line",
+        "ocrd-tesserocr-segment-word",
+        "ocrd-calamari-recognize"
     ],
-    "parameters": {
-        "TesserocrRecognize": {
-            "model": "deu"
+    "parameter": {
+        "ocrd-calamari-recognize": {
+            "checkpoint": "{0}/calamari_models/*ckpt.json".format(CURRENT_DIR)
         }
     }
 }
@@ -105,14 +107,14 @@ class TasksTest(TestCase):
         result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[1])) as result_file:
             text = result_file.read()
-            # assert '<pc:Unicode>Wittenberg:</pc:Unicode>' in text
-            assert "<pc:Unicode>Gdaeneresnrsdsenenendeaenrdaenens</pc:Unicode>" in text
+            assert '<Label value="word" type="textequiv_level"/>' in text
+            assert "<Unicode>Wittenberg:</Unicode>" in text
 
         # self.clearTestDir()
 
     def test_task_results_frk(self):
         task_config_frk = task_tesseract_config
-        task_config_frk["parameters"]["TesserocrRecognize"]["model"] = "frk"
+        task_config_frk["parameter"]["ocrd-tesserocr-recognize"]["model"] = "frk"
 
         task = create_task(task_config_frk)
         assert task["task_id"] == "PPN80041750X"
@@ -123,9 +125,9 @@ class TasksTest(TestCase):
         result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[1])) as result_file:
             text = result_file.read()
-            assert "<pc:Unicode>Gdaeneresnrsdsenenendeaenrdaenens</pc:Unicode>" in text
+            assert "<Unicode>Wittenberg:</Unicode>" in text
 
-    def task_results_cal(self):
+    def test_task_results_cal(self):
         """TODO: Currently no results, using /opt/calamari_models/fraktur_historical/0.ckpt.json
            as checkpoint file.
         """
@@ -136,10 +138,8 @@ class TasksTest(TestCase):
         assert task["status"] == "Created"
         assert task["result_dir"].startswith("/tmp/ocrd_butler_results_testing/PPN80041750X")
 
-        ocr_results = os.path.join(task["result_dir"], "OCRD-CALAMARI-RECOGNIZE")
+        ocr_results = os.path.join(task["result_dir"], "OCR-D-OCR-CALAMARI")
         result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[1])) as result_file:
             text = result_file.read()
-            assert '/FILE_0001_DEFAULT.jpg' in text
-
-
+            assert "<Unicode>iieeers</Unicode>" in text
