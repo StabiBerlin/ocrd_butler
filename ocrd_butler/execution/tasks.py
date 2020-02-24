@@ -23,6 +23,8 @@ from ocrd_butler.api.chains import processor_chains
 def create_task(task):
     """ Create a task an run the given chain. """
     processors = task["processors"]
+    # TODO: Check if there is the active problem in olena_binarize with
+    #       other basenames than mets.xml.
     # mets_basename = "{}.xml".format(task["id"])
     mets_basename = "mets.xml"
 
@@ -45,9 +47,8 @@ def create_task(task):
 
     workspace.save_mets()
 
-    ocrd_tasks = []
-
-    # steps could be saved along the other task information to get a more informational task
+    # TODO: Steps could be saved along the other task information to get a
+    # more informational task.
     for index, processor_name in enumerate(processors):
         if index == 0:
             input_file_grp = task["file_grp"]
@@ -58,20 +59,13 @@ def create_task(task):
         processor = PROCESSORS_ACTION[processor_name]
 
         # Its possible to override the default parameters of the processor.
-        kwargs = { "parameter": {} }
+        kwargs = {"parameter": {}}
         if "parameters" in processor:
             kwargs["parameter"] = processor["parameters"]
         if "parameter" in task and processor_name in task["parameter"]:
             kwargs["parameter"].update(task["parameter"][processor_name])
-            # parameter = ', '.join("{!s}={!r}".format(key,val) for (key,val) in kwargs["parameter"].items())
-            # kwargs["parameter"]["clobber_mets"] = True
-
-        # TODO: If https://github.com/OCR-D/core/pull/444 won't get merged,
-        # we have to use a temp file for the parameter as ocrd/core breaks
-        # with long json string.
         parameter = json.dumps(kwargs["parameter"])
 
-        # run_cli(processor["executable"], mets_url=task["mets_url"], resolver=resolver, workspace=workspace, log_level="DEBUG", input_file_grp=input_file_grp, output_file_grp=processor["output_file_grp"],parameter=parameter)
         mets_url = "{}/mets.xml".format(dst_dir)
         run_cli(
             processor["executable"],
@@ -83,89 +77,13 @@ def create_task(task):
             output_file_grp=processor["output_file_grp"],
             parameter=parameter)
 
-        # returncode = run_cli(
-        #     task.executable,
-        #     mets,
-        #     resolver,
-        #     workspace,
-        #     log_level=log_level,
-        #     page_id=page_id,
-        #     input_file_grp=','.join(task.input_file_grps),
-        #     output_file_grp=','.join(task.output_file_grps),
-        #     parameter=task.parameter_path
-        # )
-
         # reload mets
         workspace.reload_mets()
 
-        # ocrd_task = "{0} -I {1} -O {2}".format(
-        #     processor["executable"][5:],
-        #     input_file_grp,
-        #     processor["output_file_grp"]
-        # )
-        # ocrd_tasks.append(ocrd_task)
         current_app.logger.info("Finished processing task '%s'", task)
-
-    # tasks_arg = " ".join('"{0}"'.format(ocrd_t) for ocrd_t in ocrd_tasks)
-    # run_tasks(task["mets_url"], "DEBUG", "PHYS_0001,PHYS_0002", ocrd_tasks)
 
     return {
         "task_id": task["id"],
         "result_dir": dst_dir,
         "status": "Created"
-    }
-
-
-## OLD task handling with subprocess
-@celery.task()
-def create_ocrd_workspace_process(task):
-
-    flask_app = current_app # ???
-
-    ocrd_tool = os.path.join(flask_app.config["OCRD_BIN"], "ocrd")
-    clone_workspace = "{} workspace clone {} {}".format(
-                        ocrd_tool,
-                        task["mets_url"],
-                        task["id"])
-    output = None
-
-    if not os.path.exists(os.path.join(flask_app.config["OCRD_BUTLER_RESULTS"], task["id"])):
-        try:
-            output = subprocess.check_output([clone_workspace], shell=True, cwd=flask_app.config["OCRD_BUTLER_RESULTS"])
-        except subprocess.CalledProcessError as exc:
-            return {
-                "task_id": task["id"],
-                "status": "Error",
-                "error": exc.__str__()
-            }
-
-    return {
-        "task_id": task["id"],
-        "status": "Created",
-        "output": str(output)
-    }
-
-
-@celery.task()
-def init_ocrd_workspace_process(task):
-    init_workspace = "{} workspace -d {} find --file-grp {} --download".format(
-                        ocrd_tool,
-                        task["id"],
-                        task["file_grp"])
-
-    flask_app = current_app # ???
-
-    try:
-        output = subprocess.check_output([init_workspace], shell=True, cwd=flask_app.config["OCRD_BUTLER_RESULTS"])
-    except subprocess.CalledProcessError as exc:
-        return {
-            "task_id": task["id"],
-            "status": "error",
-            "error": exc.__str__()
-        }
-
-    return {
-        "task_id": task["id"],
-        "status": "Created",
-        "output": str(output)
     }
