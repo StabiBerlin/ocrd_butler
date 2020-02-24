@@ -36,10 +36,9 @@ class AppTests(TestCase):
             return (200, headers, resp_body)
 
         def delete_api_task_callback(request):
-            task_id = json.loads(request.body)["id"]
-            db_model_Task.query.filter_by(id=task_id).delete()
+            db_model_Task.query.filter_by(id=1).delete()
             db.session.commit()
-            return (200, {}, json.dumps({"task_id": task_id, "deleted": True}))
+            return (200, {}, json.dumps({"task_id": 1, "deleted": True}))
 
         responses.add_callback(
             responses.POST, "http://localhost/api/tasks/task",
@@ -49,7 +48,7 @@ class AppTests(TestCase):
                       body="<xml>foo</xml>", status=200)
 
         responses.add_callback(
-            responses.DELETE, "http://localhost/api/task",
+            responses.DELETE, "http://localhost/api/tasks/task/1",
             callback=delete_api_task_callback)
 
     def tearDown(self):

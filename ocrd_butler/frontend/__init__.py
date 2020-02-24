@@ -247,17 +247,21 @@ def tasks():
         form=new_task_form)
 
 
-@frontend.route('/task/delete/<int:task_id>')
+@frontend.route("/task/delete/<int:task_id>")
 def task_delete(task_id):
     """Delete the task with the given id."""
-
-    data = json.dumps({
-        "id": task_id
-    })
-    headers = {"Content-Type": "application/json"}
-    requests.delete("{}api/task".format(request.host_url), data=data, headers=headers)
-    flash("Task {0} deleted.".format(task_id))
-
+    # data = json.dumps({
+    #     "task_id": task_id
+    # })
+    # headers = {"Content-Type": "application/json"}
+    response = requests.delete("{0}api/tasks/task/{1}".format(
+        request.host_url,
+        task_id))
+    if response.status_code == 200:
+        flash("Task {0} deleted.".format(task_id))
+    else:
+        result = json.loads(response.content)
+        flash("An error occured: {0}".format(result.status))
     return redirect("/tasks", code=302)
 
 

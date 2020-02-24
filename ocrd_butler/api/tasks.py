@@ -15,8 +15,9 @@ from ocrd_butler.database import db
 from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 
-
 from ocrd_butler.execution.tasks import create_task
+
+from sqlalchemy.orm.exc import NoResultFound
 
 ns = api.namespace("tasks", description="Manage OCR-D Tasks")
 
@@ -102,14 +103,13 @@ class Task(Resource):
         }
 
 
-@ns.route("/task/<string:id>")
+@ns.route("/task/<string:task_id>")
 class TaskList(Resource):
 
-    @api.doc(responses={ 200: 'OK', 400: 'Unknown task id', 500: 'Error' },
-             params={ 'id': 'id of the task' })
-    def get(self, id):
+    @api.doc(responses={ 200: 'OK', 400: 'Unknown task id', 500: 'Error' })
+    def get(self, task_id):
         try:
-            task = create_task.AsyncResult(id)
+            task = create_task.AsyncResult(task_id)
         except KeyError as e:
             ns.abort(400, e.__doc__,
                              status = "Missing parameter 'id'.",
@@ -147,10 +147,16 @@ class TaskList(Resource):
     def put(self, id):
         pass
 
-
-    @api.doc(responses={ 200: 'OK', 400: 'Unknown task id', 500: 'Error' },
-             params={ 'id': 'id of the task' })
+    @api.doc(responses={ 200: "OK", 400: "Unknown task id", 500: "Error fooo" })
     def delete(self, task_id):
+        """Delete a task."""
+        try:
+            db_model_Task.query.filter_by(id=task_id).one()
+        except NoResultFound as exc:
+            ns.abort(400, exc.__doc__,
+                     status="Unknown task_id '{0}'.".format(task_id),
+                     statusCode="400")
+
         db_model_Task.query.filter_by(id=task_id).delete()
         db.session.commit()
 
