@@ -27,7 +27,7 @@
 
             <div class="new-task-form">
                 <form action="/new-task" method="post">
-                  <div class="form-group">  
+                  <div class="form-group">
                     {{ form.task_id.label }}
                     <br />
                     {{ form.task_id() }}
@@ -117,7 +117,7 @@
                             <a href="{{ task.result.txt }}">TXT</a>
                         {% endif %}
                     </td>
-                    <td><a href="/task/delete/{{ task.id }}">x</a></td>
+                    <td><a class="delete-task" href="/task/delete/{{ task.id }}">x</a></td>
                 </tr>
                 {% endfor %}
             </table>

@@ -3,6 +3,7 @@
 """Testing the app of `ocrd_butler` package."""
 
 import pytest
+import json
 import requests
 import responses
 from requests_html import HTML
@@ -19,6 +20,37 @@ class AppTests(TestCase):
 
     def setUp(self):
         db.create_all()
+
+        def create_api_task_callback(request):
+            db_task = db_model_Task(
+                work_id="id",
+                mets_url="mets_url",
+                file_grp="file_grp",
+                worker_id="worker_task.id",
+                chain_id="chain.id",
+                parameter="")
+            db.session.add(db_task)
+            db.session.commit()
+            resp_body = "foobar"
+            headers = {}
+            return (200, headers, resp_body)
+
+        def delete_api_task_callback(request):
+            task_id = json.loads(request.body)["id"]
+            db_model_Task.query.filter_by(id=task_id).delete()
+            db.session.commit()
+            return (200, {}, json.dumps({"task_id": task_id, "deleted": True}))
+
+        responses.add_callback(
+            responses.POST, "http://localhost/api/tasks/task",
+            callback=create_api_task_callback)
+
+        responses.add(responses.GET, "http://foo.bar/mets.xml",
+                      body="<xml>foo</xml>", status=200)
+
+        responses.add_callback(
+            responses.DELETE, "http://localhost/api/task",
+            callback=delete_api_task_callback)
 
     def tearDown(self):
         db.session.remove()
@@ -40,28 +72,7 @@ class AppTests(TestCase):
     def test_create_task(self):
         """Check if task will be created."""
 
-        def create_api_task_callback(request):
-            db_task = db_model_Task(
-                work_id="id",
-                mets_url="mets_url",
-                file_grp="file_grp",
-                worker_id="worker_task.id",
-                chain_id="chain.id",
-                parameter="")
-            db.session.add(db_task)
-            db.session.commit()
-            resp_body = "foobar"
-            headers = {}
-            return (200, headers, resp_body)
-
-        responses.add_callback(
-            responses.POST, "http://localhost/api/tasks/task",
-            callback=create_api_task_callback)
-
-        responses.add(responses.GET, "http://foo.bar/mets.xml",
-                      body="<xml>foo</xml>", status=200)
-
-        response = self.client.post("/new-task", data=dict(
+        self.client.post("/new-task", data=dict(
             id="foobar",
             mets_url="http://foo.bar/mets.xml",
             file_grp="DEFAULT",
@@ -72,3 +83,30 @@ class AppTests(TestCase):
         html = HTML(html=response.data)
         assert len(html.find('table > tr > td')) == 10
         assert html.find('table > tr > td')[6].text == "worker_task.id (('PENDING',))"
+        self.client.get("/task/delete/1")
+
+    @responses.activate
+    def test_delete_task(self):
+        """Check if task will be deleted."""
+
+        self.client.post("/new-task", data=dict(
+            id="foobar",
+            mets_url="http://foo.bar/mets.xml",
+            file_grp="DEFAULT",
+            chain="FOOBAR"
+        ))
+
+        response = self.client.get("/tasks")
+        html = HTML(html=response.data)
+        assert len(html.find('table > tr > td')) == 10
+
+        delete_link = html.find('table > tr > td > a.delete-task')[0].attrs["href"]
+        response = self.client.get(delete_link)
+        # self.delete_one_task()
+
+        # assert response.status == "302 FOUND"
+
+        response = self.client.get("/tasks")
+        html = HTML(html=response.data)
+        assert len(html.find('table > tr > td')) == 0
+

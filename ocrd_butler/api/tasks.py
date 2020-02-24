@@ -147,5 +147,15 @@ class TaskList(Resource):
     def put(self, id):
         pass
 
-    def delete(self, id):
-        pass
+
+    @api.doc(responses={ 200: 'OK', 400: 'Unknown task id', 500: 'Error' },
+             params={ 'id': 'id of the task' })
+    def delete(self, task_id):
+        db_model_Task.query.filter_by(id=task_id).delete()
+        db.session.commit()
+
+        return jsonify({
+            "task_id": task_id,
+            "deleted": True
+        })
+

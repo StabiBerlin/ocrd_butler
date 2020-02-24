@@ -249,9 +249,14 @@ def tasks():
 
 @frontend.route('/task/delete/<int:task_id>')
 def task_delete(task_id):
-    # TODO: Move functionality to api.
-    db_model_Task.query.filter_by(id=task_id).delete()
-    db.session.commit()
+    """Delete the task with the given id."""
+
+    data = json.dumps({
+        "id": task_id
+    })
+    headers = {"Content-Type": "application/json"}
+    requests.delete("{}api/task".format(request.host_url), data=data, headers=headers)
+    flash("Task {0} deleted.".format(task_id))
 
     return redirect("/tasks", code=302)
 
