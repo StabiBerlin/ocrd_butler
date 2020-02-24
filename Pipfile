@@ -1,5 +1,6 @@
 [[source]]
-url = "https://pypi.python.org/simple"
+# url = "https://pypi.python.org/simple"
+url = "https://mirrors.aliyun.com/pypi/simple"
 verify_ssl = true
 
 [dev-packages]
@@ -20,12 +21,13 @@ pytest-mock = "*"
 pytest-cov = "*"
 pylint-flask = "*"
 flask-testing = "*"
+responses = "*"
+requests-html = "*"
 
 [packages]
 ocrd_butler = {path = ".",editable = true}
 click = "*"
 flask = "==1.1.1"
-flask-restplus = "==0.13.0"
 celery = "==4.3.0"
 redis = "==3.3.11"
 flower = "*"
@@ -37,3 +39,4 @@ blinker = "*"
 json2html = "*"
 requests = "*"
 flask-wtf = "*"
+flask-restx = "*"
