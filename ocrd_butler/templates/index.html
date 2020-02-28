@@ -74,7 +74,25 @@
                 "checkpoint": "/data/calamari_models/*ckpt.json"
             }
         }
+    }'</code></pre><pre><code>
+    curl -X POST -H "Content-Type: application/json" http://ocrd-butler.sbb.berlin/api/chains/chain -d '{
+        "id": "PPN80041750X-otc",
+        "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+        "file_grp": "DEFAULT",
+        "chain": "Olena - SBB-Textline - Calamari",
+        "parameter": {
+            "ocrd-olena-binarize": {
+                "impl": "sauvola-ms-split"
+            },
+            "ocrd-sbb-textline-detector": {
+                "model": "/data/sbb_textline_detector"
+            },
+            "ocrd-calamari-recognize": {
+                "checkpoint": "/data/calamari_models/*ckpt.json"
+            }
+        }
     }'</code></pre></p>
+
         </div>
     </div>
 </div>
