@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        <div class="container">
+            <div class="col-md-9">
+                <h1>Madam/Sir, here are your results!</h1>
+            </div>
+            <div class="col-md-3">
+                <img width="100%%" src="{{url_for('static', filename='butler_two.png')}}" />
+            </div>
+        </div>
+
+        <div class="container">
+                <div class="col-md-12">
+                    {% for result in results %}
+                        {{ result | safe }}
+                        <br />
+                        <br />
+                        <br />
+                    {% endfor %}
+                </div>
+        </div>
+
+
+    </div>
+{% endblock %}
