@@ -123,7 +123,8 @@ def task_information(uid):
     response = requests.get("http://localhost:5555/api/task/info/{0}".format(uid))
     task_info = json.loads(response.content)
     task_info["ready"] = task_info["state"] == "SUCCESS"
-    task_info["result"] = json.loads(task_info["result"].replace("'", '"'))
+    if task_info["result"] is not None:
+        task_info["result"] = json.loads(task_info["result"].replace("'", '"'))
     return task_info
 
 
