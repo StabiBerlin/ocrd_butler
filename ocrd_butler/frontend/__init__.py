@@ -285,12 +285,12 @@ def compare_results():
     task_from = db_model_Task.query.filter_by(id=task_from_id).first()
     task_to = db_model_Task.query.filter_by(id=task_to_id).first()
 
-    result_from = celery.AsyncResult(task_from.worker_id)
-    result_to = celery.AsyncResult(task_to.worker_id)
+    result_from = task_information(task_from.worker_id)
+    result_to = task_information(task_to.worker_id)
 
     dst_dir = "{0}-{1}".format(
-        result_from.result["result_dir"],
-        os.path.basename(result_to.result["result_dir"]))
+        result_from["result"]["result_dir"],
+        os.path.basename(result_to["result"]["result_dir"]))
 
     if not os.path.exists(dst_dir):
         os.mkdir(dst_dir)
@@ -304,10 +304,10 @@ def compare_results():
     last_output_to = PROCESSORS_ACTION[last_proc_to]["output_file_grp"]
 
     # TODO: collect informations to this task
-    results_from_path = "{0}/{1}/*".format(result_from.result["result_dir"], last_output_from)
+    results_from_path = "{0}/{1}/*".format(result_from["result"]["result_dir"], last_output_from)
     for file in glob.glob(results_from_path):
         copyfile(file, "{0}/FROM-{1}".format(dst_dir, os.path.basename(file)))
-    results_to_path = "{0}/{1}/*".format(result_to.result["result_dir"], last_output_to)
+    results_to_path = "{0}/{1}/*".format(result_to["result"]["result_dir"], last_output_to)
     for file in glob.glob(results_to_path):
         copyfile(file, "{0}/TO-{1}".format(dst_dir, os.path.basename(file)))
 
