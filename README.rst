@@ -35,24 +35,53 @@ Development installation
 We rely on the excellent installation repository `ocrd_all`_.
 Please check it out for installation.
 
-For some modules in `ocrd_all`_ there are further files nessesary.
-
-* sbb_textline_blubs
-  * https://qurator-data.de/sbb_textline_detector/models.tar.gz
-* ocrd_calamari
-  * https://qurator-data.de/calamari-models/GT4HistOCR/model.tar.xz
-* ocrd_tesserocr
-  * https://qurator-data.de/tesseract-models/GT4HistOCR/models.tar
-
 Installation is currently tested on Debian 10 and Ubuntu 18.04.
 
 Installation for development:
 
 * Follow the installation for `ocrd_all`_
 * https://github.com/OCR-D/ocrd_fileformat
-* Clone ocrd_butler (Gitlab?) and install it in the very same venv.
-  * steps...
 
+
+For some modules in `ocrd_all`_ there are further files nessesary,
+e.g. trained models for the OCR itself. The folders on the server
+can be overwritten it every single task.
+
+* sbb_textline_blubs
+
+.. code-block:: bash
+
+  > mkdir /data/sbb_textline_detector && /data/sbb_textline_detector
+  > wget https://qurator-data.de/sbb_textline_detector/models.tar.gz
+  > tar xfz model.tar.gz
+
+
+* ocrd_calamari
+
+.. code-block:: bash
+
+  > mkdir /data/calamari_models && /data/calamari_models
+  > wget https://qurator-data.de/calamari-models/GT4HistOCR/model.tar.xz
+  > tar xfz model.tar.xz
+
+* ocrd_tesserocr
+
+.. code-block:: bash
+
+  > mkdir /data/tesseract_models && /data/tesseract_models
+  > wget https://qurator-data.de/tesseract-models/GT4HistOCR/models.tar
+  > tar fz models.tar
+  > cp GT4HistOCR_2000000.traineddata /usr/share/tesseract-ocr/4.00/tessdata/
+
+
+* Clone ocrd_butler (GitLab) and install it in the very same venv.
+
+.. code-block:: bash
+
+  > cd /srv
+  > git clone https://code.dev.sbb.berlin/zidsuz/ocrd-butler && cd ocrd-butler
+  > source /srv/ocrd_all/.venv/bin/master
+  > pip install -r requirements.txt # or pipenv install if you are using pipenv
 
 .. We need to install the master branch of pipenv to get manylinux2010 included to be able to lock the dependency #functool32 of ocrd_calamari.
 ..
