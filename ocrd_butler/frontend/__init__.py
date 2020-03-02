@@ -7,6 +7,7 @@ import zipfile
 import io
 import pathlib
 import requests
+import shelve
 import subprocess
 from shutil import copyfile
 from json2html import json2html
@@ -117,15 +118,52 @@ def delete_chain(chain_id):
     return redirect("/chains", code=302)
 
 
+def task_information(uid):
+    """Get information for the task based on its uid."""
+    res = None
+    state = shelve.open("flower.db")
+    if state:
+        events = state["events"]
+        resp = events.get_or_create_task(uid)
+        if resp and len(resp) == 2:
+            res = resp[0]
+            res.result = json.loads(res.result.replace("'", '"'))
+    state.close()
+    return res
+    # resp = celery.AsyncResult(uid)
+    # if resp.result is not None:
+    #     task_info["ready"] = resp.state == "SUCCESS"
+    #     task_info["state"] = resp.state
+    #     task_info["result"] = resp.result
+    # else:
+    #     # If the worker that was responsible for running the task
+    #     # with the given id  possible that we get a successful state
+    #     # but an empty result from Celery. In this case we search the
+    #     # persistent flower database.
+    #     state = shelve.open("flower.db")
+    #     if state:
+    #         events = state["events"]
+    #         resp = events.get_or_create_task(uid)
+    #         if resp and len(resp) == 2:
+    #             resp = resp[0]
+    #             task_info["ready"] = resp.ready
+    #             task_info["state"] = resp.state
+    #             task_info["result"] = json.loads(resp.result.replace("'", '"'))
+    #     state.close()
+
+    # if resp.result is None:
+    #     current_app.logger.error("Can't load async result for '{}'".format(uid))
+    #     return None
+
+    # return task_info
+
 def current_tasks():
     results = db_model_Task.query.all()
 
-    current_tasks = []
+    tasks = []
 
     for result in results:
-
         chain = db_model_Chain.query.filter_by(id=result.chain_id).first()
-
         task = {
             "id": result.id,
             "work_id": result.work_id,
@@ -137,7 +175,8 @@ def current_tasks():
             "result": {
                 "status": "",
                 "ready": False,
-                "xml": "",
+                "page": "",
+                "alto": "",
                 "text": "",
                 "received": "",
                 "started": "",
@@ -146,45 +185,28 @@ def current_tasks():
             }
         }
 
-        res = celery.AsyncResult(result.worker_id)
-        task["result"]["status"] = res.status,
-        task["result"]["ready"] = res.status == "SUCCESS",
+        task_info = task_information(result.worker_id)
 
-        if res.ready() and res.successful():
+        if task_info.ready:
             task["result"].update({
-                "xml": "/download/xml/{}".format(result.worker_id),
+                "page": "/download/page/{}".format(result.worker_id),
+                "alto": "/download/alto/{}".format(result.worker_id),
                 "txt": "/download/txt/{}".format(result.worker_id),
             })
+        task["result"].update({
+            "received": datetime.fromtimestamp(task_info.received)
+        })
 
-        backend_res = None
-        try:
-            backend_res = requests.get("http://localhost:5555/api/task/info/{0}".format(
-                result.worker_id
-            ))
-        except Exception as ex:
-            # HTTPConnectionPool(host='localhost', port=5555): Max retries exceeded with url: /api/task/info/829f8ae4-fb10-4b7b-9d92-0d820776183e (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7fe1a9a9bd68>: Failed to establish a new connection: [Errno 111] Connection refused',))
-            pass
+        if not task_info.state == "PENDING":
+            task["result"].update({
+                "started": datetime.fromtimestamp(task_info.started)
+            })
 
-        if backend_res is not None and backend_res.status_code == 200:
-            info = json.loads(backend_res.content)
-
-            if "received" in info and info["received"] is not None:
-                task["result"].update({
-                    "received": datetime.fromtimestamp(info["received"])
-                })
-
-            if "started" in info and info["started"] is not None:
-                if not info["state"] == "PENDING":
-                    task["result"].update({
-                        "started": datetime.fromtimestamp(info["started"])
-                    })
-
-            if "succeeded" in info and info["succeeded"] is not None:
-                if info["state"] == "SUCCESS":
-                    task["result"].update({
-                        "succeeded": datetime.fromtimestamp(info["succeeded"]),
-                        "runtime": timedelta(seconds=info["runtime"])
-                    })
+        if task_info.state == "SUCCESS":
+            task["result"].update({
+                "succeeded": datetime.fromtimestamp(task_info.succeeded),
+                "runtime": timedelta(seconds=task_info.runtime)
+            })
 
         task["flower_url"] = "{0}{1}task/{2}".format(
             request.host_url.replace("5000", "5555"), # A bit hacky, but for devs on localhost.
@@ -192,9 +214,9 @@ def current_tasks():
             task["worker_id"]
         )
 
-        current_tasks.append(task)
+        tasks.append(task)
 
-    return current_tasks
+    return tasks
 
 class NewTaskForm(FlaskForm):
     """Contact form."""
@@ -339,10 +361,6 @@ def compare_results():
 @frontend.route("/task/delete/<int:task_id>")
 def task_delete(task_id):
     """Delete the task with the given id."""
-    # data = json.dumps({
-    #     "task_id": task_id
-    # })
-    # headers = {"Content-Type": "application/json"}
     response = requests.delete("{0}api/tasks/task/{1}".format(
         request.host_url,
         task_id))
@@ -357,17 +375,15 @@ def task_delete(task_id):
 @frontend.route("/download/txt/<string:worker_id>")
 def download_txt(worker_id):
     """Define route to download the results as text."""
-    # TODO: we have to have the result (destination) dir in the result of the worker
-    result = celery.AsyncResult(worker_id)
-    dst_dir = "{}".format(result.result["result_dir"])
+    task_info = task_information(worker_id)
 
     # Get the output group of the last step in the chain of the task.
-    task = db_model_Task.query.filter_by(worker_id=result.id).first()
+    task = db_model_Task.query.filter_by(worker_id=worker_id).first()
     chain = db_model_Chain.query.filter_by(id=task.chain_id).first()
     last_step = json.loads(chain.processors)[-1]
     last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
 
-    page_xml_dir = os.path.join(dst_dir, last_output)
+    page_xml_dir = os.path.join(task_info.result["result_dir"], last_output)
     fulltext = ""
 
     namespace = {
@@ -395,17 +411,43 @@ def download_txt(worker_id):
         mimetype="text/txt",
         headers={
             "Content-Disposition":
-            "attachment;filename=fulltext_%s.txt" % result.result["task_id"]
+            "attachment;filename=fulltext_%s.txt" % task_info.result["task_id"]
         }
     )
 
 
-@frontend.route("/download/xml/<string:worker_id>")
-def download_xml_zip(worker_id):
+@frontend.route("/download/page/<string:worker_id>")
+def download_page_zip(worker_id):
     """Define route to download the page xml results as zip file."""
-    # TODO: we have to have the result (destination) dir in the result of the worker
-    result = celery.AsyncResult(worker_id)
-    dst_dir = "{}".format(result.result["result_dir"])
+    task_info = task_information(worker_id)
+
+    # Get the output group of the last step in the chain of the task.
+    task = db_model_Task.query.filter_by(worker_id=worker_id).first()
+    chain = db_model_Chain.query.filter_by(id=task.chain_id).first()
+    last_step = json.loads(chain.processors)[-1]
+    last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+
+    page_xml_dir = os.path.join(task_info.result["result_dir"], last_output)
+    base_path = pathlib.Path(page_xml_dir)
+
+    data = io.BytesIO()
+    with zipfile.ZipFile(data, mode='w') as zip_file:
+        for f_name in base_path.iterdir():
+            arcname = "{0}/{1}".format(last_output, os.path.basename(f_name))
+            zip_file.write(f_name, arcname=arcname)
+    data.seek(0)
+
+    return send_file(
+        data,
+        mimetype="application/zip",
+        as_attachment=True,
+        attachment_filename="ocr_page_xml_%s.zip" % task_info.result["task_id"]
+    )
+
+@frontend.route("/download/alto/<string:worker_id>")
+def download_alto_zip(worker_id):
+    """Define route to download the alto xml results as zip file."""
+    task_info = task_information(worker_id)
 
     # Get the output group of the last step in the chain of the task.
     task = db_model_Task.query.filter_by(worker_id=result.id).first()
@@ -413,8 +455,18 @@ def download_xml_zip(worker_id):
     last_step = json.loads(chain.processors)[-1]
     last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
 
-    page_xml_dir = os.path.join(dst_dir, last_output)
+    page_xml_dir = os.path.join(task_info.result["result_dir"], last_output)
     base_path = pathlib.Path(page_xml_dir)
+
+    # run_cli(
+    #     processor["executable"],
+    #     mets_url=mets_url,
+    #     resolver=resolver,
+    #     workspace=workspace,
+    #     log_level="DEBUG",
+    #     input_file_grp=input_file_grp,
+    #     output_file_grp=processor["output_file_grp"],
+    #     parameter=parameter)
 
     data = io.BytesIO()
     with zipfile.ZipFile(data, mode='w') as z:
@@ -426,7 +478,7 @@ def download_xml_zip(worker_id):
         data,
         mimetype="application/zip",
         as_attachment=True,
-        attachment_filename="ocr_page_xml_%s.zip" % result.result["task_id"]
+        attachment_filename="ocr_page_xml_%s.zip" % task_info.result["task_id"]
     )
 
 @frontend.app_template_filter('format_date')

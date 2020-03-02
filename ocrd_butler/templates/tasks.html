@@ -112,7 +112,9 @@
                     </td>
                     <td>
                         {% if task.result.succeeded %}
-                            <a href="{{ task.result.xml }}">XML</a>
+                            <a href="{{ task.result.page }}">PAGE</a>
+                            <br />
+                            <a href="{{ task.result.alto }}">ALTO</a>
                             <br />
                             <a href="{{ task.result.txt }}">TXT</a>
                         {% endif %}
