@@ -120,42 +120,12 @@ def delete_chain(chain_id):
 
 def task_information(uid):
     """Get information for the task based on its uid."""
-    res = None
-    state = shelve.open("flower.db")
-    if state:
-        events = state["events"]
-        resp = events.get_or_create_task(uid)
-        if resp and len(resp) == 2:
-            res = resp[0]
-            res.result = json.loads(res.result.replace("'", '"'))
-    state.close()
-    return res
-    # resp = celery.AsyncResult(uid)
-    # if resp.result is not None:
-    #     task_info["ready"] = resp.state == "SUCCESS"
-    #     task_info["state"] = resp.state
-    #     task_info["result"] = resp.result
-    # else:
-    #     # If the worker that was responsible for running the task
-    #     # with the given id  possible that we get a successful state
-    #     # but an empty result from Celery. In this case we search the
-    #     # persistent flower database.
-    #     state = shelve.open("flower.db")
-    #     if state:
-    #         events = state["events"]
-    #         resp = events.get_or_create_task(uid)
-    #         if resp and len(resp) == 2:
-    #             resp = resp[0]
-    #             task_info["ready"] = resp.ready
-    #             task_info["state"] = resp.state
-    #             task_info["result"] = json.loads(resp.result.replace("'", '"'))
-    #     state.close()
+    response = requests.get("http://localhost:5555/api/task/info/{0}".format(uid))
+    task_info = json.loads(response.content)
+    task_info["ready"] = task_info["state"] == "SUCCESS"
+    task_info["result"] = json.loads(task_info["result"].replace("'", '"'))
+    return task_info
 
-    # if resp.result is None:
-    #     current_app.logger.error("Can't load async result for '{}'".format(uid))
-    #     return None
-
-    # return task_info
 
 def current_tasks():
     results = db_model_Task.query.all()
@@ -187,25 +157,27 @@ def current_tasks():
 
         task_info = task_information(result.worker_id)
 
-        if task_info.ready:
+        if task_info["ready"]:
             task["result"].update({
                 "page": "/download/page/{}".format(result.worker_id),
                 "alto": "/download/alto/{}".format(result.worker_id),
                 "txt": "/download/txt/{}".format(result.worker_id),
             })
-        task["result"].update({
-            "received": datetime.fromtimestamp(task_info.received)
-        })
 
-        if not task_info.state == "PENDING":
+        if task_info["received"] is not None:
             task["result"].update({
-                "started": datetime.fromtimestamp(task_info.started)
+                "received": datetime.fromtimestamp(task_info["received"])
             })
 
-        if task_info.state == "SUCCESS":
+        if task_info["started"] is not None:
             task["result"].update({
-                "succeeded": datetime.fromtimestamp(task_info.succeeded),
-                "runtime": timedelta(seconds=task_info.runtime)
+                "started": datetime.fromtimestamp(task_info["started"])
+            })
+
+        if task_info["succeeded"] is not None:
+            task["result"].update({
+                "succeeded": datetime.fromtimestamp(task_info["succeeded"]),
+                "runtime": timedelta(seconds=task_info["runtime"])
             })
 
         task["flower_url"] = "{0}{1}task/{2}".format(
@@ -383,7 +355,7 @@ def download_txt(worker_id):
     last_step = json.loads(chain.processors)[-1]
     last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
 
-    page_xml_dir = os.path.join(task_info.result["result_dir"], last_output)
+    page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
     fulltext = ""
 
     namespace = {
@@ -411,7 +383,7 @@ def download_txt(worker_id):
         mimetype="text/txt",
         headers={
             "Content-Disposition":
-            "attachment;filename=fulltext_%s.txt" % task_info.result["task_id"]
+            "attachment;filename=fulltext_%s.txt" % task_info["result"]["task_id"]
         }
     )
 
@@ -427,7 +399,7 @@ def download_page_zip(worker_id):
     last_step = json.loads(chain.processors)[-1]
     last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
 
-    page_xml_dir = os.path.join(task_info.result["result_dir"], last_output)
+    page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
     base_path = pathlib.Path(page_xml_dir)
 
     data = io.BytesIO()
@@ -441,7 +413,7 @@ def download_page_zip(worker_id):
         data,
         mimetype="application/zip",
         as_attachment=True,
-        attachment_filename="ocr_page_xml_%s.zip" % task_info.result["task_id"]
+        attachment_filename="ocr_page_xml_%s.zip" % task_info["result"]["task_id"]
     )
 
 @frontend.route("/download/alto/<string:worker_id>")
@@ -455,7 +427,7 @@ def download_alto_zip(worker_id):
     last_step = json.loads(chain.processors)[-1]
     last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
 
-    page_xml_dir = os.path.join(task_info.result["result_dir"], last_output)
+    page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
     base_path = pathlib.Path(page_xml_dir)
 
     # run_cli(
@@ -478,7 +450,7 @@ def download_alto_zip(worker_id):
         data,
         mimetype="application/zip",
         as_attachment=True,
-        attachment_filename="ocr_page_xml_%s.zip" % task_info.result["task_id"]
+        attachment_filename="ocr_page_xml_%s.zip" % task_info["result"]["task_id"]
     )
 
 @frontend.app_template_filter('format_date')
