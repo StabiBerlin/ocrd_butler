@@ -20,6 +20,9 @@ from wtforms.validators import DataRequired, Length, URL
 
 import xml.etree.ElementTree as ET
 
+from ocrd.processor.base import run_cli
+from ocrd.resolver import Resolver
+
 from ocrd_butler import celery
 
 from ocrd_butler.frontend.nav import nav
@@ -433,35 +436,41 @@ def download_alto_zip(worker_id):
     task_info = task_information(worker_id)
 
     # Get the output group of the last step in the chain of the task.
-    task = db_model_Task.query.filter_by(worker_id=result.id).first()
+    task = db_model_Task.query.filter_by(worker_id=worker_id).first()
     chain = db_model_Chain.query.filter_by(id=task.chain_id).first()
     last_step = json.loads(chain.processors)[-1]
     last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
 
-    page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
-    base_path = pathlib.Path(page_xml_dir)
+    # BUG?: java.lang.IllegalArgumentException:
+    # Variable value 'TextTypeSimpleType.CAPTION' is not in the list of valid values.
+    # possible reason: https://github.com/OCR-D/core/issues/451 ??
+    alto_xml_dir = os.path.join(task_info["result"]["result_dir"], "OCR-D-OCR-ALTO")
+    alto_path = pathlib.Path(alto_xml_dir)
 
-    # run_cli(
-    #     processor["executable"],
-    #     mets_url=mets_url,
-    #     resolver=resolver,
-    #     workspace=workspace,
-    #     log_level="DEBUG",
-    #     input_file_grp=input_file_grp,
-    #     output_file_grp=processor["output_file_grp"],
-    #     parameter=parameter)
+    if not os.path.exists(alto_path):
+        mets_url = "{}/mets.xml".format(task_info["result"]["result_dir"])
+        run_cli(
+            "ocrd-fileformat-transform",
+            mets_url=mets_url,
+            resolver=Resolver(),
+            log_level="DEBUG",
+            input_file_grp=last_output,
+            output_file_grp="OCR-D-OCR-ALTO",
+            parameter='{"from-to": "page alto"}'
+        )
 
     data = io.BytesIO()
     with zipfile.ZipFile(data, mode='w') as z:
-        for f_name in base_path.iterdir():
-            z.write(f_name)
+        for f_name in alto_path.iterdir():
+            arcname = "{0}/{1}".format(last_output, os.path.basename(f_name))
+            zip_file.write(f_name, arcname=arcname)
     data.seek(0)
 
     return send_file(
         data,
         mimetype="application/zip",
         as_attachment=True,
-        attachment_filename="ocr_page_xml_%s.zip" % task_info["result"]["task_id"]
+        attachment_filename="ocr_alto_xml_%s.zip" % task_info["result"]["task_id"]
     )
 
 @frontend.app_template_filter('format_date')
