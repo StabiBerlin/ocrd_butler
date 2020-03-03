@@ -121,6 +121,10 @@ def delete_chain(chain_id):
 def task_information(uid):
     """Get information for the task based on its uid."""
     response = requests.get("http://localhost:5555/api/task/info/{0}".format(uid))
+    if response.status_code == 404:
+        # current_app.logger
+        return None
+
     task_info = json.loads(response.content)
     task_info["ready"] = task_info["state"] == "SUCCESS"
     if task_info["result"] is not None:
@@ -158,28 +162,28 @@ def current_tasks():
 
         task_info = task_information(result.worker_id)
 
-        if task_info["ready"]:
+        if task_info is not None and task_info["ready"]:
             task["result"].update({
                 "page": "/download/page/{}".format(result.worker_id),
                 "alto": "/download/alto/{}".format(result.worker_id),
                 "txt": "/download/txt/{}".format(result.worker_id),
             })
 
-        if task_info["received"] is not None:
-            task["result"].update({
-                "received": datetime.fromtimestamp(task_info["received"])
-            })
+            if task_info["received"] is not None:
+                task["result"].update({
+                    "received": datetime.fromtimestamp(task_info["received"])
+                })
 
-        if task_info["started"] is not None:
-            task["result"].update({
-                "started": datetime.fromtimestamp(task_info["started"])
-            })
+            if task_info["started"] is not None:
+                task["result"].update({
+                    "started": datetime.fromtimestamp(task_info["started"])
+                })
 
-        if task_info["succeeded"] is not None:
-            task["result"].update({
-                "succeeded": datetime.fromtimestamp(task_info["succeeded"]),
-                "runtime": timedelta(seconds=task_info["runtime"])
-            })
+            if task_info["succeeded"] is not None:
+                task["result"].update({
+                    "succeeded": datetime.fromtimestamp(task_info["succeeded"]),
+                    "runtime": timedelta(seconds=task_info["runtime"])
+                })
 
         task["flower_url"] = "{0}{1}task/{2}".format(
             request.host_url.replace("5000", "5555"), # A bit hacky, but for devs on localhost.
