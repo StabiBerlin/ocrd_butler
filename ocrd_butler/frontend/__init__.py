@@ -122,13 +122,19 @@ def task_information(uid):
     """Get information for the task based on its uid."""
     response = requests.get("http://localhost:5555/api/task/info/{0}".format(uid))
     if response.status_code == 404:
-        # current_app.logger
+        current_app.logger.warning("Can't find task '{0}'".format(uid))
+        return None
+    try:
+        task_info = json.loads(response.content)
+    except json.decoder.JSONDecodeError as exc:
+        current_app.logger.error("Can't read response for task '{0}'. ({1})".format(
+            uid, exc.__str__()))
         return None
 
-    task_info = json.loads(response.content)
     task_info["ready"] = task_info["state"] == "SUCCESS"
     if task_info["result"] is not None:
         task_info["result"] = json.loads(task_info["result"].replace("'", '"'))
+
     return task_info
 
 
