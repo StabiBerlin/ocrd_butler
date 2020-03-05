@@ -460,7 +460,7 @@ def download_alto_zip(worker_id):
         )
 
     data = io.BytesIO()
-    with zipfile.ZipFile(data, mode='w') as z:
+    with zipfile.ZipFile(data, mode='w') as zip_file:
         for f_name in alto_path.iterdir():
             arcname = "{0}/{1}".format(last_output, os.path.basename(f_name))
             zip_file.write(f_name, arcname=arcname)
