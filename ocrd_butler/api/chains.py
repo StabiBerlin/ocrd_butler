@@ -13,13 +13,13 @@ from ocrd_butler.api.processors import PROCESSOR_NAMES
 from ocrd_butler.database import db
 from ocrd_butler.database.models import Chain as db_model_Chain
 
-ns = api.namespace("chains", description="Manage OCR-D processor chains")
+NS = api.namespace("chains", description="Manage OCR-D processor chains")
 
 
-@ns.route("/chain")
 class ChainList(Resource):
     """ Add chains and list all of it. """
 
+    @NS.route("/chains")
     @api.doc(responses={ 201: "Created", 400: "Missing parameter", 400: "Wrong parameter" })
     @api.expect(api_model_chain)
     def post(self):
@@ -31,7 +31,7 @@ class ChainList(Resource):
 
         for processor in processors:
             if processor not in PROCESSOR_NAMES:
-                ns.abort(400, "Wrong parameter",
+                NS.abort(400, "Wrong parameter",
                              status="Unknown processor \"{}\".".format(processor),
                              statusCode="400")
 
@@ -45,7 +45,7 @@ class ChainList(Resource):
             "id": chain.id,
         })
 
-@ns.route("/chain/<string:id>")
+@NS.route("/chain/<string:id>")
 class Chain(Resource):
     """Getter and updater for chains."""
     @api.doc(responses={ 200: "Found", 400: "Missing id" })
@@ -78,30 +78,3 @@ class Chain(Resource):
         return jsonify({
             "message": message
         })
-
-
-
-"""Our predefined processor chains.
-
-   We create different chains with a specific names and a description how
-   (or for what) useful they seem and set one chain as default.
-   If no chain or chain name was given while creating the task the default
-   one has to be used.
-"""
-
-tesserocr_chain = {
-    "name": "Tesserocr Chain",
-    "description": "Basic OCR creation via Tesseract with binarization",
-    "processors": [
-        {"TesserocrSegmentRegion": {}},
-        {"TesserocrSegmentLine": {}},
-        {"TesserocrSegmentWord": {}},
-        {"TesserocrRecognize": {}}
-    ]
-}
-
-processor_chains = [
-    tesserocr_chain,
-]
-
-default_chain = tesserocr_chain

@@ -15,8 +15,6 @@ from ocrd.processor.base import run_cli
 from ocrd_butler import celery
 
 from ocrd_butler.api.processors import PROCESSORS_ACTION
-from ocrd_butler.api.chains import default_chain
-from ocrd_butler.api.chains import processor_chains
 
 
 @celery.task()

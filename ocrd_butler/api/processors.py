@@ -18,6 +18,7 @@ DIRECT_SCRIPTS = [
     "/srv/ocrd_all/ocrd_olena",
     "/srv/ocrd_all/dinglehopper",
     "/srv/ocrd_all/sbb_textline_detector",
+    "/srv/ocrd_fileformat",
 ]
 
 
