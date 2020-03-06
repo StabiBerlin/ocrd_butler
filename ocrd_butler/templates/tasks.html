@@ -91,7 +91,7 @@
                     <td>{{ task.parameter }}</td>
                     <td><a href="{{ task.flower_url }}"
                            target="_blank">{{ task.worker_id }}</a>
-                        {% if task.result %}
+                        {% if task.result and task.result.status %}
                             ({{ task.result.status }})
                         {% endif %}
                     </td>

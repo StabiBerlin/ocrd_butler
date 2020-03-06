@@ -14,7 +14,8 @@ flask_app = factory.create_app(
     celery=make_celery(config=config),
     config=config)
 
-logging_conf_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '../logging.conf'))
+logging_conf_path = os.path.normpath(os.path.join(
+    os.path.dirname(__file__), '../logging.conf'))
 logging.config.fileConfig(logging_conf_path)
 log = logging.getLogger(__name__)
 
