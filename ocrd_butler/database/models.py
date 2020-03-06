@@ -30,13 +30,15 @@ class Chain(db.Model):
     __tablename__ = "chains"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
-    description = db.Column(db.String(1023))
-    processors = db.Column(db.String(1023))
+    description = db.Column(db.String(1024))
+    processors = db.Column(db.String(1024))
+    parameters = db.Column(db.String(2048))
 
-    def __init__(self, name, description, processors):
+    def __init__(self, name, description, processors, parameters=None):
         self.name = name
         self.description = description
         self.processors = processors
+        self.parameters = parameters
 
     def __repr__(self):
-        return "<Chain %r>" % self.name
+        return "<Chain {0} ({1})>".format(self.name, self.description)

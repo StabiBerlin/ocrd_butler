@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """Restx model definitions."""
+import json
 
 from flask_restx import fields
 from ocrd_butler.api.restx import api
 
 
 task_model = api.model("Task Model", {
-    # "uuid": fields.String(
-    #     title="ID",
-    #     required = False,
-    #     description="UUID of the task",
-    #     help="We use the one from celery when we create this task."),
     "works_id": fields.String(
         title="Works ID",
         required=True,
@@ -38,12 +34,27 @@ task_model = api.model("Task Model", {
         description="Provide parameter for the processors."),
 })
 
+
+class ChainProcessorsField(fields.Raw):
+    __schema_type__ = 'list'
+    __schema_format__ = 'JSON'
+    __schema_example__ = '["processor-1", "processor-2", ...]'
+
+    def format(self, value):
+        # return json.dumps(value)
+        return value
+
+class ChainParametersField(fields.Raw):
+    __schema_type__ = 'dict'
+    __schema_format__ = 'JSON'
+    __schema_example__ = '{"processor-1": {"pamameter-1":"value-1", ...}, ...}'
+
+    def format(self, value):
+        # return json.dumps(value)
+        return value
+
+
 chain_model = api.model("Chain Model", {
-    # "id": fields.String(
-    #     title="ID",
-    #     required = False,
-    #     description="ID of the id",
-    #     help="This will be created for you."),
     "name": fields.String(
         title="Name",
         required=True,
@@ -62,4 +73,10 @@ chain_model = api.model("Chain Model", {
         unique=True,
         description="The processor to be used.",
         help="The processors will be executed in the given order."),
+    "parameters": ChainParametersField(
+        title="Parameters",
+        required=False,
+        unique=True,
+        description="The default parameters for the processors.",
+        help="The parameters will be use while running the processor. Can be overwritten in a task."),
 })
