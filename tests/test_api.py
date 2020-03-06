@@ -25,18 +25,7 @@ class ApiTests(TestCase):
     def create_app(self):
         return create_app(config=TestingConfig)
 
-    def test_create_chain(self):
-        """Check if a new chain is created."""
-        response = self.client.post("/api/chains", json=dict(
-            name="New Chain",
-            description="Some foobar chain.",
-            processors=["ocrd-olena-binarize"],
-        ))
-        assert response.status_code == 200
-        assert response.json["message"] == "Chain created."
-        assert response.json["id"] is not None
-
-    def test_create_chain(self):
+    def test_create_new_chain(self):
         """Check if a new chain is created."""
         response = self.client.post("/api/chains", json=dict(
             name="New Chain",
@@ -155,6 +144,32 @@ class ApiTests(TestCase):
         assert response.json[1]["description"] == "Some barfoo chain."
         assert "ocrd-sbb-textline-detector" in response.json[1]["processors"]
 
+    def test_update_chain(self):
+        """Check if a new chain is created."""
+        self.client.post("/api/chains", json=dict(
+            name="New Chain",
+            description="Some foobar chain.",
+            processors=["ocrd-tesserocr-recognize"],
+        ))
+        response = self.client.get("/api/chains/1")
+        assert response.status_code == 200
+        assert response.json["id"] == 1
+        assert response.json["name"] == "New Chain"
+        assert response.json["description"] == "Some foobar chain."
+        assert "ocrd-tesserocr-recognize" in response.json["processors"]
+
+        response = self.client.put("/api/chains/1", json=dict(
+            name="Updated Chain",
+            description="Some barfoo chain.",
+            processors=["ocrd-tesserocr-segment-word"],
+        ))
+        response = self.client.get("/api/chains/1")
+        assert response.status_code == 200
+        assert response.json["id"] == 1
+        assert response.json["name"] == "Updated Chain"
+        assert response.json["description"] == "Some barfoo chain."
+        assert "ocrd-tesserocr-recognize" not in response.json["processors"]
+        assert "ocrd-tesserocr-segment-word" in response.json["processors"]
 
     def test_chain_model(self):
         assert "name" in chain_model

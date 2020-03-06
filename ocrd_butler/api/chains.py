@@ -24,16 +24,12 @@ from ocrd_butler.database.models import Chain as db_model_Chain
 chain_namespace = api.namespace("chains", description="Manage OCR-D processor chains")
 
 
-@chain_namespace.route("")
-class ChainList(Resource):
-    """ Add chains and list all of it. """
+class ChainBase(Resource):
+    """Base methods for chains."""
 
-    @api.doc(responses={201: "Created", 400: "Wrong parameter."})
-    @api.expect(chain_model)
-    def post(self):
-        """ Add a new chain. """
-
-        data = marshal(data=request.json, fields=chain_model, skip_none=False)
+    def chain_data(self, json_data):
+        """ Validate and prepare chain input. """
+        data = marshal(data=json_data, fields=chain_model, skip_none=False)
 
         if data["parameters"] is None:
             data["parameters"] = {}
@@ -61,11 +57,23 @@ class ChainList(Resource):
                         data["parameters"][processor], processor),
                     statusCode="400")
 
-        processors_serialized = json.dumps(data["processors"])
-        parameters_serialized = json.dumps(data["parameters"])
+        data["processors"] = json.dumps(data["processors"])
+        data["parameters"] = json.dumps(data["parameters"])
 
+        return data
+
+@chain_namespace.route("")
+class Chains(ChainBase):
+    """ Add chains and list all of it. """
+
+    @api.doc(responses={201: "Created", 400: "Wrong parameter."})
+    @api.expect(chain_model)
+    def post(self):
+        """ Add a new chain. """
+
+        data = self.chain_data(request.json)
         chain = db_model_Chain(data["name"], data["description"],
-                               processors_serialized, parameters_serialized)
+                               data["processors"], data["parameters"])
         db.session.add(chain)
         db.session.commit()
 
@@ -88,9 +96,8 @@ class ChainList(Resource):
         return jsonify(results)
 
 
-
 @chain_namespace.route("/<string:chain_id>")
-class Chain(Resource):
+class Chain(ChainBase):
     """Getter, updater and remover for chains."""
 
     @api.doc(responses={200: "Found", 404: "Not known chain id."})
@@ -112,9 +119,27 @@ class Chain(Resource):
             "parameters": json.loads(chain.parameters),
         })
 
+    @api.doc(responses={201: "Updated", 400: "Wrong parameter."})
+    @api.expect(chain_model)
     def put(self, chain_id):
         """ Update the chain. """
-        pass
+        data = self.chain_data(request.json)
+        chain = db_model_Chain.query.filter_by(id=chain_id).first()
+        if chain is None:
+            chain_namespace.abort(
+                404, "Wrong parameter",
+                status="Can't find a chain with the id \"{0}\".".format(chain_id),
+                statusCode="404")
+        chain.name = data["name"]
+        chain.description = data["description"]
+        chain.processors = data["processors"]
+        chain.parameters = data["parameters"]
+        db.session.commit()
+
+        return jsonify({
+            "message": "Chain updated.",
+            "id": chain.id,
+        })
 
     def delete(self, chain_id):
         """ Delete the chain by given id. """
