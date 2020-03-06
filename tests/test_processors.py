@@ -13,7 +13,6 @@ from ocrd_butler.factory import create_app
 from ocrd_butler.api.processors import PROCESSORS_CONFIG
 from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.api.processors import PROCESSOR_NAMES
-# from ocrd_butler.api.processors import PROCESSORS
 from ocrd_butler.config import TestingConfig
 
 
@@ -28,6 +27,16 @@ class ProcessorsTests(TestCase):
 
     def tearDown(self):
         pass
+
+    def test_processor_names(self):
+        """ Test our chain definition. """
+        assert "ocrd-olena-binarize" in PROCESSOR_NAMES
+        assert "ocrd-tesserocr-recognize" in PROCESSOR_NAMES
+        assert "ocrd-dinglehopper" in PROCESSOR_NAMES
+        assert "ocrd-calamari-recognize" in PROCESSOR_NAMES
+        assert "ocrd-segment-repair" in PROCESSOR_NAMES
+        assert "ocrd-keraslm-rate" in PROCESSOR_NAMES
+        assert "ocrd-anybaseocr-binarize" in PROCESSOR_NAMES
 
     def test_tesserocr_integration(self):
         """Check if ocr_tesserocr is importable."""
