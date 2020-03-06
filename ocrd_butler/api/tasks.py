@@ -19,7 +19,7 @@ from ocrd_butler.execution.tasks import create_task
 
 from sqlalchemy.orm.exc import NoResultFound
 
-ns = api.namespace("tasks", description="Manage OCR-D Tasks")
+task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 
 # get the status of a task
 # get the results of a task - this collect links to the resources like mets files, images, etc.
@@ -38,7 +38,7 @@ ns = api.namespace("tasks", description="Manage OCR-D Tasks")
 # do a butler "serve"?
 # take a butler a task or a job?
 
-@ns.route("/task")
+@task_namespace.route("/task")
 class Task(Resource):
 
     @api.doc(responses={ 201: "Created", 400: "Missing parameter" })
@@ -103,7 +103,7 @@ class Task(Resource):
         }
 
 
-@ns.route("/task/<string:task_id>")
+@task_namespace.route("/task/<string:task_id>")
 class TaskList(Resource):
 
     @api.doc(responses={ 200: 'OK', 400: 'Unknown task id', 500: 'Error' })

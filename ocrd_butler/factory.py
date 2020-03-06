@@ -14,7 +14,8 @@ from ocrd_butler.celery_utils import init_celery
 from ocrd_butler.database import db
 from ocrd_butler.frontend import frontend
 from ocrd_butler.frontend.nav import nav
-from ocrd_butler.api.tasks import ns as task_namespace
+from ocrd_butler.api.tasks import task_namespace
+from ocrd_butler.api.chains import chain_namespace
 from ocrd_butler.config import DevelopmentConfig
 
 PKG_NAME = os.path.dirname(os.path.realpath(__file__)).split("/")[-1]
@@ -40,7 +41,7 @@ def create_app(app_name=PKG_NAME, config=None, **kwargs):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # For CSRF and flash
-    app.secret_key ="foobar"
+    app.secret_key = "foobarorbarfooorbaz"
 
     if kwargs.get("celery"):
         init_celery(kwargs.get("celery"), app)
@@ -61,6 +62,7 @@ def initialize_app(app):
     app.register_blueprint(blueprint_api)
 
     api.add_namespace(task_namespace)
+    api.add_namespace(chain_namespace)
 
     # Initialize frontend.
     Bootstrap(app)
