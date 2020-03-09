@@ -6,32 +6,50 @@ import json
 from flask_restx import fields
 from ocrd_butler.api.restx import api
 
-
 task_model = api.model("Task Model", {
-    "works_id": fields.String(
-        title="Works ID",
+    "uid": fields.String(
+        title="UID",
         required=True,
-        description="ID of the work",
-        help="Can e.g. be a PPN or a SNP."),
-    "mets_url": fields.String(
-        title="METS URL",
+        description="UID of the task",
+        help="Unique id used interal."),
+    "src": fields.String(
+        title="Source",
         required=True,
-        description="METS URL of the work",
-        help="Full URL is required."),
-    "file_grp": fields.String(
-        title="File group",
-        required=False,
-        description="The file group in the METS file to start the processor chain with.",
-        help="Defaults to 'DEFAULT'.",
-        default="DEFAULT"),
-    "chain": fields.String(
+        description="URL to a METS file or filename of an image or an archive with images.",
+        help="A source is required."),
+    "chain_id": fields.String(
         title="Processor chain",
         required=True,
         description="The chain of processors that will be used."),
-    "parameter": fields.String(
-        title="Parameter",
+    "description": fields.String(
+        title="Description",
+        required=False,
+        description="Some more information what the task should fulfil.",
+        help="Be as elaborative as needed."),
+    "parameters": fields.String(
+        title="Parameters",
         required=False,
         description="Provide parameter for the processors."),
+    "default_file_grp": fields.String(
+        title="Default file group",
+        required=False,
+        description="The default file group in the METS file to start the processor chain with.",
+        help="Defaults to 'DEFAULT'.",
+        default="DEFAULT"),
+    "worker_task_id": fields.String(
+        title="Worker Task ID",
+        required=False,
+        description="ID of the worker task, used to get state and result for the async task."),
+    "status": fields.String(
+        title="Status",
+        required=False,
+        description="Current status of the task.",
+        default="CREATED"),
+    "results": fields.String(
+        title="Results",
+        required=False,
+        description="Results of a processed task.",
+        default={}),
 })
 
 
@@ -61,9 +79,9 @@ chain_model = api.model("Chain Model", {
         description="A unique name for the chain",
         help="Be creative."),
     "description": fields.String(
-        title="Descrition",
+        title="Description",
         required=False,
-        description="Some more information what the chain is for and should accomplish.",
+        description="Some more information what the chain should fulfil.",
         help="Be as elaborative as needed."),
     "processors": fields.List(
         fields.String,
@@ -77,6 +95,7 @@ chain_model = api.model("Chain Model", {
         title="Parameters",
         required=False,
         unique=True,
+        default={},
         description="The default parameters for the processors.",
         help="The parameters will be use while running the processor. Can be overwritten in a task."),
 })
