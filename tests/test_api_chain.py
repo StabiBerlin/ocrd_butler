@@ -32,7 +32,7 @@ class ApiTests(TestCase):
             description="Some foobar chain.",
             processors=["ocrd-tesserocr-recognize"],
         ))
-        assert response.status_code == 200
+        assert response.status_code == 201
         assert response.json["message"] == "Chain created."
         assert response.json["id"] is not None
 
@@ -112,6 +112,24 @@ class ApiTests(TestCase):
         assert response.json["name"] == "New Chain"
         assert response.json["description"] == "Some foobar chain."
         assert "ocrd-olena-binarize" in response.json["processors"]
+
+    def test_delete_chain(self):
+        """Check if a new chain is created."""
+        response = self.client.post("/api/chains", json=dict(
+            name="New Chain",
+            description="Some foobar chain.",
+            processors=["ocrd-tesserocr-recognize"],
+        ))
+        response = self.client.delete("/api/chains/1")
+        assert response.status_code == 200
+        assert response.json["message"] == "Chain \"New Chain(1)\" deleted."
+
+    def test_delete_unknown_chain(self):
+        """Check if a new chain is created."""
+        response = self.client.delete("/api/chains/13")
+        assert response.status_code == 404
+        assert response.json["status"] == "Can't find a chain with the id \"13\"."
+
 
     def test_get_unknown_chain(self):
         """Check if a non existing chain ...."""

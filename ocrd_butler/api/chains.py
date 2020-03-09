@@ -5,7 +5,11 @@
 
 import json
 
-from flask import jsonify, request
+from flask import (
+    make_response,
+    jsonify,
+    request
+)
 from flask_restx import (
     Resource,
     marshal
@@ -57,9 +61,6 @@ class ChainBase(Resource):
                         data["parameters"][processor], processor),
                     statusCode="400")
 
-        data["processors"] = json.dumps(data["processors"])
-        data["parameters"] = json.dumps(data["parameters"])
-
         return data
 
 @chain_namespace.route("")
@@ -72,27 +73,20 @@ class Chains(ChainBase):
         """ Add a new chain. """
 
         data = self.chain_data(request.json)
-        chain = db_model_Chain(data["name"], data["description"],
-                               data["processors"], data["parameters"])
+        chain = db_model_Chain(**data)
         db.session.add(chain)
         db.session.commit()
 
-        return jsonify({
+        return make_response({
             "message": "Chain created.",
             "id": chain.id,
-        })
+        }, 201)
 
     @api.doc(responses={200: "Found"})
     def get(self):
         """ Get all chains. """
         chains = db_model_Chain.query.all()
-        results = [{
-            "id": chain.id,
-            "name": chain.name,
-            "description": chain.description,
-            "processors": json.loads(chain.processors),
-            "parameters": json.loads(chain.parameters),
-            } for chain in chains]
+        results = [chain.to_json() for chain in chains]
         return jsonify(results)
 
 
@@ -111,15 +105,9 @@ class Chain(ChainBase):
                 status="Can't find a chain with the id \"{0}\".".format(chain_id),
                 statusCode="404")
 
-        return jsonify({
-            "id": chain.id,
-            "name": chain.name,
-            "description": chain.description,
-            "processors": json.loads(chain.processors),
-            "parameters": json.loads(chain.parameters),
-        })
+        return jsonify(chain.to_json())
 
-    @api.doc(responses={201: "Updated", 400: "Wrong parameter."})
+    @api.doc(responses={201: "Updated", 404: "Unknown chain."})
     @api.expect(chain_model)
     def put(self, chain_id):
         """ Update the chain. """
@@ -128,7 +116,8 @@ class Chain(ChainBase):
         if chain is None:
             chain_namespace.abort(
                 404, "Wrong parameter",
-                status="Can't find a chain with the id \"{0}\".".format(chain_id),
+                status="Can't find a chain with the id \"{0}\".".format(
+                    chain_id),
                 statusCode="404")
         chain.name = data["name"]
         chain.description = data["description"]
@@ -141,11 +130,19 @@ class Chain(ChainBase):
             "id": chain.id,
         })
 
+    @api.doc(responses={200: "Deleted", 404: "Unknown chain."})
     def delete(self, chain_id):
         """ Delete the chain by given id. """
         res = db_model_Chain.query.filter_by(id=chain_id)
         chain = res.first()
-        message = "Deleted chain {0} ({1})".format(chain.name, chain.id)
+
+        if chain is None:
+            chain_namespace.abort(
+                404, "Unknown chain_id",
+                status="Can't find a chain with the id \"{0}\".".format(chain_id),
+                statusCode="404")
+
+        message = "Chain \"{0}({1})\" deleted.".format(chain.name, chain.id)
         res.delete()
         db.session.commit()
 
