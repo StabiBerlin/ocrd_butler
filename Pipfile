@@ -23,6 +23,7 @@ pylint-flask = "*"
 flask-testing = "*"
 responses = "*"
 requests-html = "*"
+pylint-flask-sqlalchemy = "*"
 
 [packages]
 ocrd_butler = {path = ".",editable = true}
