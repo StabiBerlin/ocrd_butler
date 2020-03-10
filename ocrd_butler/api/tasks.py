@@ -61,12 +61,14 @@ class TasksBase(Resource):
 
         if data["chain_id"] is None:
             task_namespace.abort(400, "Wrong parameter.",
-                                 status="Missing processors for chain.", statusCode="400")
+                                 status="Missing chain for task.",
+                                 statusCode="400")
         else:
             chain = db_model_Chain.query.filter_by(id=data["chain_id"]).first()
             if chain is None:
                 task_namespace.abort(400, "Wrong parameter.",
-                                     status="Unknow chain with id {}.".format(data["chain_id"]),
+                                     status="Unknow chain with id {}.".format(
+                                         data["chain_id"]),
                                      statusCode="400")
 
         for processor in data["parameters"].keys():
@@ -123,7 +125,6 @@ class TaskActions(TasksBase):
                 statusCode="404")
 
         action = getattr(self, action)
-        import ipdb; ipdb.set_trace()
         if action is None:
             task_namespace.abort(
                 400, "Unknown action.",
@@ -174,7 +175,7 @@ class TaskActions(TasksBase):
 @task_namespace.route("/<string:task_id>")
 class Task(TasksBase):
 
-    @api.doc(responses={200: "OK", 400: "Unknown task id", 500: "Error"})
+    @api.doc(responses={200: "OK", 400: "Unknown task id"})
     def get(self, task_id):
         """ Get the task by given id. """
         task = db_model_Task.query.filter_by(id=task_id).first()
@@ -186,12 +187,31 @@ class Task(TasksBase):
                     task_id),
                 statusCode="404")
 
-        return task.to_json()
+        return jsonify(task.to_json())
 
-    def put(self, id):
-        pass
+    @api.doc(responses={200: "OK", 404: "Unknown task id"})
+    def put(self, task_id):
+        res = db_model_Task.query.filter_by(id=task_id)
+        task = res.first()
 
-    @api.doc(responses={200: "OK", 404: "Unknown task id", 500: "Error"})
+        if task is None:
+            task_namespace.abort(
+                404, "Unknown task.",
+                status="Can't find a task with the id \"{0}\".".format(task_id),
+                statusCode="404")
+
+        fields = task.to_json().keys()
+        for field in fields:
+            if field in request.json:
+                setattr(task, field, request.json[field])
+
+        db.session.commit()
+
+        return jsonify({
+            "message": "Task \"{0}\" updated.".format(task_id)
+        })
+
+    @api.doc(responses={200: "OK", 404: "Unknown task id"})
     def delete(self, task_id):
         """Delete a task."""
         res = db_model_Task.query.filter_by(id=task_id)

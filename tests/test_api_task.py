@@ -53,6 +53,27 @@ class ApiTests(TestCase):
         assert response.json["status"] == "CREATED"
         assert response.json["results"] == {}
 
+    def test_change_task(self):
+        """Check if a new task is created."""
+        response = self.client.post("/api/tasks", json=dict(
+            chain_id=self.chain(),
+            src="https://foobar.tdl/themets.xml",
+            description="Just a task.",
+            default_file_grp="THUMBS"
+        ))
+        assert response.status_code == 201
+        assert response.json["message"] == "Task created."
+        assert response.json["id"] == 1
+
+        response = self.client.get("/api/tasks/1")
+        assert response.json["src"] == "https://foobar.tdl/themets.xml"
+
+        response = self.client.put("/api/tasks/1", json=dict(
+            src="https://barfoo.tdl/themets.xml",
+        ))
+        response = self.client.get("/api/tasks/1")
+        assert response.json["src"] == "https://barfoo.tdl/themets.xml"
+
     def test_delete_task(self):
         """Check if a task is deleted."""
         self.client.post("/api/tasks", json=dict(
