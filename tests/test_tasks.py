@@ -15,7 +15,7 @@ from celery.exceptions import Retry
 from flask_restx import fields
 
 from ocrd_butler.api.models import task_model
-from ocrd_butler.execution.tasks import create_task
+from ocrd_butler.execution.tasks import run_task
 from ocrd_butler.factory import create_app
 from ocrd_butler.database import db
 from ocrd_butler.config import TestingConfig
@@ -110,8 +110,8 @@ class TasksTestExecution(TestCase):
             assert isinstance(task_model[field], fields.String)
 
     @pytest.mark.celery(result_backend='redis://')
-    def test_create_task(self):
-        """ Test our create_task task.
+    def test_run_task(self):
+        """ Test our run_task task.
             This really creates the output.
         """
         # https://github.com/pytest-dev/pytest-mock/ # -> its not working. why? dunno yet.
@@ -119,7 +119,7 @@ class TasksTestExecution(TestCase):
         # ocrd.processor.base.run_processor.assert_called()
 
     def test_task_results_deu(self):
-        task = create_task(task_tesseract_config)
+        task = run_task(task_tesseract_config)
 
         assert task["task_id"] == "PPN80041750X"
         assert task["status"] == "Created"
@@ -138,7 +138,7 @@ class TasksTestExecution(TestCase):
         task_config_frk = task_tesseract_config
         task_config_frk["parameter"]["ocrd-tesserocr-recognize"]["model"] = "frk"
 
-        task = create_task(task_config_frk)
+        task = run_task(task_config_frk)
         assert task["task_id"] == "PPN80041750X"
         assert task["status"] == "Created"
         assert task["result_dir"].startswith("/tmp/ocrd_butler_results_testing/PPN80041750X")
@@ -155,7 +155,7 @@ class TasksTestExecution(TestCase):
         """
         task_config_cal = task_tesseract_with_calamari_rec_config
 
-        task = create_task(task_config_cal)
+        task = run_task(task_config_cal)
         assert task["task_id"] == "PPN80041750X"
         assert task["status"] == "Created"
         assert task["result_dir"].startswith("/tmp/ocrd_butler_results_testing/PPN80041750X")
@@ -172,7 +172,7 @@ class TasksTestExecution(TestCase):
         """
         task_config_cal = task_olena_bin_calamari_rec_config
 
-        task = create_task(task_config_cal)
+        task = run_task(task_config_cal)
         assert task["task_id"] == "PPN80041750X"
         assert task["status"] == "Created"
         assert task["result_dir"].startswith("/tmp/ocrd_butler_results_testing/PPN80041750X")

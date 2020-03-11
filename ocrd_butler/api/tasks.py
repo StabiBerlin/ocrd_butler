@@ -48,6 +48,10 @@ task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 # do a butler "serve"?
 # take a butler a task or a job?
 
+# frontend:
+# - success event could push to frontend and change rotator gif that indicates the work
+# - downloadable and (even better) live log showing
+
 
 class TasksBase(Resource):
     """Base methods for tasks."""
