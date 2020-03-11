@@ -12,6 +12,7 @@ from ocrd_butler.factory import create_app, db
 from ocrd_butler.api.models import chain_model
 from ocrd_butler.api.models import ChainParametersField
 
+
 class ApiTests(TestCase):
     """Test our api."""
 

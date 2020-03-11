@@ -142,17 +142,22 @@ class TaskActions(TasksBase):
     def run(self, task):
         """ Run this task. """
         # worker_task = create_task.apply_async(args=[task], countdown=20)
-        worker_task = create_task.delay(task)
-        # worker_task = create_task(task)
-        # return {
-        #     "",
-        #     "task_id": worker_task.id,
-        #     "state": worker_task.state,
-        #     # 'current': worker_task.info.get('current', 0),
-        #     # 'total': worker_task.info.get('total', 1),
-        #     # 'status': worker_task.info.get('status', '')
-        # }
-        return worker_task
+        # worker_task = create_task.delay(task)
+        worker_task = create_task(task)
+        import ipdb; ipdb.set_trace()
+        return jsonify({
+            "worker_task_id": worker_task.id,
+            "state": worker_task.state,
+            # 'current': worker_task.info.get('current', 0),
+            # 'total': worker_task.info.get('total', 1),
+            # 'status': worker_task.info.get('status', '')
+        })
+
+    def status(self, task):
+        """ Run this task. """
+        return jsonify({
+            "status": task.status
+        })
 
     def re_run(self, task):
         """ Run this task once again. """

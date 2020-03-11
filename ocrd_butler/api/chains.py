@@ -111,7 +111,6 @@ class Chain(ChainBase):
     @api.expect(chain_model)
     def put(self, chain_id):
         """ Update the chain. """
-        data = self.chain_data(request.json)
         chain = db_model_Chain.query.filter_by(id=chain_id).first()
         if chain is None:
             chain_namespace.abort(
@@ -119,10 +118,11 @@ class Chain(ChainBase):
                 status="Can't find a chain with the id \"{0}\".".format(
                     chain_id),
                 statusCode="404")
-        chain.name = data["name"]
-        chain.description = data["description"]
-        chain.processors = data["processors"]
-        chain.parameters = data["parameters"]
+
+        fields = chain.to_json().keys()
+        for field in fields:
+            if field in request.json:
+                setattr(chain, field, request.json[field])
         db.session.commit()
 
         return jsonify({

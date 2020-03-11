@@ -78,7 +78,9 @@ task_olena_bin_calamari_rec_config = {
     }
 }
 
-class TasksTest(TestCase):
+
+class TasksTestExecution(TestCase):
+    """ tbd. """
 
     def create_app(self):
         app = create_app(config=TestingConfig)
