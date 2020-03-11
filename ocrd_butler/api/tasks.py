@@ -27,7 +27,7 @@ from ocrd_butler.database import db
 from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 
-from ocrd_butler.execution.tasks import create_task
+from ocrd_butler.execution.tasks import run_task
 
 task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 
@@ -51,6 +51,11 @@ task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 
 class TasksBase(Resource):
     """Base methods for tasks."""
+
+    def __init__(self, api=None, *args, **kwargs):
+        super().__init__(api, *args, **kwargs)
+        self.get_actions = ("status", "results")
+        self.post_actions = ("run", "rerun", "stop")
 
     def task_data(self, json_data):
         """ Validate and prepare task input. """
@@ -110,7 +115,7 @@ class Task(TasksBase):
 
 @task_namespace.route("/<string:task_id>/<string:action>")
 class TaskActions(TasksBase):
-    """Run actions on the task, e.g. start, status, stop."""
+    """Run actions on the task, e.g. run, rerun, stop."""
 
     @api.doc(responses={200: "OK", 400: "Unknown action",
                         404: "Unknown task", 500: "Error"})
@@ -124,13 +129,40 @@ class TaskActions(TasksBase):
                 status="Unknown task for id \"{0}\".".format(task_id),
                 statusCode="404")
 
-        action = getattr(self, action)
-        if action is None:
+        if action not in self.post_actions:
             task_namespace.abort(
                 400, "Unknown action.",
                 status="Unknown action \"{0}\".".format(action),
                 statusCode="400")
 
+        action = getattr(self, action)
+        try:
+            return action(task)
+        except Exception as exc:
+            task_namespace.abort(
+                500, "Error.",
+                status="Unexpected error \"{0}\".".format(exc.__str__()),
+                statusCode="400")
+
+    @api.doc(responses={200: "OK", 400: "Unknown action",
+                        404: "Unknown task", 500: "Error"})
+    def get(self, task_id, action):
+        """ Get some information for the task. """
+        # TODO: Return the actions as OPTIONS.
+        task = db_model_Task.query.filter_by(id=task_id).first()
+        if task is None:
+            task_namespace.abort(
+                404, "Unknown task.",
+                status="Unknown task for id \"{0}\".".format(task_id),
+                statusCode="404")
+
+        if action not in self.get_actions:
+            task_namespace.abort(
+                400, "Unknown action.",
+                status="Unknown action \"{0}\".".format(action),
+                statusCode="400")
+
+        action = getattr(self, action)
         try:
             return action(task)
         except Exception as exc:
@@ -141,17 +173,25 @@ class TaskActions(TasksBase):
 
     def run(self, task):
         """ Run this task. """
-        # worker_task = create_task.apply_async(args=[task], countdown=20)
-        # worker_task = create_task.delay(task)
-        worker_task = create_task(task)
-        import ipdb; ipdb.set_trace()
+        # worker_task = run_task.apply_async(args=[task.to_json()], countdown=20)
+        # worker_task = run_task(task.to_json())
+        worker_task = run_task.delay(task.to_json())
+        task.worker_task_id = worker_task.id
+        db.session.commit()
+
         return jsonify({
             "worker_task_id": worker_task.id,
-            "state": worker_task.state,
+            "status": worker_task.status,
+            # "result_dir": worker_task["result_dir"],
             # 'current': worker_task.info.get('current', 0),
             # 'total': worker_task.info.get('total', 1),
             # 'status': worker_task.info.get('status', '')
         })
+
+    def re_run(self, task):
+        """ Run this task once again. """
+        # Basically delete all and run again.
+        pass
 
     def status(self, task):
         """ Run this task. """
@@ -159,10 +199,9 @@ class TaskActions(TasksBase):
             "status": task.status
         })
 
-    def re_run(self, task):
-        """ Run this task once again. """
-        # Basically delete all and run again.
-        pass
+    def results(self, task):
+        """ Run this task. """
+        return jsonify(task.results)
 
     def download_page(self, task):
         """ Download the results of the task as PAGE XML. """

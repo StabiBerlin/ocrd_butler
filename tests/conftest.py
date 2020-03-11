@@ -18,6 +18,24 @@ def pytest_configure(config):
         "markers", "celery(**overrides): override celery configuration for a test case"
     )
 
+@pytest.fixture(scope='session')
+def celery_config():
+    return {
+        'broker_url': 'memory://',
+        'result_backend': 'redis://'
+    }
+
+@pytest.fixture(scope='session')
+def celery_enable_logging():
+    return True
+
+@pytest.fixture(scope='session')
+def celery_includes():
+    return [
+        'ocrd_butler.execution.tasks',
+        # 'proj.tests.celery_signal_handlers',
+    ]
+
 @pytest.fixture
 def config():
     config = TestingConfig()

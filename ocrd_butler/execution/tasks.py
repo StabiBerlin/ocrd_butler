@@ -9,10 +9,7 @@ import uuid
 
 from flask import current_app
 
-from ocrd.resolver import Resolver
-from ocrd.processor.base import run_cli
-
-from ocrd_butler import celery
+from celery import shared_task
 
 from celery.signals import (
     task_failure,
@@ -21,29 +18,45 @@ from celery.signals import (
     task_success,
 )
 
+from ocrd.resolver import Resolver
+from ocrd.processor.base import run_cli
+
+from ocrd_butler import celery
 from ocrd_butler.api.processors import PROCESSORS_ACTION
+from ocrd_butler.database import db
+from ocrd_butler.database.models import Chain as db_model_Chain
+from ocrd_butler.database.models import Task as db_model_Task
+
 
 
 @task_prerun.connect
 def task_prerun_handler(task_id, task, *args, **kwargs):
-    print ("task_prerun_handler", task_id)
+    current_app.logger.info("Start processing task '{0}'.", task["id"])
 
 @task_postrun.connect
 def task_postrun_handler(task_id, task, *args, **kwargs):
-    print ("task_postrun_handler", task_id)
+    current_app.logger.info("Finished processing task '{0}'.", task_id)
 
 @task_success.connect
 def task_success_handler(sender, result, **kwargs):
-    print ("task_success_handler", task_id)
+    task = db_model_Task.query.filter_by(id=result["task_id"]).first()
+    task.status = "SUCCESS"
+    task.results = result
+    db.session.commit()
+    current_app.logger.info("Success on task '{0}'.", task["id"])
 
 @task_failure.connect
 def task_failure_handler(sender, result, **kwargs):
-    print ("task_failure_handler", task_id)
+    current_app.logger.info("Failure on task '{0}'.", task["id"])
+    task = db_model_Task.query.filter_by(id=result["task_id"]).first()
+    task.status = "FAILURE"
+    db.session.commit()
 
-@celery.task()
-def create_task(task):
+
+@celery.task(bind=True)
+def run_task(self, task):
     """ Create a task an run the given chain. """
-    processors = task.chain.processors
+    processors = task["chain"]["processors"]
     # TODO: Check if there is the active problem in olena_binarize with
     #       other basenames than mets.xml.
     # mets_basename = "{}.xml".format(task["id"])
@@ -51,17 +64,17 @@ def create_task(task):
 
     # Create workspace
     dst_dir = "{}/{}".format(current_app.config["OCRD_BUTLER_RESULTS"],
-                                task.uid)
+                             task["uid"])
 
     resolver = Resolver()
     workspace = resolver.workspace_from_url(
-        task.src,
+        task["src"],
         dst_dir=dst_dir,
         mets_basename=mets_basename,
         clobber_mets=True
     )
 
-    for file_name in workspace.mets.find_files(fileGrp=task.default_file_grp):
+    for file_name in workspace.mets.find_files(fileGrp=task["default_file_grp"]):
         if not file_name.local_filename:
             workspace.download_file(file_name)
 
@@ -71,7 +84,7 @@ def create_task(task):
     # more informational task.
     for index, processor_name in enumerate(processors):
         if index == 0:
-            input_file_grp = task.default_file_grp
+            input_file_grp = task["default_file_grp"]
         else:
             previous_processor = PROCESSORS_ACTION[processors[index-1]]
             input_file_grp = previous_processor["output_file_grp"]
@@ -82,8 +95,8 @@ def create_task(task):
         kwargs = {"parameter": {}}
         if "parameters" in processor:
             kwargs["parameter"] = processor["parameters"]
-        if processor_name in task.parameters:
-            kwargs["parameter"].update(task.parameters[processor_name])
+        if processor_name in task["parameters"]:
+            kwargs["parameter"].update(task["parameters"][processor_name])
         parameter = json.dumps(kwargs["parameter"])
 
         mets_url = "{}/mets.xml".format(dst_dir)
@@ -100,10 +113,10 @@ def create_task(task):
         # reload mets
         workspace.reload_mets()
 
-        current_app.logger.info("Finished processing task '%s'", task)
+        current_app.logger.info("Finished processing task '{0}'.", task["id"])
 
     return {
-        "task_id": task.id,
+        "task_id": task["id"],
         "result_dir": dst_dir,
         "status": "SUCCESS"
     }

@@ -41,7 +41,7 @@ class Task(db.Model):
             "id": self.id,
             "uid": self.uid,
             "src": self.src,
-            "chain": self.chain.name,
+            "chain": self.chain.to_json(),
             "parameters": self.parameters,
             "description": self.description,
             "default_file_grp": self.default_file_grp,

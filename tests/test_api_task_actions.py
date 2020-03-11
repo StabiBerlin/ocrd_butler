@@ -5,6 +5,7 @@
 import pytest
 import os
 import responses
+from unittest import mock
 
 from flask_restx import fields
 from flask_testing import TestCase
@@ -13,10 +14,36 @@ from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import create_app, db
 from ocrd_butler.api.models import task_model
 
+@pytest.fixture(scope='session')
+def celery_config():
+    return {
+        'broker_url': 'amqp://',
+        'result_backend': 'redis://'
+    }
+
+@pytest.fixture(scope='session')
+def celery_enable_logging():
+    return True
+
+@pytest.fixture(scope='session')
+def celery_includes():
+    return [
+        'ocrd_butler.execution.tasks',
+        # 'proj.tests.celery_signal_handlers',
+    ]
+
+# https://medium.com/@scythargon/how-to-use-celery-pytest-fixtures-for-celery-intergration-testing-6d61c91775d9
+# # @pytest.mark.usefixtures("config")
+# @pytest.mark.usefixtures('celery_session_app')
+# @pytest.mark.usefixtures('celery_session_worker')
 class ApiTests(TestCase):
     """Test our api actions."""
 
     def setUp(self):
+
+        from ocrd_butler import celery
+        celery.conf.task_always_eager = True
+
         db.create_all()
 
 
@@ -45,7 +72,7 @@ class ApiTests(TestCase):
         db.drop_all()
         # self.clearTestDir()
 
-    def clearTestDir(self):
+    def clearTestDir(self, config):
         config = TestingConfig()
         test_dirs = glob.glob("%s/*" % config.OCRD_BUTLER_RESULTS)
         for test_dir in test_dirs:
@@ -67,36 +94,26 @@ class ApiTests(TestCase):
         ))
         return response.json["id"]
 
+    @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
-    def test_task_tesserocr(self):
+    def test_task_tesserocr(self, mock_run_task):
         """Check if a new task is created."""
         response = self.client.post("/api/tasks", json=dict(
             chain_id=self.t_chain(),
             src="http://foo.bar/mets.xml",
             description="Tesserocr task."
         ))
+
         response = self.client.post("/api/tasks/1/run")
         assert response.status_code == 200
+        # assert response.json["status"] == "STARTED"
 
-        assert response["json"]["task_id"] == "PPN80041750X"
-        assert response["json"]["status"] == "STARTED"
-        assert response["json"]["result_dir"].startswith(
-            "/tmp/ocrd_butler_results_testing")
-
-        import time
-        count = 5
-        while True:
-            response = self.client.get("/api/tasks/1/status")
-            if status == "SUCCESS":
-                break
-            else:
-                time.sleep(5)
-                count += 1
+        response = self.client.get("/api/tasks/1/status")
+        assert response.json["status"] == "SUCCESS"
 
         response = self.client.get("/api/tasks/1/results")
-        ocr_results = os.path.join(task["result_dir"], "OCR-D-OCR-TESS")
+        ocr_results = os.path.join(response.json["result_dir"], "OCR-D-OCR-TESS")
         result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[1])) as result_file:
             text = result_file.read()
-            assert '<Label value="word" type="textequiv_level"/>' in text
-            assert "<Unicode>Wittenberg:</Unicode>" in text
+            assert "酬酬" in text

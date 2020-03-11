@@ -64,12 +64,12 @@ class ApiTests(TestCase):
         ))
         response = self.client.get("/api/chains/1")
         assert "ocrd-tesserocr-segment-region" in response.json["parameters"].keys()
-        assert response.json["parameters"]["ocrd-tesserocr-recognize"]["dpi"] == -1
+        assert response.json["parameters"]["ocrd-tesserocr-recognize"]["textequiv_level"] == "line"
         assert response.json["parameters"]["ocrd-tesserocr-recognize"]["overwrite_words"] is False
 
     def test_create_chain_with_own_parameters(self):
         """Check if a new chain is created."""
-        self.client.post("/api/chains", json=dict(
+        response = self.client.post("/api/chains", json=dict(
             name="New Chain",
             description="Some foobar chain.",
             processors=["ocrd-olena-binarize"],
@@ -79,6 +79,7 @@ class ApiTests(TestCase):
                 }
             }
         ))
+
         response = self.client.get("/api/chains/1")
         assert "ocrd-olena-binarize" in response.json["parameters"].keys()
         assert response.json["parameters"]["ocrd-olena-binarize"]["impl"] == "sauvola-ms-split"
