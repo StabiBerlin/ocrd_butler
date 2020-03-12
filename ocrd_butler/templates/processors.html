@@ -17,12 +17,17 @@
         </div>
 
         <div class="col-md-12">
-            {# {{ processors|tojson }} #}
             {% for processor in processors %}
                 <h2>{{ processor.name }} <a name="table-{{ processor.name }}" style="cursor:nesw-resize;"
                     onclick="javascript:;jQuery('.table-{{ processor.name }}').toggle('fast');window.location.hash='table-{{ processor.name }}';">
                     +
                     </a>
+                    {% if "package" in processor %}
+                        <br />
+                        <a class="" style="font-size: 1rem" href="{{ processor["package"]["git_url"] }}" target="_blank">
+                            Package: {{ processor["package"]["name"] }} ({{ processor["package"]["version"] }})
+                        </a>
+                    {% endif %}
                 </h2>
                 <table style="display:none;" class="table-{{ processor.name }} table">
                     {% for key, value in processor.items() %}

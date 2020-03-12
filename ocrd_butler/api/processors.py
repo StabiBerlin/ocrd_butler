@@ -42,13 +42,22 @@ for package in DIRECT_SCRIPTS:
     ocrd_tool_file = os.path.abspath(os.path.join(package, "ocrd-tool.json"))
 
     if not os.path.exists(ocrd_tool_file):
+        current_app.logger.info(
+            "Can't find ocrd-tools.json {0}, giving up.".format(ocrd_tool_file))
         continue
 
     with open(ocrd_tool_file) as fh:
         ocrd_tool = json.load(fh)
 
+    package_information = {"package": {"name": os.path.basename(package)}}
+    for name, value in ocrd_tool.items():
+        if name == "tools":
+            continue
+        package_information["package"][name] = value
+
     for name, config in ocrd_tool["tools"].items():
         PROCESSORS_CONFIG[name] = config
+        PROCESSORS_CONFIG[name].update(package_information)
 
 
 for package in PROCESSOR_PACKAGES:
@@ -71,7 +80,7 @@ for package in PROCESSOR_PACKAGES:
     with open(ocrd_tool_file) as fh:
         ocrd_tool = json.load(fh)
 
-    package_information = {"package": {}}
+    package_information = {"package": {"name": package}}
     for name, value in ocrd_tool.items():
         if name == "tools":
             continue
