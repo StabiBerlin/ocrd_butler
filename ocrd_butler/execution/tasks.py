@@ -31,7 +31,7 @@ from ocrd_butler.database.models import Task as db_model_Task
 
 @task_prerun.connect
 def task_prerun_handler(task_id, task, *args, **kwargs):
-    current_app.logger.info("Start processing task '{0}'.", task["id"])
+    current_app.logger.info("Start processing task '{0}'.", task_id)
 
 @task_postrun.connect
 def task_postrun_handler(task_id, task, *args, **kwargs):
@@ -43,15 +43,16 @@ def task_success_handler(sender, result, **kwargs):
     task.status = "SUCCESS"
     task.results = result
     db.session.commit()
-    current_app.logger.info("Success on task '{0}'.", task["id"])
+    current_app.logger.info("Success on task id: '{0}', worker task id: {1}.",
+                            task.id, task.worker_task_id)
 
 @task_failure.connect
 def task_failure_handler(sender, result, **kwargs):
-    current_app.logger.info("Failure on task '{0}'.", task["id"])
     task = db_model_Task.query.filter_by(id=result["task_id"]).first()
     task.status = "FAILURE"
     db.session.commit()
-
+    current_app.logger.info("Failure on task id: '{0}', worker task id: {1}.",
+                            task.id, task.worker_task_id)
 
 @celery.task(bind=True)
 def run_task(self, task):
