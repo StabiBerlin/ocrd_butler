@@ -10,6 +10,19 @@ class Config(object):
     CELERY_RESULT_BACKEND_URL = "redis://localhost:6379"
     CELERY_BROKER_URL = "redis://localhost:6379"
     OCRD_BUTLER_RESULTS = "/tmp/ocrd_butler_results"
+    DIRECT_PROCESSOR_SCRIPTS = [
+        "/srv/ocrd_all/ocrd_olena",
+        "/srv/ocrd_all/dinglehopper",
+        "/srv/ocrd_all/sbb_textline_detector",
+        "/srv/ocrd_fileformat"
+    ]
+    PROCESSOR_PACKAGES = [
+        "ocrd_tesserocr",
+        "ocrd_calamari",
+        "ocrd_segment",
+        "ocrd_keraslm",
+        "ocrd_anybaseocr"
+    ]
 
 class ProductionConfig(Config):
     """Uses production database server."""

@@ -6,45 +6,30 @@ import os
 import json
 import copy
 
-from flask import (
-    current_app,
-    jsonify
-)
+from flask import jsonify
 from flask_restx import Resource
 
 from ocrd_butler.api.restx import api
 
+# TODO: This should be a loadable conf in JSON or similiar
+from ocrd_butler.config import Config
+
+ocrd_config = Config()
 
 processors_namespace = api.namespace(
     "processors",
     description="Get the processors known by our butler.")
 
+
 PROCESSORS_CONFIG = {}
 
-DIRECT_SCRIPTS = [
-    "/srv/ocrd_all/ocrd_olena",
-    "/srv/ocrd_all/dinglehopper",
-    "/srv/ocrd_all/sbb_textline_detector",
-    "/srv/ocrd_fileformat",
-]
 
-
-PROCESSOR_PACKAGES = [
-    "ocrd_tesserocr",
-    "ocrd_calamari",
-    "ocrd_segment",
-    "ocrd_keraslm",
-    "ocrd_anybaseocr",
-]
-
-
-for package in DIRECT_SCRIPTS:
+for package in ocrd_config.DIRECT_PROCESSOR_SCRIPTS:
     ocrd_tool_file = os.path.abspath(os.path.join(package, "ocrd-tool.json"))
 
     if not os.path.exists(ocrd_tool_file):
-        current_app.logger.info(
+        raise ImportError(
             "Can't find ocrd-tools.json {0}, giving up.".format(ocrd_tool_file))
-        continue
 
     with open(ocrd_tool_file) as fh:
         ocrd_tool = json.load(fh)
@@ -60,7 +45,7 @@ for package in DIRECT_SCRIPTS:
         PROCESSORS_CONFIG[name].update(package_information)
 
 
-for package in PROCESSOR_PACKAGES:
+for package in ocrd_config.PROCESSOR_PACKAGES:
     module = __import__(package, fromlist=["config", "cli"])
     m_path = module.__path__[0]
 
@@ -73,9 +58,8 @@ for package in PROCESSOR_PACKAGES:
         ocrd_tool_file = os.path.abspath(
             os.path.join(m_path, "wrapper", "ocrd-tool.json"))
     if not os.path.exists(ocrd_tool_file):
-        current_app.logger.info(
-            "Can't find ocrd-tools.json from {0}, giving up.".format(package))
-        continue
+        raise ImportError(
+            "Can't find ocrd-tools.json {0}, giving up.".format(ocrd_tool_file))
 
     with open(ocrd_tool_file) as fh:
         ocrd_tool = json.load(fh)
