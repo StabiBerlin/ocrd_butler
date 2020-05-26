@@ -104,7 +104,7 @@ def chains():
         "id": c.id,
         "name": c.name,
         "description": c.description,
-        "processors": json.loads(c.processors)
+        "processors": c.processors
         } for c in results]
 
     return render_template(
