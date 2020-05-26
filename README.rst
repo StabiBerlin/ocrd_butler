@@ -47,11 +47,11 @@ For some modules in `ocrd_all`_ there are further files nessesary,
 e.g. trained models for the OCR itself. The folders on the server
 can be overwritten it every single task.
 
-* sbb_textline_blubs
+* sbb_textline_detector
 
 .. code-block:: bash
 
-  > mkdir /data/sbb_textline_detector && /data/sbb_textline_detector
+  > mkdir /data/sbb_textline_detector && cd /data/sbb_textline_detector
   > wget https://qurator-data.de/sbb_textline_detector/models.tar.gz
   > tar xfz model.tar.gz
 
@@ -60,7 +60,7 @@ can be overwritten it every single task.
 
 .. code-block:: bash
 
-  > mkdir /data/calamari_models && /data/calamari_models
+  > mkdir /data/calamari_models && cd /data/calamari_models
   > wget https://qurator-data.de/calamari-models/GT4HistOCR/model.tar.xz
   > tar xfz model.tar.xz
 
@@ -68,7 +68,7 @@ can be overwritten it every single task.
 
 .. code-block:: bash
 
-  > mkdir /data/tesseract_models && /data/tesseract_models
+  > mkdir /data/tesseract_models && cd /data/tesseract_models
   > wget https://qurator-data.de/tesseract-models/GT4HistOCR/models.tar
   > tar fz models.tar
   > cp GT4HistOCR_2000000.traineddata /usr/share/tesseract-ocr/4.00/tessdata/
