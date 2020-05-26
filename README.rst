@@ -53,7 +53,7 @@ can be overwritten it every single task.
 
   > mkdir /data/sbb_textline_detector && cd /data/sbb_textline_detector
   > wget https://qurator-data.de/sbb_textline_detector/models.tar.gz
-  > tar xfz model.tar.gz
+  > tar xfz models.tar.gz
 
 
 * ocrd_calamari
@@ -62,7 +62,7 @@ can be overwritten it every single task.
 
   > mkdir /data/calamari_models && cd /data/calamari_models
   > wget https://qurator-data.de/calamari-models/GT4HistOCR/model.tar.xz
-  > tar xfz model.tar.xz
+  > tar xf model.tar.xz
 
 * ocrd_tesserocr
 
@@ -70,7 +70,7 @@ can be overwritten it every single task.
 
   > mkdir /data/tesseract_models && cd /data/tesseract_models
   > wget https://qurator-data.de/tesseract-models/GT4HistOCR/models.tar
-  > tar fz models.tar
+  > tar xf models.tar
   > cp GT4HistOCR_2000000.traineddata /usr/share/tesseract-ocr/4.00/tessdata/
 
 
