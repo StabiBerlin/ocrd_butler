@@ -10,3 +10,8 @@ def camel_case_split(identifier):
         ".+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)",
         identifier)
     return [m.group(0) for m in matches]
+
+def host_url(request):
+    # return request.host_url
+    return "http://localhost:5000/"
+

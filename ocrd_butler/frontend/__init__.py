@@ -34,6 +34,8 @@ from ocrd_butler.database import db
 from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 
+from ocrd_butler.util import host_url
+
 frontend = Blueprint("frontend", __name__)
 
 @frontend.context_processor
@@ -87,8 +89,12 @@ def new_chain():
         "processors": request.form.getlist("processors")
     })
     headers = {"Content-Type": "application/json"}
-    requests.post("{}api/chains/chain".format(request.host_url), data=data, headers=headers)
-    flash("New chain created.")
+    response = requests.post("{}api/chains".format(host_url(request)), data=data, headers=headers)
+    if response.status_code in (200, 201):
+        flash("New chain created.")
+    else:
+        flash("Can't create new chain. Status {0}, Error {1}".format(
+            response.status_code, response.json()["message"]))
     return redirect("/chains", code=302)
 
 
@@ -238,8 +244,13 @@ def new_task():
         "parameter": parameter
     })
     headers = {"Content-Type": "application/json"}
-    requests.post("{}api/tasks/task".format(request.host_url), data=data, headers=headers)
-    flash("New task created.")
+    response = requests.post("{}api/tasks".format(host_url(request)), data=data, headers=headers)
+    if response.status_code in (200, 201):
+        flash("New task created.")
+    else:
+        result = response.json()
+        flash("Can't create new task. Status {0}, Error '{1}': '{2}'.".format(
+            result["statusCode"], result["message"], result["status"]))
     return redirect("/tasks", code=302)
 
 
@@ -348,9 +359,9 @@ def compare_results():
 def task_delete(task_id):
     """Delete the task with the given id."""
     response = requests.delete("{0}api/tasks/task/{1}".format(
-        request.host_url,
+        host_url(request),
         task_id))
-    if response.status_code == 200:
+    if response.status_code in (200, 201):
         flash("Task {0} deleted.".format(task_id))
     else:
         result = json.loads(response.content)
