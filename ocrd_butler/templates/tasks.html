@@ -33,9 +33,9 @@
                     {{ form.task_id() }}
                     <br />
                     <br />
-                    {{ form.mets_url.label }}
+                    {{ form.src.label }}
                     <br />
-                    {{ form.mets_url() }}
+                    {{ form.src() }}
                     <br />
                     <br />
                     {{ form.input_file_grp.label }}
@@ -43,9 +43,9 @@
                     {{ form.input_file_grp() }}
                     <br />
                     <br />
-                    {{ form.chain.label }}
+                    {{ form.chain_id.label }}
                     <br />
-                    {{ form.chain() }}
+                    {{ form.chain_id() }}
                     <br />
                     <br />
                     {{ form.parameter.label }}
@@ -62,11 +62,10 @@
             <table class="table">
                 <tr>
                     <th>ID</th>
-                    <th>Work ID</th>
-                    <th>METS</th>
+                    <th>Source (METS)</th>
                     <th>Input file group</th>
                     <th>Chain</th>
-                    <th>Parameter</th>
+                    <th>Parameters</th>
                     <th>Worker (Status)</th>
                     <th>Times</th>
                     <th>Results</th>
@@ -77,20 +76,12 @@
                     <td>{{ task.id }}
                         <!--<input type="checkbox" name="id" value="{{ task.id }}" />-->
                     </td>
-                    <td>
-                        {% if task.work_id.startswith("PPN") %}
-                            <a href="https://digital.staatsbibliothek-berlin.de/werkansicht?PPN={{ task.work_id }}"
-                               target="_blank">{{ task.work_id }}</a>
-                        {% else %}
-                            {{ task.work_id }}
-                        {% endif %}
-                    </td>
-                    <td><a href="{{ task.mets_url }}">XML</a></td>
-                    <td>{{ task.file_grp }}</td>
+                    <td><a href="{{ task.src }}">XML</a></td>
+                    <td>{{ task.default_file_grp }}</td>
                     <td>{{ task.chain }}</td>
-                    <td>{{ task.parameter }}</td>
+                    <td>{{ task.parameters }}</td>
                     <td><a href="{{ task.flower_url }}"
-                           target="_blank">{{ task.worker_id }}</a>
+                           target="_blank">{{ task.worker_task_id }}</a>
                         {% if task.result and task.result.status %}
                             ({{ task.result.status }})
                         {% endif %}

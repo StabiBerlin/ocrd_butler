@@ -41,13 +41,15 @@ class ChainBase(Resource):
         # Should some checks be in the model itself?
         if data["processors"] is None:
             chain_namespace.abort(400, "Wrong parameter.",
-                                  status="Missing processors for chain.", statusCode="400")
+                                  status="Missing processors for chain.",
+                                  statusCode="400")
 
         for processor in data["processors"]:
             if processor not in PROCESSOR_NAMES:
-                chain_namespace.abort(400, "Wrong parameter.",
-                                      status="Unknown processor \"{}\".".format(processor),
-                                      statusCode="400")
+                chain_namespace.abort(
+                    400, "Wrong parameter.",
+                    status="Unknown processor \"{}\".".format(processor),
+                    statusCode="400")
 
             # The OCR-D validator updates all parameters with default values.
             if processor not in data["parameters"].keys():
@@ -57,8 +59,11 @@ class ChainBase(Resource):
             if not report.is_valid:
                 chain_namespace.abort(
                     400, "Wrong parameter.",
-                    status="Unknown parameter \"{0}\" for processor \"{1}\".".format(
-                        data["parameters"][processor], processor),
+                    status="Error while validating parameters \"{0}\""
+                           "for processor \"{1}\" -> \"{2}\".".format(
+                                data["parameters"][processor],
+                                processor,
+                                str(report.errors)),
                     statusCode="400")
 
         return data

@@ -57,7 +57,6 @@ def task_failure_handler(sender, result, **kwargs):
 @celery.task(bind=True)
 def run_task(self, task):
     """ Create a task an run the given chain. """
-    processors = task["chain"]["processors"]
     # TODO: Check if there is the active problem in olena_binarize with
     #       other basenames than mets.xml.
     # mets_basename = "{}.xml".format(task["id"])
@@ -83,11 +82,11 @@ def run_task(self, task):
 
     # TODO: Steps could be saved along the other task information to get a
     # more informational task.
-    for index, processor_name in enumerate(processors):
+    for index, processor_name in enumerate(task["chain"]["processors"]):
         if index == 0:
             input_file_grp = task["default_file_grp"]
         else:
-            previous_processor = PROCESSORS_ACTION[processors[index-1]]
+            previous_processor = PROCESSORS_ACTION[task["chain"]["processors"][index-1]]
             input_file_grp = previous_processor["output_file_grp"]
 
         processor = PROCESSORS_ACTION[processor_name]

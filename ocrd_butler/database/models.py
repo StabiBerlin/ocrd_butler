@@ -2,6 +2,7 @@
 """OCRD Butler database models."""
 
 from ocrd_butler.database import db
+from ocrd_butler.util import to_json
 # from sqlalchemy.dialects.postgresql import JSON
 
 
@@ -13,7 +14,7 @@ class Task(db.Model):
     src = db.Column(db.String(255))
     chain_id = db.Column(db.Integer, db.ForeignKey('chains.id'))
     description = db.Column(db.String(1024))
-    parameters = db.Column(db.String(4096))
+    parameters = db.Column(db.JSON)
     default_file_grp = db.Column(db.String(64))
     worker_task_id = db.Column(db.String(64))
     status = db.Column(db.String(64))
@@ -42,7 +43,7 @@ class Task(db.Model):
             "uid": self.uid,
             "src": self.src,
             "chain": self.chain.to_json(),
-            "parameters": self.parameters,
+            "parameters": to_json(self.parameters),
             "description": self.description,
             "default_file_grp": self.default_file_grp,
             "worker_task_id": self.worker_task_id,

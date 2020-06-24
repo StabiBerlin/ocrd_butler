@@ -28,6 +28,7 @@ from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 
 from ocrd_butler.execution.tasks import run_task
+from ocrd_butler.util import to_json
 
 task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 
@@ -64,9 +65,10 @@ class TasksBase(Resource):
     def task_data(self, json_data):
         """ Validate and prepare task input. """
         data = marshal(data=json_data, fields=task_model, skip_none=False)
-
+        # import ipdb; ipdb.set_trace()
         if "parameters" not in data or data["parameters"] is None:
             data["parameters"] = {}
+        data["parameters"] = to_json(data["parameters"])
 
         if data["chain_id"] is None:
             task_namespace.abort(400, "Wrong parameter.",
@@ -102,7 +104,6 @@ class Task(TasksBase):
     @api.doc(responses={201: "Created", 400: "Missing parameter"})
     @api.expect(task_model)
     def post(self):
-
         data = self.task_data(request.json)
 
         task = db_model_Task(**data)
@@ -177,20 +178,24 @@ class TaskActions(TasksBase):
 
     def run(self, task):
         """ Run this task. """
-        # worker_task = run_task.apply_async(args=[task.to_json()], countdown=20)
+        # worker_task = run_task.apply_async(args=[task.to_json()],
+        #                                    countdown=20)
         # worker_task = run_task(task.to_json())
         worker_task = run_task.delay(task.to_json())
         task.worker_task_id = worker_task.id
         db.session.commit()
 
-        return jsonify({
+        result = {
             "worker_task_id": worker_task.id,
             "status": worker_task.status,
+            "traceback": worker_task.traceback,
             # "result_dir": worker_task["result_dir"],
             # 'current': worker_task.info.get('current', 0),
             # 'total': worker_task.info.get('total', 1),
             # 'status': worker_task.info.get('status', '')
-        })
+        }
+
+        return jsonify(result)
 
     def re_run(self, task):
         """ Run this task once again. """

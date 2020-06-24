@@ -64,7 +64,7 @@ class ApiTests(TestCase):
         ))
         response = self.client.get("/api/chains/1")
         assert "ocrd-tesserocr-segment-region" in response.json["parameters"].keys()
-        assert response.json["parameters"]["ocrd-tesserocr-recognize"]["textequiv_level"] == "line"
+        assert response.json["parameters"]["ocrd-tesserocr-recognize"]["textequiv_level"] == "word"
         assert response.json["parameters"]["ocrd-tesserocr-recognize"]["overwrite_words"] is False
 
     def test_create_chain_with_own_parameters(self):
@@ -99,7 +99,8 @@ class ApiTests(TestCase):
         assert response.status_code == 400
         # OCR-D validator updates all parameters with default values.
         assert response.status == "400 BAD REQUEST"
-        assert response.json["status"].startswith("Unknown parameter \"{\'impl\': \'foobar\',")
+        assert response.json["status"].startswith(
+            "Error while validating parameters \"{\'impl\': \'foobar\',")
 
     def test_get_chain(self):
         """Check if an existing chain is returned."""

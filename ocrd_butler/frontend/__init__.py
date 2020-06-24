@@ -86,7 +86,8 @@ def new_chain():
     data = json.dumps({
         "name": request.form.get("name"),
         "description": request.form.get("description"),
-        "processors": request.form.getlist("processors")
+        "processors": request.form.getlist("processors"),
+        "parameters": request.form.get("parameters")
     })
     headers = {"Content-Type": "application/json"}
     response = requests.post("{}api/chains".format(host_url(request)), data=data, headers=headers)
@@ -129,6 +130,10 @@ def delete_chain(chain_id):
 
 def task_information(uid):
     """Get information for the task based on its uid."""
+
+    if uid is None:
+        return None
+
     response = requests.get("http://localhost:5555/api/task/info/{0}".format(uid))
     if response.status_code == 404:
         current_app.logger.warning("Can't find task '{0}'".format(uid))
@@ -156,12 +161,11 @@ def current_tasks():
         chain = db_model_Chain.query.filter_by(id=result.chain_id).first()
         task = {
             "id": result.id,
-            "work_id": result.work_id,
-            "mets_url": result.mets_url,
-            "file_grp": result.file_grp,
-            "worker_id": result.worker_id,
+            "src": result.src,
+            "default_file_grp": result.default_file_grp,
             "chain": chain,
-            "parameter": result.parameter,
+            "parameters": result.parameters,
+            "worker_task_id": result.worker_task_id,
             "result": {
                 "status": "",
                 "ready": False,
@@ -175,13 +179,13 @@ def current_tasks():
             }
         }
 
-        task_info = task_information(result.worker_id)
+        task_info = task_information(result.worker_task_id)
 
         if task_info is not None and task_info["ready"]:
             task["result"].update({
-                "page": "/download/page/{}".format(result.worker_id),
-                "alto": "/download/alto/{}".format(result.worker_id),
-                "txt": "/download/txt/{}".format(result.worker_id),
+                "page": "/download/page/{}".format(result.worker_task_id),
+                "alto": "/download/alto/{}".format(result.worker_task_id),
+                "txt": "/download/txt/{}".format(result.worker_task_id),
             })
 
             if task_info["received"] is not None:
@@ -203,51 +207,56 @@ def current_tasks():
         task["flower_url"] = "{0}{1}task/{2}".format(
             request.host_url.replace("5000", "5555"), # A bit hacky, but for devs on localhost.
             "flower/" if not "localhost:5000" in request.host_url else "",
-            task["worker_id"]
+            task["worker_task_id"]
         )
 
         tasks.append(task)
 
     return tasks
 
+
 class NewTaskForm(FlaskForm):
-    """Contact form."""
+    """New task form."""
     task_id = StringField("Task ID", [
         DataRequired(),
         Length(min=4, message=("The task has to be at least 4 letters."))])
-    mets_url = StringField("METS URL",
+    src = StringField("Source (METS)",
                 validators=[
                     DataRequired(message="Please enter an URL to a METS file."),
                     URL(message="Please enter a valid URL to a METS file.")
                 ])
     input_file_grp = StringField("Input file group (defaults to 'DEFAULT')")
-    chain = SelectField('Chain',
-                validators=[
+    chain_id = SelectField('Chain', validators=[
                     DataRequired(message="Please choose a chain.")
                 ])
-    parameter = TextAreaField('Parameter')
+    parameter = TextAreaField('Parameters')
     submit = SubmitField('Create new task')
 
 @frontend.route("/new-task", methods=['POST'])
 def new_task():
     # TODO: Adjust task model works_id => id!
-    parameter = request.form.get("parameter")
+    parameters = request.form.get("parameter")
 
-    if parameter:
-        parameter = json.loads(parameter)
+    if parameters is not None:
+        parameters = json.loads(parameters)
+    else:
+        parameters = {}
 
     data = json.dumps({
         "id": request.form.get("task_id"),
-        "mets_url": request.form.get("mets_url"),
+        "src": request.form.get("src"),
         "file_grp": request.form.get("input_file_grp") or "DEFAULT",
-        "chain": request.form.get("chain"),
-        "parameter": parameter
+        "chain_id": request.form.get("chain_id"),
+        "parameters": parameters
     })
     headers = {"Content-Type": "application/json"}
-    response = requests.post("{}api/tasks".format(host_url(request)), data=data, headers=headers)
-    if response.status_code in (200, 201):
+    response = requests.post("{}api/tasks".format(host_url(request)),
+                             data=data, headers=headers)
+
+    if response.status_code == 201:
         flash("New task created.")
     else:
+        # import ipdb; ipdb.set_trace()
         result = response.json()
         flash("Can't create new task. Status {0}, Error '{1}': '{2}'.".format(
             result["statusCode"], result["message"], result["status"]))
@@ -260,7 +269,7 @@ def tasks():
     # new_task_form = NewTaskForm(csrf_enabled=False)
     new_task_form = NewTaskForm()
     chains = db_model_Chain.query.all()
-    new_task_form.chain.choices = [(chain.name, chain.name) for chain in chains]
+    new_task_form.chain_id.choices = [(chain.id, chain.name) for chain in chains]
 
     return render_template(
         "tasks.html",
