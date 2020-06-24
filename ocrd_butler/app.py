@@ -28,7 +28,7 @@ def main():
     """What should I do, when I'm called directly?"""
     log.info("> Starting development server at http://%s/api/ <<<<<" %
              flask_app.config['SERVER_NAME'])
-    flask_app.run(host="0.0.0.0", debug=False)
+    flask_app.run(host="0.0.0.0", debug=True)
 
 
 if __name__ == "__main__":
