@@ -19,7 +19,12 @@
                 "ocrd-tesserocr-segment-line",
                 "ocrd-tesserocr-segment-word",
                 "ocrd-calamari-recognize"
-            ]
+            ],
+            "parameters": {
+                "ocrd-calamari-recognize": {
+                    "checkpoint": "/data/calamari_models/*ckpt.json"
+                }
+            }
         }
         ,
         {
@@ -30,27 +35,32 @@
                 "ocrd-tesserocr-segment-region",
                 "ocrd-tesserocr-segment-line",
                 "ocrd-calamari-recognize"
-            ]
-        }
-        ,
-        {
-            "id": "PPN729167801",
-            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN729167801.mets.xml",
-            "file_grp": "DEFAULT",
-            "chain": "Tesseract - Calamari",
-            "parameter": {
-                "ocrd-calamari-recognize": {
-                    "checkpoint": "/home/j23d/projects/ocrd_butler/calamari_models/*ckpt.json"
+            ],
+            "parameters": {
+                "ocrd-olena-binarize": {
+                    "impl": "sauvola-ms-split"
                 }
             }
         }
         ,
         {
-            "id": "PPN729167801",
-            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN729167801.mets.xml",
-            "file_grp": "DEFAULT",
-            "chain": "Tesseract",
-            "parameter": {
+            "task_description": "PPN729167801",
+            "src": "https://content.staatsbibliothek-berlin.de/dc/PPN729167801.mets.xml",
+            "default_file_grp": "DEFAULT",
+            "chain_id": "1",
+            "parameters": {
+                "ocrd-calamari-recognize": {
+                    "checkpoint": "/data/calamari_models/*ckpt.json"
+                }
+            }
+        }
+        ,
+        {
+            "task_description": "PPN729167801",
+            "src": "https://content.staatsbibliothek-berlin.de/dc/PPN729167801.mets.xml",
+            "default_file_grp": "DEFAULT",
+            "chain_id": "1",
+            "parameters": {
                 "ocrd-tesserocr-recognize": {
                     "model": "GT4HistOCR_2000000"
                 }
@@ -58,11 +68,11 @@
         }
         ,
         {
-            "id": "PPN80041750X-t",
-            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
-            "file_grp": "DEFAULT",
-            "chain": "Tesseract",
-            "parameter": {
+            "task_description": "PPN80041750X-t",
+            "src": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+            "default_file_grp": "DEFAULT",
+            "chain_id": "1",
+            "parameters": {
                 "ocrd-tesserocr-recognize": {
                     "model": "GT4HistOCR_2000000"
                 }
@@ -73,8 +83,8 @@
             "id": "PPN80041750X-tc",
             "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
             "file_grp": "DEFAULT",
-            "chain": "Tesseract - Calamari",
-            "parameter": {
+            "chain_id": "2",
+            "parameters": {
                 "ocrd-calamari-recognize": {
                     "checkpoint": "/home/j23d/projects/ocrd/calamari_models/*ckpt.json"
                 }
@@ -82,11 +92,11 @@
         }
         ,
         {
-            "id": "PPN80041750X-oo",
-            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
-            "file_grp": "DEFAULT",
-            "chain": "Foo",
-            "parameter": {
+            "description": "PPN80041750X-oo",
+            "src": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+            "default_file_grp": "DEFAULT",
+            "chain_id": "5",
+            "parameters": {
                 "ocrd-olena-binarize": {
                     "impl": "sauvola-ms-split"
                 }
@@ -94,37 +104,37 @@
         }
         ,
         {
-            "id": "PPN80041750X-oc",
-            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
-            "file_grp": "DEFAULT",
-            "chain": "Olena - Calamari",
-            "parameter": {
+            "description": "PPN80041750X-oc",
+            "src": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+            "default_file_grp": "DEFAULT",
+            "chain_id": "3",
+            "parameters": {
                 "ocrd-olena-binarize": {
                     "impl": "sauvola-ms-split"
                 },
                 "ocrd-calamari-recognize": {
-                    "checkpoint": "/home/j23d/projects/ocrd/calamari_models/*ckpt.json"
+                    "checkpoint": "/data/calamari_models/*ckpt.json"
                 }
             }
         }
         ,
         {
-            "id": "PPN777647508",
-            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN777647508.mets.xml",
-            "file_grp": "DEFAULT",
-            "chain": "Tesseract One",
-            "parameter": {
-                "TesserocrRecognize": {
+            "description": "PPN777647508",
+            "src": "https://content.staatsbibliothek-berlin.de/dc/PPN777647508.mets.xml",
+            "default_file_grp": "DEFAULT",
+            "chain_id": "Tesseract One",
+            "parameters": {
+                "tesserocr-recognize": {
                     "model": "Fraktur"
                 }
             }
         },
         {
-            "id": "PPN80041750X-otc",
-            "mets_url": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
-            "file_grp": "DEFAULT",
-            "chain": "Olena - SBB-Textline - Calamari",
-            "parameter": {
+            "description": "PPN80041750X-otc",
+            "src": "https://content.staatsbibliothek-berlin.de/dc/PPN80041750X.mets.xml",
+            "default_file_grp": "DEFAULT",
+            "chain": "4",
+            "parameters": {
                 "ocrd-olena-binarize": {
                     "impl": "sauvola-ms-split"
                 },
