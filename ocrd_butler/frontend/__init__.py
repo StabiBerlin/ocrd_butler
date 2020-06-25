@@ -72,6 +72,7 @@ def processors():
         "processors.html",
         processors=PROCESSORS_VIEW)
 
+
 class NewChainForm(FlaskForm):
     """Contact form."""
     name = StringField('Name', [
@@ -83,6 +84,8 @@ class NewChainForm(FlaskForm):
 
 @frontend.route("/new-chain", methods=['POST'])
 def new_chain():
+    """TODO: The order of the processors is not preserved in the multiselect!
+    """
     data = json.dumps({
         "name": request.form.get("name"),
         "description": request.form.get("description"),
@@ -390,15 +393,15 @@ def task_run(task_id):
         flash("An error occured: {0}".format(result.status))
     return redirect("/tasks", code=302)
 
-@frontend.route("/download/txt/<string:worker_id>")
-def download_txt(worker_id):
+@frontend.route("/download/txt/<string:worker_task_id>")
+def download_txt(worker_task_id):
     """Define route to download the results as text."""
-    task_info = task_information(worker_id)
+    task_info = task_information(worker_task_id)
 
     # Get the output group of the last step in the chain of the task.
-    task = db_model_Task.query.filter_by(worker_id=worker_id).first()
+    task = db_model_Task.query.filter_by(worker_task_id=worker_task_id).first()
     chain = db_model_Chain.query.filter_by(id=task.chain_id).first()
-    last_step = json.loads(chain.processors)[-1]
+    last_step = chain.processors[-1]
     last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
 
     page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
@@ -434,15 +437,15 @@ def download_txt(worker_id):
     )
 
 
-@frontend.route("/download/page/<string:worker_id>")
-def download_page_zip(worker_id):
+@frontend.route("/download/page/<string:worker_task_id>")
+def download_page_zip(worker_task_id):
     """Define route to download the page xml results as zip file."""
-    task_info = task_information(worker_id)
+    task_info = task_information(worker_task_id)
 
     # Get the output group of the last step in the chain of the task.
-    task = db_model_Task.query.filter_by(worker_id=worker_id).first()
+    task = db_model_Task.query.filter_by(worker_task_id=worker_task_id).first()
     chain = db_model_Chain.query.filter_by(id=task.chain_id).first()
-    last_step = json.loads(chain.processors)[-1]
+    last_step = chain.processors[-1]
     last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
 
     page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
@@ -462,15 +465,15 @@ def download_page_zip(worker_id):
         attachment_filename="ocr_page_xml_%s.zip" % task_info["result"]["task_id"]
     )
 
-@frontend.route("/download/alto/<string:worker_id>")
-def download_alto_zip(worker_id):
+@frontend.route("/download/alto/<string:worker_task_id>")
+def download_alto_zip(worker_task_id):
     """Define route to download the alto xml results as zip file."""
-    task_info = task_information(worker_id)
+    task_info = task_information(worker_task_id)
 
     # Get the output group of the last step in the chain of the task.
-    task = db_model_Task.query.filter_by(worker_id=worker_id).first()
+    task = db_model_Task.query.filter_by(worker_task_id=worker_task_id).first()
     chain = db_model_Chain.query.filter_by(id=task.chain_id).first()
-    last_step = json.loads(chain.processors)[-1]
+    last_step = chain.processors[-1]
     last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
 
     # BUG?: java.lang.IllegalArgumentException:
