@@ -65,7 +65,7 @@ class TasksBase(Resource):
     def task_data(self, json_data):
         """ Validate and prepare task input. """
         data = marshal(data=json_data, fields=task_model, skip_none=False)
-        # import ipdb; ipdb.set_trace()
+
         if "parameters" not in data or data["parameters"] is None:
             data["parameters"] = {}
         data["parameters"] = to_json(data["parameters"])
