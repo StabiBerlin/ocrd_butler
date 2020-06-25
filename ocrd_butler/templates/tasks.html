@@ -28,9 +28,9 @@
             <div class="new-task-form">
                 <form action="/new-task" method="post">
                   <div class="form-group">
-                    {{ form.task_id.label }}
+                    {{ form.task_description.label }}
                     <br />
-                    {{ form.task_id() }}
+                    {{ form.task_description() }}
                     <br />
                     <br />
                     {{ form.src.label }}
@@ -61,8 +61,8 @@
             <form method="POST" url=".">
             <table class="table">
                 <tr>
-                    <th>ID</th>
-                    <th>Source (METS)</th>
+                    <th>Task</th>
+                    <th>Source</th>
                     <th>Input file group</th>
                     <th>Chain</th>
                     <th>Parameters</th>
@@ -74,7 +74,11 @@
                 </tr>
                 {% for task in tasks %}
                 <tr>
-                    <td>{{ task.id }}
+                    <td>{{ task.description }}
+                        <br />
+                        ID: {{ task.id }}
+                        <br />
+                        UID: {{ task.uid }}
                         <!--<input type="checkbox" name="id" value="{{ task.id }}" />-->
                     </td>
                     <td><a href="{{ task.src }}">XML</a></td>

@@ -29,14 +29,15 @@
         </div>
 
         <div class="col-md-2">
-            <button id="new-chain" type="button" class="btn">Add a new chain</button>
+            <!-- <button id="new-chain" type="button" class="btn">Add a new chain</button> -->
+            To add a new chain, please use the <a href="/api" target="_blank">api</a>.
         </div>
 
         <div class="col-md-10">
 
             <div class="new-chain-form">
                 <form action="/new-chain" method="post">
-                  <div class="form-group">  
+                  <div class="form-group">
                     {{ form.name.label }}
                     <br />
                     {{ form.name() }}

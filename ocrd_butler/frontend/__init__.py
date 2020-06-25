@@ -165,7 +165,10 @@ def current_tasks():
     for result in results:
         chain = db_model_Chain.query.filter_by(id=result.chain_id).first()
         task = {
+            "repr": result.__str__(),
+            "description": result.description,
             "id": result.id,
+            "uid": result.uid,
             "src": result.src,
             "default_file_grp": result.default_file_grp,
             "chain": chain,
@@ -222,11 +225,10 @@ def current_tasks():
 
 class NewTaskForm(FlaskForm):
     """New task form."""
-    task_id = StringField("Task ID", [
+    task_description = StringField("Task description", [
         DataRequired(),
         Length(min=4, message=("The task has to be at least 4 letters."))])
-    src = StringField("Source (METS)",
-                validators=[
+    src = StringField("Source (METS)", validators=[
                     DataRequired(message="Please enter an URL to a METS file."),
                     URL(message="Please enter a valid URL to a METS file.")
                 ])
@@ -248,7 +250,7 @@ def new_task():
         parameters = {}
 
     data = json.dumps({
-        "id": request.form.get("task_id"),
+        "description": request.form.get("task_description"),
         "src": request.form.get("src"),
         "file_grp": request.form.get("input_file_grp") or "DEFAULT",
         "chain_id": request.form.get("chain_id"),

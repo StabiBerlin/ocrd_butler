@@ -54,7 +54,7 @@ class Task(db.Model):
     def __repr__(self):
         desc = self.description and ", description: {}".format(
             self.description) or ""
-        return "<Task {0} - source {1}, chain {2}{3}>".format(
+        return "Task {0} - source {1}, chain {2}{3}".format(
             self.uid, self.src, self.chain.name, desc)
 
 
@@ -83,4 +83,4 @@ class Chain(db.Model):
             }
 
     def __repr__(self):
-        return "<self {0} ({1})>".format(self.name, self.description)
+        return "Chain {0} ({1})".format(self.name, self.description)
