@@ -237,7 +237,7 @@ def new_task():
     # TODO: Adjust task model works_id => id!
     parameters = request.form.get("parameter")
 
-    if parameters is not None:
+    if parameters:
         parameters = json.loads(parameters)
     else:
         parameters = {}
@@ -377,6 +377,18 @@ def task_delete(task_id):
         flash("An error occured: {0}".format(result.status))
     return redirect("/tasks", code=302)
 
+@frontend.route("/task/run/<int:task_id>")
+def task_run(task_id):
+    """Run the task with the given id."""
+    response = requests.post("{0}api/tasks/{1}/run".format(
+        host_url(request),
+        task_id))
+    if response.status_code in (200, 201):
+        flash("Task {0} started.".format(task_id))
+    else:
+        result = json.loads(response.content)
+        flash("An error occured: {0}".format(result.status))
+    return redirect("/tasks", code=302)
 
 @frontend.route("/download/txt/<string:worker_id>")
 def download_txt(worker_id):
