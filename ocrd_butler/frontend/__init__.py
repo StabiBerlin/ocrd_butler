@@ -65,6 +65,7 @@ def handle_500(err):
         exception=err.original_exception,
         traceback=traceback.format_exc()), 500
 
+
 @frontend.route("/processors")
 def processors():
     """Define the page presenting the integrated processors."""
@@ -81,6 +82,7 @@ class NewChainForm(FlaskForm):
     description = StringField('Description', [DataRequired()])
     processors = SelectMultipleField('Processors for chain')
     submit = SubmitField('Create new chain')
+
 
 @frontend.route("/new-chain", methods=['POST'])
 def new_chain():
@@ -370,15 +372,17 @@ def compare_results():
 @frontend.route("/task/delete/<int:task_id>")
 def task_delete(task_id):
     """Delete the task with the given id."""
-    response = requests.delete("{0}api/tasks/task/{1}".format(
+    response = requests.delete("{0}api/tasks/{1}".format(
         host_url(request),
         task_id))
+
     if response.status_code in (200, 201):
         flash("Task {0} deleted.".format(task_id))
     else:
         result = json.loads(response.content)
         flash("An error occured: {0}".format(result.status))
     return redirect("/tasks", code=302)
+
 
 @frontend.route("/task/run/<int:task_id>")
 def task_run(task_id):
