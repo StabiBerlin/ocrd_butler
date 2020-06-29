@@ -396,7 +396,7 @@ def task_run(task_id):
         flash("Task {0} started.".format(task_id))
     else:
         result = json.loads(response.content)
-        flash("An error occured: {0}".format(result.status))
+        flash("An error occured: {0}".format(result["status"]))
     return redirect("/tasks", code=302)
 
 @frontend.route("/download/txt/<string:worker_task_id>")
