@@ -39,6 +39,9 @@
             "parameters": {
                 "ocrd-olena-binarize": {
                     "impl": "sauvola-ms-split"
+                },
+                "ocrd-calamari-recognize": {
+                    "checkpoint": "/data/calamari_models/*ckpt.json"
                 }
             }
         }
