@@ -91,10 +91,13 @@ def run_task(self, task):
 
         processor = PROCESSORS_ACTION[processor_name]
 
-        # Its possible to override the default parameters of the processor.
+        # Its possible to override the default parameters of the processor
+        # via chain or task.
         kwargs = {"parameter": {}}
         if "parameters" in processor:
             kwargs["parameter"] = processor["parameters"]
+        if processor_name in task["chain"]["parameters"]:
+            kwargs["parameter"].update(task["chain"]["parameters"][processor_name])
         if processor_name in task["parameters"]:
             kwargs["parameter"].update(task["parameters"][processor_name])
         parameter = json.dumps(kwargs["parameter"])
