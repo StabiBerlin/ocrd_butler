@@ -112,12 +112,19 @@ def chains():
     p_choices = [(name, name) for name in PROCESSOR_NAMES]
     new_chain_form.processors.choices = p_choices
 
-    current_chains = [{
-        "id": c.id,
-        "name": c.name,
-        "description": c.description,
-        "processors": c.processors
-        } for c in results]
+    current_chains = []
+
+    for c in results:
+        parameters = json.dumps(c.parameters, indent=4, separators=(',', ': '))
+        parameters = parameters.replace(' ', '&nbsp;')
+        parameters = parameters.replace('\n', '<br />')
+        current_chains.append({
+            "id": c.id,
+            "name": c.name,
+            "description": c.description,
+            "processors": c.processors,
+            "parameters": parameters
+        })
 
     return render_template(
         "chains.html",
