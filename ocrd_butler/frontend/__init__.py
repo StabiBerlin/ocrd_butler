@@ -263,10 +263,14 @@ def new_task():
     if response.status_code == 201:
         flash("New task created.")
     else:
-        # import ipdb; ipdb.set_trace()
-        result = response.json()
-        flash("Can't create new task. Status {0}, Error '{1}': '{2}'.".format(
-            result["statusCode"], result["message"], result["status"]))
+        try:
+            result = response.json()
+            flash("Can't create new task. Status {0}, Error '{1}': '{2}'.".format(
+                result["statusCode"], result["message"], result["status"]))
+        except Exception as exc:
+            flash("Exception while displaying error message in new_task. Exc: {0}."
+                    " Is the proxy active?".format(exc.__str__()))
+
     return redirect("/tasks", code=302)
 
 
