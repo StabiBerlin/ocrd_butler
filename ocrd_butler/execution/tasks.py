@@ -2,134 +2,124 @@
 
 """Celery tasks definitions."""
 
-from flask import current_app
+import json
 import os
 import subprocess
 import uuid
 
-from ocrd.cli.workspace import WorkspaceCtx, workspace_clone
+from flask import current_app
 
-from ocrd.processor.base import run_processor
+from celery import shared_task
+
+from celery.signals import (
+    task_failure,
+    task_postrun,
+    task_prerun,
+    task_success,
+)
+
+from ocrd.resolver import Resolver
+from ocrd.processor.base import run_cli
 
 from ocrd_butler import celery
-
 from ocrd_butler.api.processors import PROCESSORS_ACTION
-from ocrd_butler.api.chains import processor_chains, default_chain
+from ocrd_butler.database import db
+from ocrd_butler.database.models import Chain as db_model_Chain
+from ocrd_butler.database.models import Task as db_model_Task
 
 
-@celery.task()
-def create_task(task):
+
+@task_prerun.connect
+def task_prerun_handler(task_id, task, *args, **kwargs):
+    current_app.logger.info("Start processing task '{0}'.", task_id)
+
+@task_postrun.connect
+def task_postrun_handler(task_id, task, *args, **kwargs):
+    current_app.logger.info("Finished processing task '{0}'.", task_id)
+
+@task_success.connect
+def task_success_handler(sender, result, **kwargs):
+    task = db_model_Task.query.filter_by(id=result["task_id"]).first()
+    task.status = "SUCCESS"
+    task.results = result
+    db.session.commit()
+    current_app.logger.info("Success on task id: '{0}', worker task id: {1}.",
+                            task.id, task.worker_task_id)
+
+@task_failure.connect
+def task_failure_handler(sender, result, **kwargs):
+    task = db_model_Task.query.filter_by(id=result["task_id"]).first()
+    task.status = "FAILURE"
+    db.session.commit()
+    current_app.logger.info("Failure on task id: '{0}', worker task id: {1}.",
+                            task.id, task.worker_task_id)
+
+@celery.task(bind=True)
+def run_task(self, task):
     """ Create a task an run the given chain. """
-
-    processors = task["processors"]
+    # TODO: Check if there is the active problem in olena_binarize with
+    #       other basenames than mets.xml.
+    # mets_basename = "{}.xml".format(task["id"])
+    mets_basename = "mets.xml"
 
     # Create workspace
-    dst_dir = "{}/{}-{}".format(current_app.config["OCRD_BUTLER_RESULTS"],
-                                task["id"],
-                                uuid.uuid1().__str__())
-    ctx = WorkspaceCtx(
-        directory=dst_dir,
-        mets_basename="{}.xml".format(task["id"]),
-        automatic_backup=True
-    )
-    workspace = ctx.resolver.workspace_from_url(
-        task["mets_url"],
+    dst_dir = "{}/{}".format(current_app.config["OCRD_BUTLER_RESULTS"],
+                             task["uid"])
+
+    resolver = Resolver()
+    workspace = resolver.workspace_from_url(
+        task["src"],
         dst_dir=dst_dir,
-        mets_basename=ctx.mets_basename,
+        mets_basename=mets_basename,
         clobber_mets=True
     )
 
-    for f in workspace.mets.find_files(fileGrp=task["file_grp"]):
-        if not f.local_filename:
-            workspace.download_file(f)
+    for file_name in workspace.mets.find_files(fileGrp=task["default_file_grp"]):
+        if not file_name.local_filename:
+            workspace.download_file(file_name)
 
     workspace.save_mets()
 
-    # steps could be saved along the other task information to get a more informational task
-    for index, processor_name in enumerate(processors):
+    # TODO: Steps could be saved along the other task information to get a
+    # more informational task.
+    for index, processor_name in enumerate(task["chain"]["processors"]):
         if index == 0:
-            input_file_grp = task["file_grp"]
+            input_file_grp = task["default_file_grp"]
         else:
-            previous_processor = PROCESSORS_ACTION[processors[index-1]]
+            previous_processor = PROCESSORS_ACTION[task["chain"]["processors"][index-1]]
             input_file_grp = previous_processor["output_file_grp"]
 
         processor = PROCESSORS_ACTION[processor_name]
 
-        # Its possible to override the default parameters of the processor.
-        kwargs = {}
+        # Its possible to override the default parameters of the processor
+        # via chain or task.
+        kwargs = {"parameter": {}}
         if "parameters" in processor:
-            kwargs["parameter"] = {}
-            for key, value in processor["parameters"].items():
-                if "parameters" in task and processor_name in task["parameters"] and\
-                    key in task["parameters"][processor_name]:
-                    kwargs["parameter"][key] = task["parameters"][processor_name][key]
-                else:
-                    kwargs["parameter"][key] = value
+            kwargs["parameter"] = processor["parameters"]
+        if processor_name in task["chain"]["parameters"]:
+            kwargs["parameter"].update(task["chain"]["parameters"][processor_name])
+        if processor_name in task["parameters"]:
+            kwargs["parameter"].update(task["parameters"][processor_name])
+        parameter = json.dumps(kwargs["parameter"])
 
-        run_processor(processor["class"],
-                      mets_url=task["mets_url"],
-                      workspace=workspace,
-                      input_file_grp=input_file_grp,
-                      output_file_grp=processor["output_file_grp"],
-                      **kwargs)
+        mets_url = "{}/mets.xml".format(dst_dir)
+        run_cli(
+            processor["executable"],
+            mets_url=mets_url,
+            resolver=resolver,
+            workspace=workspace,
+            log_level="DEBUG",
+            input_file_grp=input_file_grp,
+            output_file_grp=processor["output_file_grp"],
+            parameter=parameter)
+
+        # reload mets
+        workspace.reload_mets()
+
+        current_app.logger.info("Finished processing task '{0}'.", task["id"])
 
     return {
         "task_id": task["id"],
         "result_dir": dst_dir,
-        "status": "Created"
-    }
-
-
-## OLD task handling with subprocess
-@celery.task()
-def create_ocrd_workspace_process(task):
-
-    flask_app = current_app # ???
-
-    ocrd_tool = os.path.join(flask_app.config["OCRD_BIN"], "ocrd")
-    clone_workspace = "{} workspace clone {} {}".format(
-                        ocrd_tool,
-                        task["mets_url"],
-                        task["id"])
-    output = None
-
-    if not os.path.exists(os.path.join(flask_app.config["OCRD_BUTLER_RESULTS"], task["id"])):
-        try:
-            output = subprocess.check_output([clone_workspace], shell=True, cwd=flask_app.config["OCRD_BUTLER_RESULTS"])
-        except subprocess.CalledProcessError as exc:
-            return {
-                "task_id": task["id"],
-                "status": "Error",
-                "error": exc.__str__()
-            }
-
-    return {
-        "task_id": task["id"],
-        "status": "Created",
-        "output": str(output)
-    }
-
-
-@celery.task()
-def init_ocrd_workspace_process(task):
-    init_workspace = "{} workspace -d {} find --file-grp {} --download".format(
-                        ocrd_tool,
-                        task["id"],
-                        task["file_grp"])
-
-    flask_app = current_app # ???
-
-    try:
-        output = subprocess.check_output([init_workspace], shell=True, cwd=flask_app.config["OCRD_BUTLER_RESULTS"])
-    except subprocess.CalledProcessError as exc:
-        return {
-            "task_id": task["id"],
-            "status": "error",
-            "error": exc.__str__()
-        }
-
-    return {
-        "task_id": task["id"],
-        "status": "Created",
-        "output": str(output)
+        "status": "SUCCESS"
     }

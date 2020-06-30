@@ -1,18 +1,66 @@
 {% extends "base.html" %}
 
-{% block content %}
-   <div class="container">
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet"
+          href="{{url_for('static', filename='multi-select.css')}}">
+{% endblock %}
+
+{% block scripts %}
+    {{super()}}
+    <script type="text/javascript" src="{{url_for('static', filename='jquery.multi-select.js')}}"></script>
+    <script src="{{url_for('static', filename='butler.js')}}"></script>
+{% endblock scripts %}
+
+
+{% block app_content %}
+   <div class="container chains">
+
         <div class="jumbotron">
-            <h1>Chains</h1>
-            <p>The current available chains</p>
+            <div class="container">
+                <div class="col-md-10">
+                    <h1>Chains</h1>
+                    <p>Madam/Sir, please find the currently available chains here.</p>
+                </div>
+                <div class="col-md-2">
+                    <img width="100%%" src="{{url_for('static', filename='butler_chains.png')}}" />
+                </div>
+            </div>
         </div>
+
         <div class="col-md-2">
-            <img width="100%%" src="{{url_for('static', filename='butler_chains.png')}}" />
+            <!-- <button id="new-chain" type="button" class="btn">Add a new chain</button> -->
+            To add a new chain, please use the <a href="/api" target="_blank">api</a>.
         </div>
+
         <div class="col-md-10">
-            {# {{ chains }} #}
+
+            <div class="new-chain-form">
+                <form action="/new-chain" method="post">
+                  <div class="form-group">
+                    {{ form.name.label }}
+                    <br />
+                    {{ form.name() }}
+                    <br />
+                    <br />
+                    {{ form.description.label }}
+                    <br />
+                    {{ form.description() }}
+                    <br />
+                    <br />
+                    {{ form.processors.label }}
+                    <br />
+                    {{ form.processors() }}
+                    <br />
+                    <br />
+                    {{ form.submit() }}
+                  </div>
+                </form>
+            </div>
+
+
             {% for chain in chains %}
-                <h3>{{ chain.name }}</h3>
+                <h3>{{ chain.name }} (<a title="Delete chain." href="/chain/delete/{{ chain.id }}">x</a>)</h3>
                 <p>
                     <h4>Description</h4>
                     {{ chain.description }}
@@ -22,9 +70,12 @@
                         {{ processor }}
                         <br />
                     {% endfor %}
+                    <h4>Parameters</h4>
+                    {{ chain.parameters|safe }}
                 </p>
             {% endfor %}
 
         </div>
+
     </div>
 {% endblock %}

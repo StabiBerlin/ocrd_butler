@@ -9,5 +9,6 @@ nav.register_element('frontend_top', Navbar(
     View('Processors', 'frontend.processors'),
     View('Chains', 'frontend.chains'),
     View('Tasks', 'frontend.tasks'),
-    Link('Queue Backend', dest='http://localhost:5555'),
+    Link('API', dest='/api'),
+    Link('Queue Backend', dest='/flower/'),
 ))

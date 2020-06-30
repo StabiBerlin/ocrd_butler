@@ -1,5 +1,6 @@
 [[source]]
-url = "https://pypi.python.org/simple"
+# url = "https://pypi.python.org/simple"
+url = "https://mirrors.aliyun.com/pypi/simple"
 verify_ssl = true
 
 [dev-packages]
@@ -15,27 +16,29 @@ PyInstaller = "*"
 Sphinx = "*"
 twine = "*"
 pylint = "*"
-ipdb = "*"
 pdbpp = "*"
 pytest-mock = "*"
 pytest-cov = "*"
 pylint-flask = "*"
 flask-testing = "*"
+responses = "*"
+requests-html = "*"
+pylint-flask-sqlalchemy = "*"
 
 [packages]
 ocrd_butler = {path = ".",editable = true}
 click = "*"
 flask = "==1.1.1"
-flask-restplus = "==0.13.0"
 celery = "==4.3.0"
 redis = "==3.3.11"
 flower = "*"
 kombu = "==4.6.3" # https://github.com/celery/kombu/issues/1063
-ocrd = "==1.0.1"
-ocrd-tesserocr = "==0.4.0"
 flask-sqlalchemy = "*"
 flask-bootstrap = "*"
 flask-nav = "*"
-ocrd-calamari = "*"
 blinker = "*"
 json2html = "*"
+requests = "*"
+flask-wtf = "*"
+flask-restx = "*"
+pipenv-to-requirements = "*"

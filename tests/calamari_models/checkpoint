@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/mike/devel/experiments/train-calamari-gt4histocr/models/4.ckpt"
+all_model_checkpoint_paths: "/home/mike/devel/experiments/train-calamari-gt4histocr/models/4.ckpt"
