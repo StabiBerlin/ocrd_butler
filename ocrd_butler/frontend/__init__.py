@@ -442,11 +442,12 @@ def download_txt(worker_task_id):
         tree = ET.parse(file)
         xmlns = tree.getroot().tag.split("}")[0].strip("{")
         if xmlns in namespace.values():
-            for regions in tree.iterfind(".//{%s}TextEquiv" % xmlns):
+            for regions in tree.iterfind(".//{%s}TextRegion" % xmlns):
                 fulltext += "\n"
-                for region in regions.findall("{%s}Unicode" % xmlns):
-                    if region.text is not None:
-                        fulltext += region.text
+                for content in regions.findall(
+                        ".//{%s}TextLine//{%s}TextEquiv//{%s}Unicode" % (xmlns, xmlns, xmlns)):
+                    if content.text is not None:
+                        fulltext += content.text
 
     return Response(
         fulltext,
