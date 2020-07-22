@@ -411,7 +411,8 @@ def task_run(task_id):
             flash("An error occured: {0}".format(result["status"]))
         except Exception as exc:
             result = response.content
-            flash("An error occured: {0}".format(result))
+            flash("An error occured: {0}. (Exception: {1})".format(
+                result, exc.__str__()))
     return redirect("/tasks", code=302)
 
 @frontend.route("/download/txt/<string:worker_task_id>")

@@ -55,7 +55,9 @@ class Task(db.Model):
         desc = self.description and ", description: {}".format(
             self.description) or ""
         return "Task {0} - source {1}, chain {2}{3}".format(
-            self.uid, self.src, self.chain.name, desc)
+            self.uid, self.src, self.chain, desc)
+            # TODO: test_frontend/test_task_delete fail with
+            # self.uid, self.src, self.chain.name, desc)
 
 
 class Chain(db.Model):
