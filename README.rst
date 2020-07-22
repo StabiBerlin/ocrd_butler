@@ -133,6 +133,19 @@ Resources
 ---------
 `Flask + Celery = how to. <https://medium.com/@frassetto.stefano/flask-celery-howto-d106958a15fe>`
 
+
+Known problems
+--------------
+
+ModuleNotFoundError: No module named 'tensorflow.contrib'
+
+.. code-block:: bash
+
+    . venv/activate
+    pip install --upgrade pip
+    pip uninstall tensorflow
+    pip install tensorflow-gpu==1.15.*
+
 Ideas
 -----
 
