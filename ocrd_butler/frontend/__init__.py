@@ -438,7 +438,11 @@ def download_txt(worker_task_id):
         "page_2018-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2018-07-15",
         "page_2019-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15"
     }
-    for file in glob.glob("{}/*.xml".format(page_xml_dir)):
+
+    files = glob.glob("{}/*.xml".format(page_xml_dir))
+    files.sort()
+
+    for file in files:
         tree = ET.parse(file)
         xmlns = tree.getroot().tag.split("}")[0].strip("{")
         if xmlns in namespace.values():
