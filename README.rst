@@ -40,6 +40,11 @@ Installation is currently tested on Debian 10 and Ubuntu 18.04.
 Installation for development:
 
 * Follow the installation for `ocrd_all`_
+
+.. code-block:: bash
+
+  > make all [-k]
+
 * https://github.com/OCR-D/ocrd_fileformat
 
 
@@ -118,7 +123,7 @@ Start flower monitor:
 
 .. code-block:: bash
 
-    ╰─$ flower --broker redis://localhost:6379
+    ╰─$ flower --broker redis://localhost:6379 --persistent=True --db=flower [--log=debug --url_prefix=flower]
 
 Flower monitor: http://localhost:5555
 
