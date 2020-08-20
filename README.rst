@@ -36,17 +36,36 @@ We rely on the excellent installation repository `ocrd_all`_.
 Please check it out for installation.
 
 Installation is currently tested on Debian 10 and Ubuntu 18.04.
+Be aware that on more up-to-date systems with Python >= 3.8.x there is currently a problem installing tensorflow==1.15.x, so you have to use at most Python 3.7.
 
 Installation for development:
 
-* Follow the installation for `ocrd_all`_
+Follow the installation for `ocrd_all`_
 
 .. code-block:: bash
 
-  > make all [-k]
+  /home/ocrd > git clone https://github.com/OCR-D/ocrd_all.git & cd ocrd_all
+  /home/ocrd/ocrd_all > make all
+  ... -> download appropriate models...
 
-* https://github.com/OCR-D/ocrd_fileformat
+Install ocrd-butler in the virtual environment created by ocrd_all:
 
+.. code-block:: bash
+
+  /home/ocrd > git clone https://code.dev.sbb.berlin/zidsuz/ocrd-butler.git & cd ocrd-butler
+  /home/ocrd/ocrd-butler > source ../ocrd_all/venv/bin/activate
+  (venv) /home/ocrd/ocrd-butler > pip install -r requirements.txt
+  (venv) /home/ocrd/ocrd-butler > pip install -r requirements-dev.txt
+  (venv) /home/ocrd/ocrd-butler > python setup.py develop
+
+Maybe there are more steps nessesary, e.g.
+
+.. code-block:: bash
+
+  /home/ocrd > cd ocrd_all/ocrd_calamari
+  /home/ocrd/ocrd_all/ocrd_calamari > python setup.py develop
+
+This step maybe needed for ocrd_calamari, ocrd_segment, ocrd_keraslm and ocrd_anybaseocr.
 
 For some modules in `ocrd_all`_ there are further files nessesary,
 e.g. trained models for the OCR itself. The folders on the server
@@ -99,25 +118,12 @@ can be overwritten it every single task.
 ..     ╰─$ pipenv install
 ..     ╰─$ python setup.py develop
 
-Run the app:
-
-.. code-block:: bash
-
-    ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata FLASK_APP=ocrd_butler/app.py flask run
-    ╰─$ FLASK_APP=ocrd_butler/app.py flask run
-
 
 Start celery worker:
 
 .. code-block:: bash
 
     ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
-    ╰─$ celery worker -A ocrd_butler.celery_worker.celery -E -l info
-
-If download of METS files fail - disable the proxy on local machines.
-There are, as always, problems with network connections due to the proxy.
-
-Swagger docs: http://localhost:5000/api
 
 Start flower monitor:
 
@@ -126,6 +132,21 @@ Start flower monitor:
     ╰─$ flower --broker redis://localhost:6379 --persistent=True --db=flower [--log=debug --url_prefix=flower]
 
 Flower monitor: http://localhost:5555
+
+
+Run the app:
+
+.. code-block:: bash
+
+    ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata FLASK_APP=ocrd_butler/app.py flask run
+    or
+    ╰─$ FLASK_APP=ocrd_butler/app.py flask run
+
+
+If download of METS files fail - disable the proxy on local machines.
+
+Swagger docs: http://localhost:5000/api
+
 
 Run the tests:
 
@@ -150,6 +171,7 @@ ModuleNotFoundError: No module named 'tensorflow.contrib'
     pip install --upgrade pip
     pip uninstall tensorflow
     pip install tensorflow-gpu==1.15.*
+
 
 Ideas
 -----
@@ -177,6 +199,7 @@ TODOs
 
 Credits
 -------
+
 
 This package was created with Cookiecutter_ and the
 `elgertam/cookiecutter-pipenv`_ project template,
