@@ -10,7 +10,6 @@ import requests
 import shelve
 import subprocess
 from shutil import copyfile
-from json2html import json2html
 
 from flask import Blueprint, render_template, flash, redirect, url_for, jsonify, Response, send_file, current_app, request
 from flask_wtf import FlaskForm
@@ -27,7 +26,6 @@ from ocrd_butler import celery
 
 from ocrd_butler.frontend.nav import nav
 from ocrd_butler.api.processors import PROCESSORS_ACTION
-from ocrd_butler.api.processors import PROCESSORS_VIEW
 from ocrd_butler.api.processors import PROCESSOR_NAMES
 
 from ocrd_butler.database import db
@@ -38,12 +36,6 @@ from ocrd_butler.util import host_url
 
 frontend = Blueprint("frontend", __name__)
 
-@frontend.context_processor
-def utility_processor():
-    return dict(json2html=json2html,
-                type=type,
-                list=list,
-                dict=dict)
 
 @frontend.route("/")
 def index():
@@ -64,14 +56,6 @@ def handle_500(err):
         error=err,
         exception=err.original_exception,
         traceback=traceback.format_exc()), 500
-
-
-@frontend.route("/processors")
-def processors():
-    """Define the page presenting the integrated processors."""
-    return render_template(
-        "processors.html",
-        processors=PROCESSORS_VIEW)
 
 
 class NewChainForm(FlaskForm):

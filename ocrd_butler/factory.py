@@ -14,6 +14,7 @@ from ocrd_butler.api.restx import api
 from ocrd_butler.celery_utils import init_celery
 from ocrd_butler.database import db
 from ocrd_butler.frontend import frontend
+from ocrd_butler.frontend.processors import processors_blueprint
 from ocrd_butler.frontend.nav import nav
 
 PKG_NAME = os.path.dirname(os.path.realpath(__file__)).split("/")[-1]
@@ -65,6 +66,7 @@ def initialize_app(app):
     Bootstrap(app)
     nav.init_app(app)
     app.register_blueprint(frontend)
+    app.register_blueprint(processors_blueprint)
 
     db.init_app(app)
     db.create_all(app=app)

@@ -6,7 +6,7 @@ nav = Nav()
 # registers the "top" menubar
 nav.register_element('frontend_top', Navbar(
     View('Home', 'frontend.index'),
-    View('Processors', 'frontend.processors'),
+    View('Processors', 'processors_blueprint.processors'),
     View('Chains', 'frontend.chains'),
     View('Tasks', 'frontend.tasks'),
     Link('API', dest='/api'),
