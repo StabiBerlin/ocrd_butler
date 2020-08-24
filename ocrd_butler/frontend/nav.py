@@ -7,7 +7,7 @@ nav = Nav()
 nav.register_element('frontend_top', Navbar(
     View('Home', 'frontend.index'),
     View('Processors', 'processors_blueprint.processors'),
-    View('Chains', 'frontend.chains'),
+    View('Chains', 'chains_blueprint.chains'),
     View('Tasks', 'frontend.tasks'),
     Link('API', dest='/api'),
     Link('Queue Backend', dest='/flower/'),
