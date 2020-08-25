@@ -11,10 +11,11 @@ from flask_nav.elements import (
 
 nav = Nav()
 nav.register_element('frontend_top', Navbar(
-    View('Home', 'frontend.index'),
+    View('Home', 'frontend_blueprint.index'),
     View('Processors', 'processors_blueprint.processors'),
     View('Chains', 'chains_blueprint.chains'),
     View('Tasks', 'tasks_blueprint.tasks'),
+    View('Compare', 'compare_blueprint.compare'),
     Link('API', dest='/api'),
     Link('Queue Backend', dest='/flower/'),
 ))

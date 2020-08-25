@@ -177,6 +177,7 @@ def new_task():
 
     TODO: Adjust task model works_id => id!
     """
+    # pylint: disable=broad-except
     parameters = request.form.get("parameter")
 
     if parameters:
