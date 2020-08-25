@@ -1,3 +1,7 @@
+"""
+Routes for the chains.
+"""
+
 import json
 import requests
 
@@ -12,11 +16,8 @@ from flask_wtf import FlaskForm
 
 from wtforms import (
     StringField,
-    TextField,
     SubmitField,
-    SelectField,
-    SelectMultipleField,
-    TextAreaField
+    SelectMultipleField
 )
 from wtforms.validators import (
     DataRequired,
@@ -33,7 +34,9 @@ chains_blueprint = Blueprint("chains_blueprint", __name__)
 
 
 class NewChainForm(FlaskForm):
-    """Contact form."""
+    """
+    Describes the form to create a new chain via frontend.
+    """
     name = StringField('Name', [
         DataRequired(),
         Length(min=4, message=("Your name has to be at least 4 letters."))])
@@ -44,7 +47,10 @@ class NewChainForm(FlaskForm):
 
 @chains_blueprint.route("/new-chain", methods=['POST'])
 def new_chain():
-    """TODO: The order of the processors is not preserved in the multiselect!
+    """
+    Create a new chain from the data given in the form.
+
+    TODO: The order of the processors is not preserved in the multiselect!
     """
     data = json.dumps({
         "name": request.form.get("name"),
@@ -53,7 +59,8 @@ def new_chain():
         "parameters": request.form.get("parameters")
     })
     headers = {"Content-Type": "application/json"}
-    response = requests.post("{}api/chains".format(host_url(request)), data=data, headers=headers)
+    response = requests.post("{}api/chains".format(
+        host_url(request)), data=data, headers=headers)
     if response.status_code in (200, 201):
         flash("New chain created.")
     else:
@@ -64,7 +71,9 @@ def new_chain():
 
 @chains_blueprint.route("/chains")
 def chains():
-    """Define the page presenting the configured chains."""
+    """
+    The page presenting the existing chains.
+    """
     results = db_model_Chain.query.all()
     new_chain_form = NewChainForm(csrf_enabled=False)
     p_choices = [(name, name) for name in PROCESSOR_NAMES]
@@ -72,15 +81,15 @@ def chains():
 
     current_chains = []
 
-    for c in results:
-        parameters = json.dumps(c.parameters, indent=4, separators=(',', ': '))
+    for chain in results:
+        parameters = json.dumps(chain.parameters, indent=4, separators=(',', ': '))
         parameters = parameters.replace(' ', '&nbsp;')
         parameters = parameters.replace('\n', '<br />')
         current_chains.append({
-            "id": c.id,
-            "name": c.name,
-            "description": c.description,
-            "processors": c.processors,
+            "id": chain.id,
+            "name": chain.name,
+            "description": chain.description,
+            "processors": chain.processors,
             "parameters": parameters
         })
 
@@ -91,7 +100,11 @@ def chains():
 
 @chains_blueprint.route('/chain/delete/<int:chain_id>')
 def delete_chain(chain_id):
-    # TODO: Move functionality to api.
+    """
+    Delete the given chain.
+    TODO: Move functionality to api.
+    """
+    # pylint: disable=no-member
     db_model_Chain.query.filter_by(id=chain_id).delete()
     db.session.commit()
 

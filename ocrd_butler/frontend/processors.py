@@ -1,15 +1,19 @@
+"""
+Routes for the processors.
+"""
+
 from flask import Blueprint
 from flask import render_template
 
 from json2html import json2html
 
 from ocrd_butler.api.processors import PROCESSORS_VIEW
-from ocrd_butler.frontend import frontend
 
 processors_blueprint = Blueprint("processors_blueprint", __name__)
 
 @processors_blueprint.context_processor
 def utility_processor():
+    """Add utilities for the jinja2 template."""
     return dict(json2html=json2html,
                 type=type,
                 list=list,

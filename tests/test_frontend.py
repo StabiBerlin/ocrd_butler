@@ -1,22 +1,19 @@
 # -*- coding: utf-8 -*-
+"""
+Testing the frontend of `ocrd_butler` package.
+"""
 
-"""Testing the app of `ocrd_butler` package."""
-
-import pytest
 import json
-import requests
 import responses
 from requests_html import HTML
 
-from flask import (
-    make_response,
-    jsonify,
-    request
-)
 from flask_testing import TestCase
 
 from ocrd_butler.config import TestingConfig
-from ocrd_butler.factory import create_app, db
+from ocrd_butler.factory import (
+    create_app,
+    db
+)
 from ocrd_butler.database.models import Task as db_model_Task
 
 
