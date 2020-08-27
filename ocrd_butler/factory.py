@@ -13,10 +13,11 @@ from ocrd_butler.api.tasks import task_namespace
 from ocrd_butler.api.restx import api
 from ocrd_butler.celery_utils import init_celery
 from ocrd_butler.database import db
-from ocrd_butler.frontend import frontend
+from ocrd_butler.frontend import frontend_blueprint
 from ocrd_butler.frontend.processors import processors_blueprint
 from ocrd_butler.frontend.chains import chains_blueprint
 from ocrd_butler.frontend.tasks import tasks_blueprint
+from ocrd_butler.frontend.compare import compare_blueprint
 from ocrd_butler.frontend.nav import nav
 
 PKG_NAME = os.path.dirname(os.path.realpath(__file__)).split("/")[-1]
@@ -67,10 +68,11 @@ def initialize_app(app):
 
     Bootstrap(app)
     nav.init_app(app)
-    app.register_blueprint(frontend)
+    app.register_blueprint(frontend_blueprint)
     app.register_blueprint(processors_blueprint)
     app.register_blueprint(chains_blueprint)
     app.register_blueprint(tasks_blueprint)
+    app.register_blueprint(compare_blueprint)
 
     db.init_app(app)
     db.create_all(app=app)
