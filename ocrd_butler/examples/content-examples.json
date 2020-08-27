@@ -89,7 +89,7 @@
             "chain_id": "2",
             "parameters": {
                 "ocrd-calamari-recognize": {
-                    "checkpoint": "/home/j23d/projects/ocrd/calamari_models/*ckpt.json"
+                    "checkpoint": "/data/calamari_models/*ckpt.json"
                 }
             }
         }

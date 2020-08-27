@@ -32,13 +32,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/j23d/ocrd_butler
+    $ git clone git://github.com/StaatsbibliothekBerlin/ocrd_butler
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/j23d/ocrd_butler/tarball/master
+    $ curl  -OL https://github.com/StaatsbibliothekBerlin/ocrd_butler/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/j23d/ocrd_butler
-.. _tarball: https://github.com/j23d/ocrd_butler/tarball/master
+.. _Github repo: https://github.com/StaatsbibliothekBerlin/ocrd_butler
+.. _tarball: https://github.com/StaatsbibliothekBerlin/ocrd_butler/tarball/master

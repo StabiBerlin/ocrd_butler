@@ -21,10 +21,10 @@ script: tox
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
-  user: j23d
+  user: StaatsbibliothekBerlin
   password:
     secure: PLEASE_REPLACE_ME
   on:
     tags: true
-    repo: j23d/ocrd_butler
+    repo: StaatsbibliothekBerlin/ocrd_butler
     python: 3.7
