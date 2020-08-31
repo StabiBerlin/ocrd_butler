@@ -10,6 +10,7 @@ before_install:
   - source ~/virtualenv/python3.7/bin/activate
   - git clone https://github.com/OCR-D/ocrd_all.git ocrd_all
   - cd ocrd_all
+  - sudo apt-get -qq update
   - sudo make deps-ubuntu
   - make all
   - cd ..
