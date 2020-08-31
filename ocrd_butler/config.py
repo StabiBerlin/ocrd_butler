@@ -14,7 +14,7 @@ class Config(object):
         "/srv/ocrd_all/ocrd_olena",
         "/srv/ocrd_all/dinglehopper",
         "/srv/ocrd_all/sbb_textline_detector",
-        "/srv/ocrd_fileformat"
+        "/srv/ocrd_all/ocrd_fileformat"
     ]
     PROCESSOR_PACKAGES = [
         "ocrd_tesserocr",

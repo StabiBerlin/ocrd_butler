@@ -102,6 +102,8 @@ def run_task(self, task):
             kwargs["parameter"].update(task["parameters"][processor_name])
         parameter = json.dumps(kwargs["parameter"])
 
+        # TODO: Add validation of the parameters.
+
         mets_url = "{}/mets.xml".format(dst_dir)
         run_cli(
             processor["executable"],

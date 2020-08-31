@@ -13,7 +13,11 @@ from ocrd_butler.api.tasks import task_namespace
 from ocrd_butler.api.restx import api
 from ocrd_butler.celery_utils import init_celery
 from ocrd_butler.database import db
-from ocrd_butler.frontend import frontend
+from ocrd_butler.frontend import frontend_blueprint
+from ocrd_butler.frontend.processors import processors_blueprint
+from ocrd_butler.frontend.chains import chains_blueprint
+from ocrd_butler.frontend.tasks import tasks_blueprint
+from ocrd_butler.frontend.compare import compare_blueprint
 from ocrd_butler.frontend.nav import nav
 
 PKG_NAME = os.path.dirname(os.path.realpath(__file__)).split("/")[-1]
@@ -37,7 +41,7 @@ def create_app(app_name=PKG_NAME, config=None, **kwargs):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # For CSRF and flash
-    app.secret_key = "foobarorbarfooorbaz"
+    app.secret_key = "42d2a9e832245e0e56bb929d46393c4a467322cc21b53bc61a181004"
 
     if kwargs.get("celery"):
         init_celery(kwargs.get("celery"), app)
@@ -48,9 +52,10 @@ def create_app(app_name=PKG_NAME, config=None, **kwargs):
 
 
 def initialize_app(app):
-    """Prepare our app with the needed blueprints and database."""
+    """
+    Prepare our app with the needed blueprints and database.
+    """
     # configure_app(app)
-
     # log.info("> Starting development server at http://%s/api/ <<<<<" %
     #          app.config["SERVER_NAME"])
 
@@ -61,10 +66,13 @@ def initialize_app(app):
     api.add_namespace(task_namespace)
     api.add_namespace(chain_namespace)
 
-    # Initialize frontend.
     Bootstrap(app)
     nav.init_app(app)
-    app.register_blueprint(frontend)
+    app.register_blueprint(frontend_blueprint)
+    app.register_blueprint(processors_blueprint)
+    app.register_blueprint(chains_blueprint)
+    app.register_blueprint(tasks_blueprint)
+    app.register_blueprint(compare_blueprint)
 
     db.init_app(app)
     db.create_all(app=app)

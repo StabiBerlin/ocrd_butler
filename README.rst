@@ -6,28 +6,28 @@ ocrd_butler
 .. .. image:: https://img.shields.io/pypi/v/ocrd_butler.svg
 ..         :target: https://pypi.python.org/pypi/ocrd_butler
 
-.. .. image:: https://img.shields.io/travis/j23d/ocrd_butler.svg
-..         :target: https://travis-ci.org/j23d/ocrd_butler
+.. .. image:: https://img.shields.io/travis/StaatsbibliothekBerlin/ocrd_butler.svg
+..         :target: https://travis-ci.org/StaatsbibliothekBerlin/ocrd_butler
 
 .. .. image:: https://readthedocs.org/projects/ocrd-butler/badge/?version=latest
 ..         :target: https://ocrd-butler.readthedocs.io/en/latest/?badge=latest
 ..         :alt: Documentation Status
 
-.. .. image:: https://pyup.io/repos/github/j23d/ocrd_butler/shield.svg
-..      :target: https://pyup.io/repos/github/j23d/ocrd_butler/
+.. .. image:: https://pyup.io/repos/github/StaatsbibliothekBerlin/ocrd_butler/shield.svg
+..      :target: https://pyup.io/repos/github/StaatsbibliothekBerlin/ocrd_butler/
 ..      :alt: Updates
 
 
 Processing tasks in the ecosystem of the [OCR-D](https://github.com/OCR-D) project.
 
-* Free software: Apache Software License 2.0
-* Documentation: https://ocrd-butler.readthedocs.io.
+* Free software: MIT License
 
 
 Features
 --------
 
-REST API to run tasks for OCR-D.
+REST API to define chains of processors in the OCR-D ecosystem run tasks for .
+
 
 Development installation
 ------------------------
@@ -36,12 +36,36 @@ We rely on the excellent installation repository `ocrd_all`_.
 Please check it out for installation.
 
 Installation is currently tested on Debian 10 and Ubuntu 18.04.
+Be aware that on more up-to-date systems with Python >= 3.8.x there is currently a problem installing tensorflow==1.15.x, so you have to use at most Python 3.7.
 
 Installation for development:
 
-* Follow the installation for `ocrd_all`_
-* https://github.com/OCR-D/ocrd_fileformat
+Follow the installation for `ocrd_all`_
 
+.. code-block:: bash
+
+  /home/ocrd > git clone https://github.com/OCR-D/ocrd_all.git & cd ocrd_all
+  /home/ocrd/ocrd_all > make all
+  ... -> download appropriate models...
+
+Install ocrd-butler in the virtual environment created by ocrd_all:
+
+.. code-block:: bash
+
+  /home/ocrd > git clone https://code.dev.sbb.berlin/zidsuz/ocrd-butler.git & cd ocrd-butler
+  /home/ocrd/ocrd-butler > source ../ocrd_all/venv/bin/activate
+  (venv) /home/ocrd/ocrd-butler > pip install -r requirements.txt
+  (venv) /home/ocrd/ocrd-butler > pip install -r requirements-dev.txt
+  (venv) /home/ocrd/ocrd-butler > python setup.py develop
+
+Maybe there are more steps nessesary, e.g.
+
+.. code-block:: bash
+
+  /home/ocrd > cd ocrd_all/ocrd_calamari
+  /home/ocrd/ocrd_all/ocrd_calamari > python setup.py develop
+
+This step maybe needed for ocrd_calamari, ocrd_segment, ocrd_keraslm and ocrd_anybaseocr.
 
 For some modules in `ocrd_all`_ there are further files nessesary,
 e.g. trained models for the OCR itself. The folders on the server
@@ -83,44 +107,35 @@ can be overwritten it every single task.
   > source /srv/ocrd_all/.venv/bin/master
   > pip install -r requirements.txt # or pipenv install if you are using pipenv
 
-.. We need to install the master branch of pipenv to get manylinux2010 included to be able to lock the dependency #functool32 of ocrd_calamari.
-..
-.. .. code-block:: bash
-..
-..     ╰─$ pip install --user git+https://github.com/pypa/pipenv.git@master
-..
-.. .. code-block:: bash
-..
-..     ╰─$ pipenv install
-..     ╰─$ python setup.py develop
-
-Run the app:
-
-.. code-block:: bash
-
-    ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata FLASK_APP=ocrd_butler/app.py flask run
-    ╰─$ FLASK_APP=ocrd_butler/app.py flask run
-
 
 Start celery worker:
 
 .. code-block:: bash
 
     ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
-    ╰─$ celery worker -A ocrd_butler.celery_worker.celery -E -l info
-
-If download of METS files fail - disable the proxy on local machines.
-There are, as always, problems with network connections due to the proxy.
-
-Swagger docs: http://localhost:5000/api
 
 Start flower monitor:
 
 .. code-block:: bash
 
-    ╰─$ flower --broker redis://localhost:6379
+    ╰─$ flower --broker redis://localhost:6379 --persistent=True --db=flower [--log=debug --url_prefix=flower]
 
 Flower monitor: http://localhost:5555
+
+
+Run the app:
+
+.. code-block:: bash
+
+    ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata FLASK_APP=ocrd_butler/app.py flask run
+    or
+    ╰─$ FLASK_APP=ocrd_butler/app.py flask run
+
+
+If download of METS files fail - disable the proxy on local machines.
+
+Swagger docs: http://localhost:5000/api
+
 
 Run the tests:
 
@@ -133,32 +148,40 @@ Resources
 ---------
 `Flask + Celery = how to. <https://medium.com/@frassetto.stefano/flask-celery-howto-d106958a15fe>`
 
-Ideas
+
+Known problems
+--------------
+
+ModuleNotFoundError: No module named 'tensorflow.contrib'
+
+.. code-block:: bash
+
+    . venv/activate
+    pip install --upgrade pip
+    pip uninstall tensorflow
+    pip install tensorflow-gpu==1.15.*
+
+
+TODOs
 -----
 
 - input and output filegroups are not always from the previous processor
   - could be more complicated - check the infos we get from ocrd-tools.json
 
 - dinglehopper:
-  - If there are Ground Truth data it could be placed in a configured folder
-    on the server with the data as page xml files inside a folder id named
-    with the work id. Then we show a button to start a run against this data.
-    Otherwise we can search for all other tasks with the same work_id and present
-    a UI to run against the choosen one.
+  - If there are Ground Truth data it could be placed in a configured folder on the server with the data as page xml files inside a folder id named with the work id. Then we show a button to start a run against this data.
+  Otherwise we can search for all other tasks with the same work_id and present a UI to run against the choosen one.
 
 - Use processor groups to be able to build forms with these presented.
 - Check if ocrd-olena-binarize fail with another name for a METS file in a
   workspace then mets.xml.
 
-TODOs
------
-- tasks have to updated with:
-  - tags
-  - description / notes
 
+Hint
+----
 
-Credits
--------
+This software is in alpha state yet, so don't expect it to work properly. Support is currently not guarenteed.
+
 
 This package was created with Cookiecutter_ and the
 `elgertam/cookiecutter-pipenv`_ project template,
@@ -169,3 +192,4 @@ based on `audreyr/cookiecutter-pypackage`_.
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
 .. _`ocrd_all`: https://github.com/OCR-D/ocrd_all
 .. _`Qurator Data`: https://qurator-data.de/
+.. _`OCR-D ecosystem`: https://github.com/topics/ocr-d

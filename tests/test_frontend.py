@@ -1,22 +1,19 @@
 # -*- coding: utf-8 -*-
+"""
+Testing the frontend of `ocrd_butler` package.
+"""
 
-"""Testing the app of `ocrd_butler` package."""
-
-import pytest
 import json
-import requests
 import responses
 from requests_html import HTML
 
-from flask import (
-    make_response,
-    jsonify,
-    request
-)
 from flask_testing import TestCase
 
 from ocrd_butler.config import TestingConfig
-from ocrd_butler.factory import create_app, db
+from ocrd_butler.factory import (
+    create_app,
+    db
+)
 from ocrd_butler.database.models import Task as db_model_Task
 
 
@@ -53,7 +50,7 @@ class FrontendTests(TestCase):
                       body="<xml>foo</xml>", status=200)
 
         responses.add_callback(
-            responses.DELETE, "http://localhost/api/tasks/task/1",
+            responses.DELETE, "http://localhost/api/tasks/1",
             callback=delete_api_task_callback)
 
         def api_get_taskinfo_callback(request):
@@ -80,7 +77,7 @@ class FrontendTests(TestCase):
         self.assert200(response)
         self.assert_template_used("tasks.html")
         html = HTML(html=response.data)
-        assert len(html.find('table > tr > th')) == 9
+        assert len(html.find('table > tr > th')) == 10
         assert len(html.find('table > tr > td')) == 0
 
     def get_chain_id(self):
@@ -108,8 +105,8 @@ class FrontendTests(TestCase):
 
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
-        assert len(html.find('table > tr > td')) == 9
-        assert html.find('table > tr > td')[5].text == "worker_task.id"
+        assert len(html.find('table > tr > td')) == 10
+        assert html.find('table > tr > td')[6].text == "worker_task.id"
         self.client.get("/task/delete/1")
 
     @responses.activate
@@ -117,21 +114,19 @@ class FrontendTests(TestCase):
         """Check if task will be deleted."""
 
         self.client.post("/new-task", data=dict(
-            id="foobar",
+            task_id="foobar-del",
+            description="barfoo",
             src="http://foo.bar/mets.xml",
-            default_file_grp="DEFAULT",
             chain_id=self.get_chain_id()
         ))
 
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
-        assert len(html.find('table > tr > td')) == 9
+        assert len(html.find('table > tr > td')) == 10
 
         delete_link = html.find('table > tr > td > a.delete-task')[0].attrs["href"]
-        response = self.client.get(delete_link)
-        # self.delete_one_task()
-
-        # assert response.status == "302 FOUND"
+        # response = self.client.get(delete_link)
+        self.client.get("/task/delete/1")
 
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
