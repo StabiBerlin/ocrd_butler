@@ -2,31 +2,25 @@
 ocrd_butler
 ===========
 
-
-.. .. image:: https://img.shields.io/pypi/v/ocrd_butler.svg
-..         :target: https://pypi.python.org/pypi/ocrd_butler
-
 .. .. image:: https://img.shields.io/travis/StaatsbibliothekBerlin/ocrd_butler.svg
 ..         :target: https://travis-ci.org/StaatsbibliothekBerlin/ocrd_butler
 
-.. .. image:: https://readthedocs.org/projects/ocrd-butler/badge/?version=latest
-..         :target: https://ocrd-butler.readthedocs.io/en/latest/?badge=latest
-..         :alt: Documentation Status
 
-.. .. image:: https://pyup.io/repos/github/StaatsbibliothekBerlin/ocrd_butler/shield.svg
-..      :target: https://pyup.io/repos/github/StaatsbibliothekBerlin/ocrd_butler/
-..      :alt: Updates
-
-
-Processing tasks in the ecosystem of the [OCR-D](https://github.com/OCR-D) project.
-
-* Free software: MIT License
+Processing tasks in the ecosystem of the `OCR-D project`_ project.
 
 
 Features
 --------
 
-REST API to define chains of processors in the OCR-D ecosystem run tasks for .
+REST API to define chains of processors and run tasks with it in the OCR-D ecosystem.
+
+
+Hints
+-----
+
+* Free software: MIT License
+
+* This software is in alpha state yet, so don't expect it to work properly. Support is currently not guarenteed.
 
 
 Development installation
@@ -177,19 +171,12 @@ TODOs
   workspace then mets.xml.
 
 
-Hint
-----
-
-This software is in alpha state yet, so don't expect it to work properly. Support is currently not guarenteed.
-
-
-This package was created with Cookiecutter_ and the
-`elgertam/cookiecutter-pipenv`_ project template,
-based on `audreyr/cookiecutter-pypackage`_.
+This package was created with Cookiecutter_ and the `elgertam/cookiecutter-pipenv`_ project template, based on `audreyr/cookiecutter-pypackage`_.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`elgertam/cookiecutter-pipenv`: https://github.com/elgertam/cookiecutter-pipenv
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
 .. _`ocrd_all`: https://github.com/OCR-D/ocrd_all
+.. _`OCR-D project`: https://github.com/OCR-D
 .. _`Qurator Data`: https://qurator-data.de/
 .. _`OCR-D ecosystem`: https://github.com/topics/ocr-d
