@@ -31,7 +31,7 @@ click = "*"
 flask = "==1.1.1"
 celery = "==4.3.0"
 redis = "==3.3.11"
-flower = "*"
+flower = "==0.9.4"
 kombu = "==4.6.3" # https://github.com/celery/kombu/issues/1063
 flask-sqlalchemy = "*"
 flask-bootstrap = "*"
