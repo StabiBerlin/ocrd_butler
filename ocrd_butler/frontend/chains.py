@@ -25,7 +25,6 @@ from wtforms.validators import (
 )
 
 from ocrd_butler.api.processors import PROCESSOR_NAMES
-from ocrd_butler.database import db
 from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.util import host_url
 
@@ -69,6 +68,21 @@ def new_chain():
     return redirect("/chains", code=302)
 
 
+@chains_blueprint.route("/chain/delete/<int:chain_id>")
+def delete_chain(chain_id):
+    """
+    Delete the given chain.
+    """
+    url = "{0}api/chains/{1}".format(host_url(request), chain_id)
+    response = requests.delete(url)
+
+    if response.status_code is 200:
+        flash(response.json()["message"])
+    else:
+        flash("Can't delete chain {0}. Status {1}, Error {2}".format(
+            chain_id, response.status_code, response.json()["message"]))
+    return redirect("/chains", code=302)
+
 @chains_blueprint.route("/chains")
 def chains():
     """
@@ -97,15 +111,3 @@ def chains():
         "chains.html",
         chains=current_chains,
         form=new_chain_form)
-
-@chains_blueprint.route('/chain/delete/<int:chain_id>')
-def delete_chain(chain_id):
-    """
-    Delete the given chain.
-    TODO: Move functionality to api.
-    """
-    # pylint: disable=no-member
-    db_model_Chain.query.filter_by(id=chain_id).delete()
-    db.session.commit()
-
-    return redirect("/chains", code=302)
