@@ -126,6 +126,8 @@ class ApiTests(TestCase):
         response = self.client.delete("/api/chains/1")
         assert response.status_code == 200
         assert response.json["message"] == "Chain \"New Chain(1)\" deleted."
+        response = self.client.get("/api/chains/1")
+        assert response.status_code == 404
 
     def test_delete_unknown_chain(self):
         """Check if a new chain is created."""

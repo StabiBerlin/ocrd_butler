@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=no-member
 
 """ Chain api implementation.
 """
-
 import json
 
 from flask import (
