@@ -11,6 +11,11 @@ from flask_bootstrap import Bootstrap
 from ocrd_butler.api.chains import chain_namespace
 from ocrd_butler.api.tasks import task_namespace
 from ocrd_butler.api.restx import api
+from ocrd_butler.api_v1.restx import api_v1
+from ocrd_butler.api_v1.openapi import processor_namespace
+from ocrd_butler.api_v1.openapi import workflow_namespace
+from ocrd_butler.api_v1.openapi import workspace_namespace
+from ocrd_butler.api_v1.openapi import discovery_namespace
 from ocrd_butler.celery_utils import init_celery
 from ocrd_butler.database import db
 from ocrd_butler.frontend import frontend_blueprint
@@ -65,6 +70,15 @@ def initialize_app(app):
 
     api.add_namespace(task_namespace)
     api.add_namespace(chain_namespace)
+
+    blueprint_api_v1 = Blueprint('api_v1', __name__, url_prefix='/api_v1')
+    api_v1.init_app(blueprint_api_v1)
+    app.register_blueprint(blueprint_api_v1)
+
+    api.add_namespace(processor_namespace)
+    api.add_namespace(workflow_namespace)
+    api.add_namespace(workspace_namespace)
+    api.add_namespace(discovery_namespace)
 
     Bootstrap(app)
     nav.init_app(app)

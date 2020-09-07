@@ -1,0 +1,26 @@
+from flask_restx import Resource
+from ocrd_butler.api_v1.restx import api_v1
+
+{% for pathname, path_args in paths.items() %}
+
+    {% if is_base_pathname(pathname) %}
+{{ get_namespace(pathname) }}_namespace = api_v1.namespace("{{ pathname[1:] }}", description="{{ get_tag(tags, pathname)["description"] }}")
+    {% endif %}
+
+@{{ get_namespace(pathname) }}_namespace.route("{{ get_route(pathname) }}")
+class {{ get_namespace(pathname).capitalize() }}(Resource):
+    """
+    {{ get_tag(tags, pathname)["description"] }}
+    """
+
+    {% for method, method_args in path_args.items() %}
+    @api_v1.doc(responses={{ render_responses(path_args[method]["responses"]) }})
+    def {{ method }}(self{% if has_parameters(pathname) %}, {% endif %}{{ ", ".join(get_parameters(pathname)) }}):
+        """
+        {% if "200" in method_args["responses"] %}
+        {{ method_args["responses"]["200"]["description"] }}.
+        {% endif %}
+        """
+
+      {% endfor %}
+{% endfor %}
