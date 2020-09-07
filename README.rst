@@ -46,7 +46,7 @@ Install ocrd-butler in the virtual environment created by ocrd_all:
 
 .. code-block:: bash
 
-  /home/ocrd > git clone https://code.dev.sbb.berlin/zidsuz/ocrd-butler.git & cd ocrd-butler
+  /home/ocrd > git clone https://github.com/StaatsbibliothekBerlin/ocrd_butler.git & cd ocrd-butler
   /home/ocrd/ocrd-butler > source ../ocrd_all/venv/bin/activate
   (venv) /home/ocrd/ocrd-butler > pip install -r requirements.txt
   (venv) /home/ocrd/ocrd-butler > pip install -r requirements-dev.txt
@@ -97,7 +97,7 @@ can be overwritten it every single task.
 .. code-block:: bash
 
   > cd /srv
-  > git clone https://code.dev.sbb.berlin/zidsuz/ocrd-butler && cd ocrd-butler
+  > git clone https://github.com/StaatsbibliothekBerlin/ocrd_butler.git && cd ocrd-butler
   > source /srv/ocrd_all/.venv/bin/master
   > pip install -r requirements.txt # or pipenv install if you are using pipenv
 
@@ -160,16 +160,15 @@ TODOs
 -----
 
 - input and output filegroups are not always from the previous processor
-  - could be more complicated - check the infos we get from ocrd-tools.json
-
+  - more complicated input/output group scenarios
+  - check the infos we get from ocrd-tools.json
 - dinglehopper:
   - If there are Ground Truth data it could be placed in a configured folder on the server with the data as page xml files inside a folder id named with the work id. Then we show a button to start a run against this data.
   Otherwise we can search for all other tasks with the same work_id and present a UI to run against the choosen one.
-
 - Use processor groups to be able to build forms with these presented.
 - Check if ocrd-olena-binarize fail with another name for a METS file in a
   workspace then mets.xml.
-
+- Refactor ocrd_tool information collection to https://ocr-d.de/en/spec/cli#-j---dump-json
 
 This package was created with Cookiecutter_ and the `elgertam/cookiecutter-pipenv`_ project template, based on `audreyr/cookiecutter-pypackage`_.
 
