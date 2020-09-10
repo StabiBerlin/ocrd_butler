@@ -34,6 +34,13 @@ Be aware that on more up-to-date systems with Python >= 3.8.x there is currently
 
 Installation for development:
 
+Install Redis Server (needed as backend for Celery and Flower)
+
+.. code-block:: bash
+
+  user@server:/ > sudo apt install redis
+  user@server:/ > sudo service redis start
+
 Follow the installation for `ocrd_all`_
 
 .. code-block:: bash
@@ -91,15 +98,6 @@ can be overwritten it every single task.
   > tar xf models.tar
   > cp GT4HistOCR_2000000.traineddata /usr/share/tesseract-ocr/4.00/tessdata/
 
-
-* Clone ocrd_butler (GitLab) and install it in the very same venv.
-
-.. code-block:: bash
-
-  > cd /srv
-  > git clone https://github.com/StaatsbibliothekBerlin/ocrd_butler.git && cd ocrd-butler
-  > source /srv/ocrd_all/.venv/bin/master
-  > pip install -r requirements.txt # or pipenv install if you are using pipenv
 
 
 Start celery worker:
