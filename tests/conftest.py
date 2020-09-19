@@ -10,7 +10,7 @@ from ocrd_butler.config import TestingConfig
 def pytest_configure(config):
     """Register additional pytest configuration."""
     # add the pytest.mark.celery() marker registration to the pytest.ini [markers] section
-    # this prevents pytest 4.5 and newer from issueing a warning about an unknown marker
+    # this prevents pytest 4.5 and newer from issuing a warning about an unknown marker
     # and shows helpful marker documentation when running pytest --markers.
     # see https://github.com/celery/celery/commit/6e91e94129f9a6fed8d00ad1ad8ce28c59d482ce
     # not needed anymore when we use celery>=4.4.x.

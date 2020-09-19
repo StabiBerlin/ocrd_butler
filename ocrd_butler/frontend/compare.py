@@ -46,7 +46,7 @@ class CompareForm(FlaskForm):
 @compare_blueprint.route("/compare", methods=["GET"])
 def compare():
     """
-    Page for create a comparisation between two OCR text versions.
+    Page for create a comparison between two OCR text versions.
     """
     compare_form = CompareForm()
     cur_tasks = db_model_Task.query.all()
@@ -99,7 +99,7 @@ def compare_results():
     last_proc_to = json.loads(chain_to.processors)[-1]
     last_output_to = PROCESSORS_ACTION[last_proc_to]["output_file_grp"]
 
-    # TODO: collect informations to this task
+    # TODO: collect information to this task
     results_from_path = "{0}/{1}/*".format(result_from["result"]["result_dir"], last_output_from)
     for file in glob.glob(results_from_path):
         copyfile(file, "{0}/FROM-{1}".format(dst_dir, os.path.basename(file)))

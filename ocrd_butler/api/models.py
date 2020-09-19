@@ -11,7 +11,7 @@ task_model = api.model("Task Model", {
         title="UID",
         required=True,
         description="UID of the task",
-        help="Unique id used interal."),
+        help="Unique id used internally."),
     "src": fields.String(
         title="Source",
         required=True,
