@@ -20,7 +20,7 @@ Hints
 
 * Free software: MIT License
 
-* This software is in alpha state yet, so don't expect it to work properly. Support is currently not guarenteed.
+* This software is in alpha state yet, so don't expect it to work properly. Support is currently not guaranteed.
 
 
 Development installation
@@ -52,7 +52,7 @@ Install ocrd-butler in the virtual environment created by ocrd_all:
   (venv) /home/ocrd/ocrd-butler > pip install -r requirements-dev.txt
   (venv) /home/ocrd/ocrd-butler > python setup.py develop
 
-Maybe there are more steps nessesary, e.g.
+Maybe there are more steps necessary, e.g.
 
 .. code-block:: bash
 
@@ -61,7 +61,7 @@ Maybe there are more steps nessesary, e.g.
 
 This step maybe needed for ocrd_calamari, ocrd_segment, ocrd_keraslm and ocrd_anybaseocr.
 
-For some modules in `ocrd_all`_ there are further files nessesary,
+For some modules in `ocrd_all`_ there are further files necessary,
 e.g. trained models for the OCR itself. The folders on the server
 can be overwritten it every single task.
 
@@ -164,7 +164,7 @@ TODOs
   - check the infos we get from ocrd-tools.json
 - dinglehopper:
   - If there are Ground Truth data it could be placed in a configured folder on the server with the data as page xml files inside a folder id named with the work id. Then we show a button to start a run against this data.
-  Otherwise we can search for all other tasks with the same work_id and present a UI to run against the choosen one.
+  Otherwise we can search for all other tasks with the same work_id and present a UI to run against the chosen one.
 - Use processor groups to be able to build forms with these presented.
 - Check if ocrd-olena-binarize fail with another name for a METS file in a
   workspace then mets.xml.

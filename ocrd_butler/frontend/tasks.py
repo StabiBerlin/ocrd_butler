@@ -235,7 +235,7 @@ def task_delete(task_id):
         flash("Task {0} deleted.".format(task_id))
     else:
         result = json.loads(response.content)
-        flash("An error occured: {0}".format(result.status))
+        flash("An error occurred: {0}".format(result.status))
     return redirect("/tasks", code=302)
 
 
@@ -251,10 +251,10 @@ def task_run(task_id):
     else:
         try:
             result = json.loads(response.content)
-            flash("An error occured: {0}".format(result["status"]))
+            flash("An error occurred: {0}".format(result["status"]))
         except Exception as exc:
             result = response.content
-            flash("An error occured: {0}. (Exception: {1})".format(
+            flash("An error occurred: {0}. (Exception: {1})".format(
                 result, exc.__str__()))
     return redirect("/tasks", code=302)
 

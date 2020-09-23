@@ -11,7 +11,7 @@ from flask_restx import Resource
 
 from ocrd_butler.api.restx import api
 
-# TODO: This should be a loadable conf in JSON or similiar
+# TODO: This should be a loadable conf in JSON or similar
 from ocrd_butler.config import Config
 
 ocrd_config = Config()
@@ -94,7 +94,7 @@ for name, config in PROCESSORS_ACTION.items():
     config["parameters"] = parameters
 
     # Just take the first in-/output file group for now.
-    # TODO: This is also connected to the choosen paramters.
+    # TODO: This is also connected to the chosen parameters.
     try:
         config["input_file_grp"] = config["input_file_grp"][0]
     except KeyError:
@@ -122,5 +122,5 @@ class Processors(Resource):
     """Shows the processor configuration."""
 
     def get(self):
-        """Returns the processor informations as JSON data."""
+        """Returns the processor information as JSON data."""
         return jsonify(PROCESSORS_VIEW)

@@ -78,7 +78,7 @@ class TasksBase(Resource):
             chain = db_model_Chain.query.filter_by(id=data["chain_id"]).first()
             if chain is None:
                 task_namespace.abort(400, "Wrong parameter.",
-                                     status="Unknow chain with id {}.".format(
+                                     status="Unknown chain with id {}.".format(
                                          data["chain_id"]),
                                      statusCode="400")
 
