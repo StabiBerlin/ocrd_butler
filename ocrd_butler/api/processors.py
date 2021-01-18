@@ -12,7 +12,7 @@ from flask import jsonify
 from flask_restx import Resource
 
 from ocrd_butler.api.restx import api
-
+from ocrd_butler.util import log
 from ocrd_butler.config import Config
 
 ocrd_config = Config()
@@ -48,8 +48,8 @@ for name, config in PROCESSORS_ACTION.items():
     # TODO: This is also connected to the choosen paramters.
     try:
         config["input_file_grp"] = config["input_file_grp"][0]
-    except KeyError:
-        pass
+    except (KeyError, IndexError) as exc:
+        log.error(exc)
 
     # TODO: Move this fixed setting to a configuration like place. (tbi)
     if name == "ocrd-olena-binarize":
@@ -57,8 +57,8 @@ for name, config in PROCESSORS_ACTION.items():
     else:
         try:
             config["output_file_grp"] = config["output_file_grp"][0]
-        except KeyError:
-            pass
+        except (KeyError, IndexError) as exc:
+            log.error(exc)
 
 PROCESSORS_VIEW = []
 for name, config in PROCESSORS_CONFIG.items():
