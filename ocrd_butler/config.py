@@ -19,6 +19,7 @@ class Config(object):
         "ocrd-olena-binarize",
 
         "ocrd-sbb-textline-detector",
+        "ocrd-sbb-binarize",
 
         "ocrd-fileformat-transform",
 
@@ -116,4 +117,3 @@ class TestingConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     OCRD_BUTLER_RESULTS = "/tmp/ocrd_butler_results_testing"
-
