@@ -54,6 +54,8 @@ for name, config in PROCESSORS_ACTION.items():
     # TODO: Move this fixed setting to a configuration like place. (tbi)
     if name == "ocrd-olena-binarize":
         config["output_file_grp"] = "OCR-D-IMG-BINPAGE"
+    if name == "ocrd-sbb-binarize":
+        config["output_file_grp"] = "OCR-D-IMG-BINPAGE"
     else:
         try:
             config["output_file_grp"] = config["output_file_grp"][0]
