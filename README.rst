@@ -109,14 +109,11 @@ Run the app:
 
 .. code-block:: bash
 
-    ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata FLASK_APP=ocrd_butler/app.py flask run
-    or
     ╰─$ FLASK_APP=ocrd_butler/app.py flask run
 
 
-If download of METS files fail - disable the proxy on local machines.
-
-Swagger docs: http://localhost:5000/api
+Flask frontend: http://localhost:5000
+Swagger interface: http://localhost:5000/api
 
 
 Run the tests:
@@ -124,11 +121,6 @@ Run the tests:
 .. code-block:: bash
 
     ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata py.test
-
-
-Resources
----------
-`Flask + Celery = how to. <https://medium.com/@frassetto.stefano/flask-celery-howto-d106958a15fe>`
 
 
 Known problems
