@@ -43,7 +43,7 @@ class Config(object):
         "ocrd-segment-extract-pages",
         "ocrd-segment-from-masks",
 
-        # "ocrd-anybaseocr-binarize",
+        "ocrd-anybaseocr-binarize",
         # "ocrd-anybaseocr-dewarp",
         # "ocrd-anybaseocr-block-segmentation",
         # "ocrd-anybaseocr-layout-analysis",
