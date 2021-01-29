@@ -90,17 +90,16 @@ install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
 tesseract-model: ## install trained model for tesseract
-	mkdir -p /data/tesseract_models && cd /data/tesseract_models
-	wget https://qurator-data.de/tesseract-models/GT4HistOCR/models.tar
-	tar -xf models.tar
-	cp GT4HistOCR_2000000.traineddata /usr/share/tesseract-ocr/4.00/tessdata/
+	mkdir -p /data/tesseract_models && cd /data/tesseract_models; \
+	wget https://qurator-data.de/tesseract-models/GT4HistOCR/models.tar; \
+	tar -xf models.tar -C /usr/share/tesseract-ocr/4.00/tessdata/ GT4HistOCR_2000000.traineddata
 
 calamari-model: ## install trained model for calamari
-	mkdir -p /data/calamari_models && cd /data/calamari_models
-	wget https://qurator-data.de/calamari-models/GT4HistOCR/model.tar.xz
+	mkdir -p /data/calamari_models && cd /data/calamari_models; \
+	wget https://qurator-data.de/calamari-models/GT4HistOCR/model.tar.xz; \
 	tar -xf model.tar.xz
 
 textline-detector-model: ## install trained model for sbb textline detector
-	mkdir -p /data/sbb_textline_detector && cd /data/sbb_textline_detector
-	wget https://qurator-data.de/sbb_textline_detector/models.tar.gz
+	mkdir -p /data/sbb_textline_detector && cd /data/sbb_textline_detector; \
+	wget https://qurator-data.de/sbb_textline_detector/models.tar.gz; \
 	tar -xzf models.tar.gz
