@@ -132,11 +132,11 @@ class ApiTests(TestCase):
 
         response = self.client.get("/api/tasks/1/results")
         ocr_results = os.path.join(response.json["result_dir"],
-                                   "OCR-D-OCR-TESS")
+                                   "OCR-D-SEG-REGION")
         result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[2])) as result_file:
             text = result_file.read()
-            assert "<pc:Unicode>пропуск\nдля нeмецких" in text
+            assert "<pc:Unicode>Preußischer Kulturbesitz</pc:Unicode>" in text
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
@@ -178,7 +178,7 @@ class ApiTests(TestCase):
         result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[2])) as result_file:
             text = result_file.read()
-            assert "<pc:Unicode>der klauptstaalt lortgethrt.</pc:Unicode>" in text
+            assert "<pc:Unicode>Staatsbibliotnen</pc:Unicode>" in text
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
@@ -186,6 +186,8 @@ class ApiTests(TestCase):
         """Currently using /opt/calamari_models/fraktur_historical/0.ckpt.json
            as checkpoint file.
         """
+        assert os.path.exists("{0}/calamari_models/0.ckpt.json".format(CURRENT_DIR))
+
         chain_response = self.client.post("/api/chains", json=dict(
             name="TC Chain",
             description="Chain with olena binarization, tesseract segmentation"
@@ -212,7 +214,7 @@ class ApiTests(TestCase):
                     "impl": "sauvola-ms-split"
                 },
                 "ocrd-calamari-recognize": {
-                    "checkpoint": "{0}/calamari_models/*ckpt.json".format(
+                    "checkpoint": "{0}/calamari_models/*.ckpt.json".format(
                         CURRENT_DIR)
                 }
             }
@@ -231,4 +233,4 @@ class ApiTests(TestCase):
         result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[2])) as result_file:
             text = result_file.read()
-            assert "<pc:Unicode>für deutsehe Soldaten und</pc:Unicode>" in text
+            assert "<pc:Unicode>Staatshibliothe</pc:Unicode>" in text
