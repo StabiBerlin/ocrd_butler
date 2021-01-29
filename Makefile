@@ -54,7 +54,7 @@ lint: ## check style with flake8
 	flake8 ocrd_butler tests
 
 test: ## run tests quickly with the default Python
-	py.test
+	TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata py.test
 
 test-all: ## run tests on every Python version with tox
 	tox
