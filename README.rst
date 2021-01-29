@@ -126,7 +126,7 @@ Run the tests:
 
 .. code-block:: bash
 
-    ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata py.test
+    ╰─$ make test
 
 
 Known problems
