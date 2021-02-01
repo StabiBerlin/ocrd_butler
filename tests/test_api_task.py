@@ -2,14 +2,13 @@
 
 """Testing the api for `ocrd_butler` package."""
 
-import pytest
-
 from flask_restx import fields
 from flask_testing import TestCase
 
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import create_app, db
 from ocrd_butler.api.models import task_model
+
 
 class ApiTests(TestCase):
     """Test our api."""

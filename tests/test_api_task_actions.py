@@ -4,16 +4,15 @@
 
 import pytest
 import os
+import glob
 import responses
 import shutil
 from unittest import mock
 
-from flask_restx import fields
 from flask_testing import TestCase
 
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import create_app, db
-from ocrd_butler.api.models import task_model
 
 
 CURRENT_DIR = os.path.dirname(__file__)

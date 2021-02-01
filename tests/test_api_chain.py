@@ -2,8 +2,6 @@
 
 """Testing the api for `ocrd_butler` package."""
 
-import pytest
-
 from flask_restx import fields
 from flask_testing import TestCase
 
@@ -206,5 +204,3 @@ class ApiTests(TestCase):
                 assert type(chain_model[field]) == ChainParametersField
             else:
                 assert type(chain_model[field]) == fields.String
-
-

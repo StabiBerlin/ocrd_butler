@@ -2,9 +2,6 @@
 
 """Testing the processor configuration for `ocrd_butler` package."""
 
-import pytest
-import requests
-
 from flask_testing import TestCase
 
 from ocrd_butler.factory import create_app
