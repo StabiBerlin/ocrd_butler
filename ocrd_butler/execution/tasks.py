@@ -3,13 +3,8 @@
 """Celery tasks definitions."""
 
 import json
-import os
-import subprocess
-import uuid
 
 from flask import current_app
-
-from celery import shared_task
 
 from celery.signals import (
     task_failure,
@@ -24,7 +19,6 @@ from ocrd.processor.base import run_cli
 from ocrd_butler import celery
 from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.database import db
-from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 
 
@@ -77,7 +71,9 @@ def run_task(self, task):
         clobber_mets=True
     )
 
-    for file_name in workspace.mets.find_files(fileGrp=task["default_file_grp"]):
+    for file_name in workspace.mets.find_files(
+        fileGrp=task["default_file_grp"]
+    ):
         if not file_name.local_filename:
             workspace.download_file(file_name)
 

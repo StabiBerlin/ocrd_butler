@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """Restx model definitions."""
-import json
 
 from flask_restx import fields
 from ocrd_butler.api.restx import api
