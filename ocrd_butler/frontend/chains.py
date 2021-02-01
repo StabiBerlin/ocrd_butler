@@ -76,12 +76,13 @@ def delete_chain(chain_id):
     url = "{0}api/chains/{1}".format(host_url(request), chain_id)
     response = requests.delete(url)
 
-    if response.status_code is 200:
+    if response.status_code == 200:
         flash(response.json()["message"])
     else:
         flash("Can't delete chain {0}. Status {1}, Error {2}".format(
             chain_id, response.status_code, response.json()["message"]))
     return redirect("/chains", code=302)
+
 
 @chains_blueprint.route("/chains")
 def chains():
