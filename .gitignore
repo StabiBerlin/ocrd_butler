@@ -48,6 +48,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 **/*.ckpt.h5
+**/*.ckpt.json
 
 # Translations
 *.mo
