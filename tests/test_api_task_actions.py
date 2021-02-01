@@ -25,9 +25,11 @@ def celery_config():
         'result_backend': 'redis://'
     }
 
+
 @pytest.fixture(scope='session')
 def celery_enable_logging():
     return True
+
 
 @pytest.fixture(scope='session')
 def celery_includes():

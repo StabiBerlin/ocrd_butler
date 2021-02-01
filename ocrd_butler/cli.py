@@ -18,5 +18,6 @@ def main(debug=False, args=None):
     flask_app.run(debug=debug)
     return 0
 
+
 if __name__ == "__main__":
     sys.exit(main())  # pragma: no cover
