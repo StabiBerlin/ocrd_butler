@@ -45,7 +45,7 @@ Follow the installation for `ocrd_all`_
 
 .. code-block:: bash
 
-  /home/ocrd > git clone https://github.com/OCR-D/ocrd_all.git & cd ocrd_all
+  /home/ocrd > git clone --recurse-submodules https://github.com/OCR-D/ocrd_all.git && cd ocrd_all
   /home/ocrd/ocrd_all > make all
   ... -> download appropriate modules...
 
