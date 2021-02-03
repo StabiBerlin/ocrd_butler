@@ -56,6 +56,7 @@ tasks_blueprint = Blueprint("tasks_blueprint", __name__)
 def _jinja2_filter_format_date(date, fmt="%d.%m.%Y, %H:%M"):
     return date.strftime(fmt)
 
+
 @tasks_blueprint.app_template_filter('format_delta')
 def _jinja2_filter_format_delta(delta):
     return delta.__str__()
@@ -145,8 +146,8 @@ def current_tasks():
                 })
 
         task["flower_url"] = "{0}{1}task/{2}".format(
-            request.host_url.replace("5000", "5555"), # A bit hacky, but for devs on localhost.
-            "flower/" if not "localhost:5000" in request.host_url else "",
+            request.host_url.replace("5000", "5555"),  # A bit hacky, but for devs on localhost.
+            "flower/" if "localhost:5000" not in request.host_url else "",
             task["worker_task_id"]
         )
 
@@ -258,6 +259,7 @@ def task_run(task_id):
                 result, exc.__str__()))
     return redirect("/tasks", code=302)
 
+
 @tasks_blueprint.route("/download/txt/<string:worker_task_id>")
 def download_txt(worker_task_id):
     """Define route to download the results as text."""
@@ -334,6 +336,7 @@ def download_page_zip(worker_task_id):
         as_attachment=True,
         attachment_filename="ocr_page_xml_%s.zip" % task_info["result"]["task_id"]
     )
+
 
 @tasks_blueprint.route("/download/alto/<string:worker_task_id>")
 def download_alto_zip(worker_task_id):

@@ -2,8 +2,6 @@
 
 """Testing the api for `ocrd_butler` package."""
 
-import pytest
-
 from flask_restx import fields
 from flask_testing import TestCase
 
@@ -65,7 +63,8 @@ class ApiTests(TestCase):
         response = self.client.get("/api/chains/1")
         assert "ocrd-tesserocr-segment-region" in response.json["parameters"].keys()
         assert response.json["parameters"]["ocrd-tesserocr-recognize"]["textequiv_level"] == "word"
-        assert response.json["parameters"]["ocrd-tesserocr-recognize"]["overwrite_words"] is False
+        assert response.json["parameters"]["ocrd-tesserocr-recognize"]["overwrite_segments"] is False
+        assert response.json["parameters"]["ocrd-tesserocr-segment-word"]["overwrite_words"] is True
 
     def test_create_chain_with_own_parameters(self):
         """Check if a new chain is created."""
@@ -134,7 +133,6 @@ class ApiTests(TestCase):
         response = self.client.delete("/api/chains/13")
         assert response.status_code == 404
         assert response.json["status"] == "Can't find a chain with the id \"13\"."
-
 
     def test_get_unknown_chain(self):
         """Check if a non existing chain ...."""
@@ -206,5 +204,3 @@ class ApiTests(TestCase):
                 assert type(chain_model[field]) == ChainParametersField
             else:
                 assert type(chain_model[field]) == fields.String
-
-

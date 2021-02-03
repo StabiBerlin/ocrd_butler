@@ -43,6 +43,7 @@ class CompareForm(FlaskForm):
         validators=[DataRequired(message="Please choose a task to compare to.")])
     submit = SubmitField('Compare tasks')
 
+
 @compare_blueprint.route("/compare", methods=["GET"])
 def compare():
     """
@@ -56,6 +57,7 @@ def compare():
     return render_template(
         "compare.html",
         form=compare_form)
+
 
 @compare_blueprint.route('/compare', methods=['POST'])
 def compare_results():

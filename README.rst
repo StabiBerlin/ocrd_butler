@@ -45,9 +45,15 @@ Follow the installation for `ocrd_all`_
 
 .. code-block:: bash
 
-  /home/ocrd > git clone https://github.com/OCR-D/ocrd_all.git & cd ocrd_all
+  /home/ocrd > git clone --recurse-submodules https://github.com/OCR-D/ocrd_all.git && cd ocrd_all
   /home/ocrd/ocrd_all > make all
-  ... -> download appropriate models...
+  ... -> download appropriate modules...
+
+Install german language files for Tesseract OCR:
+
+.. code-block:: bash
+
+  user@server:/ > sudo apt install tesseract-ocr-deu
 
 Install ocrd-butler in the virtual environment created by ocrd_all:
 
@@ -62,28 +68,28 @@ Install ocrd-butler in the virtual environment created by ocrd_all:
 
 For some modules in `ocrd_all`_ there are further files nessesary, e.g. trained models for the OCR itself. The folders on the server can be overwritten it every single task.
 
-* sbb_textline_detector
+* ``sbb_textline_detector`` (i.e. ``make textline-detector-model``):
 
 .. code-block:: bash
 
-  > mkdir /data/sbb_textline_detector && cd /data/sbb_textline_detector
+  > mkdir -p /data/sbb_textline_detector && cd /data/sbb_textline_detector
   > wget https://qurator-data.de/sbb_textline_detector/models.tar.gz
   > tar xfz models.tar.gz
 
 
-* ocrd_calamari
+* ``ocrd_calamari`` (i.e. ``make calamari-model``):
 
 .. code-block:: bash
 
-  > mkdir /data/calamari_models && cd /data/calamari_models
+  > mkdir -p /data/calamari_models && cd /data/calamari_models
   > wget https://qurator-data.de/calamari-models/GT4HistOCR/model.tar.xz
   > tar xf model.tar.xz
 
-* ocrd_tesserocr
+* ``ocrd_tesserocr`` (i.e. ``make tesseract-model``):
 
 .. code-block:: bash
 
-  > mkdir /data/tesseract_models && cd /data/tesseract_models
+  > mkdir -p /data/tesseract_models && cd /data/tesseract_models
   > wget https://qurator-data.de/tesseract-models/GT4HistOCR/models.tar
   > tar xf models.tar
   > cp GT4HistOCR_2000000.traineddata /usr/share/tesseract-ocr/4.00/tessdata/
@@ -120,7 +126,7 @@ Run the tests:
 
 .. code-block:: bash
 
-    ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata py.test
+    ╰─$ make test
 
 
 Known problems
@@ -159,3 +165,4 @@ This package was created with Cookiecutter_ and the `elgertam/cookiecutter-pipen
 .. _`OCR-D project`: https://github.com/OCR-D
 .. _`Qurator Data`: https://qurator-data.de/
 .. _`OCR-D ecosystem`: https://github.com/topics/ocr-d
+.. _tesseract-ocr-deu debian: https://packages.debian.org/de/sid/tesseract-ocr-deu

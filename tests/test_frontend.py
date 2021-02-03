@@ -131,4 +131,3 @@ class FrontendTests(TestCase):
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
         assert len(html.find('table > tr > td')) == 0
-

@@ -43,7 +43,7 @@ class Config(object):
         "ocrd-segment-extract-pages",
         "ocrd-segment-from-masks",
 
-        # "ocrd-anybaseocr-binarize",
+        "ocrd-anybaseocr-binarize",
         # "ocrd-anybaseocr-dewarp",
         # "ocrd-anybaseocr-block-segmentation",
         # "ocrd-anybaseocr-layout-analysis",
@@ -97,11 +97,13 @@ class Config(object):
         # "ocrd-skimage-normalize",
     ]
 
+
 class ProductionConfig(Config):
     """
     Uses production database server.
     """
     SQLALCHEMY_DATABASE_URI = 'sqlite:///./production.db'
+
 
 class DevelopmentConfig(Config):
     """
@@ -109,6 +111,7 @@ class DevelopmentConfig(Config):
     """
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///./development.db'
+
 
 class TestingConfig(Config):
     """

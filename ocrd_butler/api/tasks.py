@@ -14,9 +14,6 @@ from flask_restx import (
     marshal
 )
 
-from celery.signals import task_success
-from sqlalchemy.orm.exc import NoResultFound
-
 from ocrd_validators import ParameterValidator
 
 from ocrd_butler.api.restx import api

@@ -24,5 +24,6 @@ class ApiTests(TestCase):
         """Check if our processors are getable."""
         response = self.client.get("/api/processors")
         assert response.status_code == 200
-        assert response.json[0]["executable"] == "ocrd-olena-binarize"
-        assert response.json[5]["package"]["git_url"] == "https://github.com/OCR-D/ocrd_tesserocr"
+        assert len(response.json) == len(TestingConfig.PROCESSORS)
+        for i, processor in enumerate(response.json):
+            assert processor["executable"] == TestingConfig.PROCESSORS[i]

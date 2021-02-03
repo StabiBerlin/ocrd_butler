@@ -6,12 +6,7 @@ import glob
 import os
 import shutil
 
-import pytest
-from pytest import raises
 from flask_testing import TestCase
-
-from celery.exceptions import Retry
-
 from flask_restx import fields
 
 from ocrd_butler.api.models import task_model
@@ -98,4 +93,3 @@ class TasksTestExecution(TestCase):
     #     with open(os.path.join(ocr_results, result_files[1])) as result_file:
     #         text = result_file.read()
     #         assert "<pc:Unicode>Wittenberg:</pc:Unicode>" in text
-

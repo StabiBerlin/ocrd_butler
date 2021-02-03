@@ -3,13 +3,8 @@
 """Celery tasks definitions."""
 
 import json
-import os
-import subprocess
-import uuid
 
 from flask import current_app
-
-from celery import shared_task
 
 from celery.signals import (
     task_failure,
@@ -24,18 +19,18 @@ from ocrd.processor.base import run_cli
 from ocrd_butler import celery
 from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.database import db
-from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
-
 
 
 @task_prerun.connect
 def task_prerun_handler(task_id, task, *args, **kwargs):
-    current_app.logger.info("Start processing task '{0}'.", task_id)
+    current_app.logger.info("Start processing task '%s'.", task_id)
+
 
 @task_postrun.connect
 def task_postrun_handler(task_id, task, *args, **kwargs):
-    current_app.logger.info("Finished processing task '{0}'.", task_id)
+    current_app.logger.info("Finished processing task '%s'.", task_id)
+
 
 @task_success.connect
 def task_success_handler(sender, result, **kwargs):
@@ -43,16 +38,18 @@ def task_success_handler(sender, result, **kwargs):
     task.status = "SUCCESS"
     task.results = result
     db.session.commit()
-    current_app.logger.info("Success on task id: '{0}', worker task id: {1}.",
+    current_app.logger.info("Success on task id: '%s', worker task id: %s.",
                             task.id, task.worker_task_id)
+
 
 @task_failure.connect
 def task_failure_handler(sender, result, **kwargs):
     task = db_model_Task.query.filter_by(id=result["task_id"]).first()
     task.status = "FAILURE"
     db.session.commit()
-    current_app.logger.info("Failure on task id: '{0}', worker task id: {1}.",
+    current_app.logger.info("Failure on task id: '%s', worker task id: %s.",
                             task.id, task.worker_task_id)
+
 
 @celery.task(bind=True)
 def run_task(self, task):
@@ -74,7 +71,9 @@ def run_task(self, task):
         clobber_mets=True
     )
 
-    for file_name in workspace.mets.find_files(fileGrp=task["default_file_grp"]):
+    for file_name in workspace.mets.find_files(
+        fileGrp=task["default_file_grp"]
+    ):
         if not file_name.local_filename:
             workspace.download_file(file_name)
 
@@ -86,7 +85,9 @@ def run_task(self, task):
         if index == 0:
             input_file_grp = task["default_file_grp"]
         else:
-            previous_processor = PROCESSORS_ACTION[task["chain"]["processors"][index-1]]
+            previous_processor = PROCESSORS_ACTION[
+                task["chain"]["processors"][index - 1]
+            ]
             input_file_grp = previous_processor["output_file_grp"]
 
         processor = PROCESSORS_ACTION[processor_name]
@@ -118,7 +119,7 @@ def run_task(self, task):
         # reload mets
         workspace.reload_mets()
 
-        current_app.logger.info("Finished processing task '{0}'.", task["id"])
+        current_app.logger.info("Finished processing task '%s'.", task["id"])
 
     return {
         "task_id": task["id"],

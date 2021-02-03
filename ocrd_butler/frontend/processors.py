@@ -11,6 +11,7 @@ from ocrd_butler.api.processors import PROCESSORS_VIEW
 
 processors_blueprint = Blueprint("processors_blueprint", __name__)
 
+
 @processors_blueprint.context_processor
 def utility_processor():
     """Add utilities for the jinja2 template."""

@@ -82,7 +82,7 @@ class Chain(db.Model):
             "description": self.description,
             "processors": self.processors,
             "parameters": self.parameters,
-            }
+        }
 
     def __repr__(self):
         return "Chain {0} ({1})".format(self.name, self.description)

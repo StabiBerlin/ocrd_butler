@@ -12,6 +12,7 @@ logging_conf_path = os.path.normpath(os.path.join(
 logging.config.fileConfig(logging_conf_path)
 log = logging.getLogger(__name__)
 
+
 def camel_case_split(identifier):
     """CamelCase split"""
     matches = re.finditer(

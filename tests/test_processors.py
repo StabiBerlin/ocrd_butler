@@ -2,12 +2,7 @@
 
 """Testing the processor configuration for `ocrd_butler` package."""
 
-import pytest
-import requests
-
 from flask_testing import TestCase
-
-from ocrd_calamari.recognize import CalamariRecognize
 
 from ocrd_butler.factory import create_app
 from ocrd_butler.api.processors import PROCESSORS_CONFIG
@@ -64,7 +59,9 @@ class ProcessorsTests(TestCase):
         parameters = PROCESSORS_ACTION["ocrd-tesserocr-recognize"]["parameters"]
         assert "textequiv_level" in parameters
         assert parameters["textequiv_level"] == "word"
-        assert parameters["overwrite_words"] is False
+        assert parameters["overwrite_segments"] is False
+        parameters = PROCESSORS_ACTION["ocrd-tesserocr-segment-word"]["parameters"]
+        assert parameters["overwrite_words"] is True
         # assert "model" not in parameters
 
     def test_calamari_integration(self):

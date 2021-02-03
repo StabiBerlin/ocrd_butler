@@ -7,6 +7,7 @@ import os
 
 from ocrd_butler.config import TestingConfig
 
+
 def pytest_configure(config):
     """Register additional pytest configuration."""
     # add the pytest.mark.celery() marker registration to the pytest.ini [markers] section
@@ -18,6 +19,7 @@ def pytest_configure(config):
         "markers", "celery(**overrides): override celery configuration for a test case"
     )
 
+
 @pytest.fixture(scope='session')
 def celery_config():
     return {
@@ -25,9 +27,11 @@ def celery_config():
         'result_backend': 'redis://'
     }
 
+
 @pytest.fixture(scope='session')
 def celery_enable_logging():
     return True
+
 
 @pytest.fixture(scope='session')
 def celery_includes():
@@ -36,10 +40,12 @@ def celery_includes():
         # 'proj.tests.celery_signal_handlers',
     ]
 
+
 @pytest.fixture
 def config():
     config = TestingConfig()
     return config
+
 
 @pytest.fixture
 def tmp_dir(config):
