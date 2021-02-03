@@ -4,10 +4,12 @@ Testing the frontend of `ocrd_butler` package.
 """
 
 import json
+import os
+from unittest import mock
+from flask_testing import TestCase
+
 import responses
 from requests_html import HTML
-
-from flask_testing import TestCase
 
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import (
@@ -131,3 +133,28 @@ class FrontendTests(TestCase):
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
         assert len(html.find('table > tr > td')) == 0
+
+    @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
+    @mock.patch("ocrd_butler.frontend.tasks.task_information")
+    def test_frontend_download_txt(self, mock_task_information, mock_fs):
+        """Check if download txt is working."""
+        mock_task_information.return_value = {
+            "ready": True,
+            "result": {
+                "result_dir": "{0}/files/ocr_result_01".format(os.path.dirname(__file__)),
+                "task_id": 23
+            }
+        }
+        mock_fs\
+            .return_value.filter_by\
+            .return_value.first\
+            .return_value = type('', (object,), {
+                "chain_id": 1,
+                "processors": ["ocrd-calamari-recognize"]
+            })()
+
+        response = self.client.get("/download/txt/foobar")
+
+        assert response.status_code == 200
+        assert response.content_type == "text/txt; charset=utf-8"
+        assert b"nen eer gbaun nonenronrndannn" in response.data
