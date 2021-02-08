@@ -3,6 +3,10 @@ Default configuration for the butler.
 https://flask.palletsprojects.com/en/1.1.x/config/
 """
 
+import os
+import json
+import subprocess
+
 
 class Config(object):
     """
@@ -97,6 +101,18 @@ class Config(object):
         # "ocrd-skimage-normalize",
     ]
 
+    @classmethod
+    def processor_specs(cls, processor: str) -> dict:
+        """ retrieve OCRD processor specification from its ``--dump-json`` output
+        and return it as a dict.
+
+        Args:
+            processor: name of a processor executable
+        """
+        return json.loads(
+            subprocess.check_output([processor, "-J"])
+        )
+
 
 class ProductionConfig(Config):
     """
@@ -120,3 +136,18 @@ class TestingConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     OCRD_BUTLER_RESULTS = "/tmp/ocrd_butler_results_testing"
+
+
+
+def profile_config() -> Config:
+    """ select a ``Config`` implementation based on the ``PROFILE`` environment variable
+    """
+    return {
+        "test": TestingConfig,
+        "dev": DevelopmentConfig,
+        "prod": ProductionConfig,
+    }.get(
+        os.environ.get(
+            "PROFILE", "DEV"
+        ).lower()
+    )
