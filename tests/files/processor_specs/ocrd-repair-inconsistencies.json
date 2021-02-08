@@ -1,0 +1,22 @@
+{
+    "tools": {
+      "ocrd-repair-inconsistencies": {
+        "executable": "ocrd-repair-inconsistencies",
+        "categories": [
+          "Layout analysis"
+        ],
+        "description": "Re-order glyphs/words/lines top-down-left-right when textually inconsistent with their parents",
+        "input_file_grp": [
+          "OCR-D-SEG-BLOCK"
+        ],
+        "output_file_grp": [
+          "OCR-D-SEG-BLOCK-FIXED"
+        ],
+        "steps": [
+          "layout/segmentation/line",
+          "layout/segmentation/word",
+          "layout/segmentation/glyph"
+        ]
+      }
+    }
+  }

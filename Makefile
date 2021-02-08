@@ -61,7 +61,7 @@ test-init: ## download current checkpoint data files from Calamari OCR github re
         endif
 
 test: test-init ## run tests quickly with the default Python
-	TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata py.test
+	PROFILE=TEST TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata py.test
 
 test-all: ## run tests on every Python version with tox
 	tox

@@ -137,6 +137,30 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     OCRD_BUTLER_RESULTS = "/tmp/ocrd_butler_results_testing"
 
+    @classmethod
+    def processor_specs(cls, processor: str) -> dict:
+        """ return fake processor specs from
+        ``tests/files/processor_specs`` resource folder in case the respective
+        binary can't be found within actual environment (i.e. `ocrd_all` is not installed).
+        """
+        try:
+            return super().processor_specs(processor)
+        except Exception:
+            pass
+
+        filename = os.path.join(
+            *'tests/files/processor_specs'.split('/'),
+            '{}.json'.format(processor)
+        )
+        if os.path.exists(filename):
+            with open(filename, 'r') as f:
+                specs = json.load(f)
+            return specs
+        else:
+            print(
+                'file not found: {}'.format(filename)
+            )
+            return {}
 
 
 def profile_config() -> Config:

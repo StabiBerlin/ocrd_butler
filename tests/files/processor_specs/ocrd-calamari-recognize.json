@@ -1,0 +1,52 @@
+{
+  "executable": "ocrd-calamari-recognize",
+  "categories": [
+    "Text recognition and optimization"
+  ],
+  "steps": [
+    "recognition/text-recognition"
+  ],
+  "description": "Recognize lines with Calamari",
+  "input_file_grp": [
+    "OCR-D-SEG-LINE"
+  ],
+  "output_file_grp": [
+    "OCR-D-OCR-CALAMARI"
+  ],
+  "parameters": {
+    "checkpoint_dir": {
+      "description": "The directory containing calamari model files (*.ckpt.json). Uses all checkpoints in that directory",
+      "type": "string",
+      "format": "file",
+      "cacheable": true,
+      "default": "qurator-gt4histocr-1.0"
+    },
+    "checkpoint": {
+      "description": "The calamari model files (*.ckpt.json)",
+      "type": "string",
+      "format": "file",
+      "cacheable": true
+    },
+    "voter": {
+      "description": "The voting algorithm to use",
+      "type": "string",
+      "default": "confidence_voter_default_ctc"
+    },
+    "textequiv_level": {
+      "type": "string",
+      "enum": [
+        "line",
+        "word",
+        "glyph"
+      ],
+      "default": "line",
+      "description": "Deepest PAGE XML hierarchy level to include TextEquiv results for"
+    },
+    "glyph_conf_cutoff": {
+      "type": "number",
+      "format": "float",
+      "default": 0.001,
+      "description": "Only include glyph alternatives with confidences above this threshold"
+    }
+  }
+}

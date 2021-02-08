@@ -1,0 +1,35 @@
+{
+  "executable": "ocrd-segment-repair",
+  "categories": [
+    "Layout analysis"
+  ],
+  "description": "Analyse and repair region segmentation; at least ensure validity and consistency of coordinates.",
+  "input_file_grp": [
+    "OCR-D-IMG",
+    "OCR-D-SEG-BLOCK"
+  ],
+  "output_file_grp": [
+    "OCR-D-EVAL-BLOCK"
+  ],
+  "steps": [
+    "layout/segmentation/region"
+  ],
+  "parameters": {
+    "sanitize": {
+      "type": "boolean",
+      "default": false,
+      "description": "Shrink and/or expand a region in such a way that it coordinates include those of all its lines"
+    },
+    "plausibilize": {
+      "type": "boolean",
+      "default": false,
+      "description": "Remove redundant (almost equal or almost contained) regions, and merge overlapping regions"
+    },
+    "plausibilize_merge_min_overlap": {
+      "type": "number",
+      "format": "float",
+      "default": 0.9,
+      "description": "When merging a region almost contained in another, require at least this ratio of area is shared with the other"
+    }
+  }
+}
