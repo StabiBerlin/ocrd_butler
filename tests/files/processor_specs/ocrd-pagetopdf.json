@@ -1,0 +1,83 @@
+{
+  "executable": "ocrd-pagetopdf",
+  "description": "Convert text and layout annotations to PDF format (overlaying original image with text layer and polygon outlines)",
+  "categories": [
+    "Long-term preservation"
+  ],
+  "steps": [
+    "postprocessing/format-conversion"
+  ],
+  "input_file_grp": [
+    "OCR-D-OCR-PAGE"
+  ],
+  "output_file_grp": [
+    "OCR-D-OCR-PDF"
+  ],
+  "parameters": {
+    "font": {
+      "description": "Font file to be used in PDF file. If unset, AletheiaSans.ttf is used. (Make sure to pick a font which covers all glyphs!)",
+      "type": "string",
+      "format": "uri",
+      "content-type": "application/x-font-ttf",
+      "default": ""
+    },
+    "outlines": {
+      "description": "What segment hierarchy to draw coordinate outlines for. If unset, no outlines are drawn.",
+      "type": "string",
+      "default": "",
+      "enum": [
+        "",
+        "region",
+        "line",
+        "word",
+        "glyph"
+      ]
+    },
+    "textequiv_level": {
+      "description": "What segment hierarchy level to render text output from. If unset, no text is rendered.",
+      "type": "string",
+      "default": "",
+      "enum": [
+        "",
+        "region",
+        "line",
+        "word",
+        "glyph"
+      ]
+    },
+    "negative2zero": {
+      "description": "Set all negative box values to 0",
+      "type": "boolean",
+      "default": false
+    },
+    "ext": {
+      "description": "Output filename extension",
+      "type": "string",
+      "default": ".pdf"
+    },
+    "multipage": {
+      "description": "Merge all PDFs into one mulitpage file. The value is used as filename for the pdf.",
+      "type": "string",
+      "default": ""
+    },
+    "pagelabel": {
+      "description": "Parameter for 'multipage': Set the page information, which will be used as pagelabel. Default is 'pageId', e.g. the option 'pagenumber' will create numbered pagelabel consecutively",
+      "type": "string",
+      "default": "pageId",
+      "enum": [
+        "pagenumber",
+        "pageId",
+        "basename",
+        "basename_without_extension",
+        "local_filename",
+        "ID",
+        "url"
+      ]
+    },
+    "script-args": {
+      "description": "Extra arguments to PageToPdf (see https://github.com/PRImA-Research-Lab/prima-page-to-pdf)",
+      "type": "string",
+      "default": ""
+    }
+  }
+}

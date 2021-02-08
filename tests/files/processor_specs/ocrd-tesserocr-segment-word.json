@@ -1,0 +1,41 @@
+{
+  "executable": "ocrd-tesserocr-segment-word",
+  "categories": [
+    "Layout analysis"
+  ],
+  "description": "Segment lines into words with Tesseract",
+  "input_file_grp": [
+    "OCR-D-SEG-LINE",
+    "OCR-D-GT-SEG-LINE"
+  ],
+  "output_file_grp": [
+    "OCR-D-SEG-WORD"
+  ],
+  "steps": [
+    "layout/segmentation/word"
+  ],
+  "parameters": {
+    "dpi": {
+      "type": "number",
+      "format": "float",
+      "description": "pixel density in dots per inch (overrides any meta-data in the images); disabled when negative",
+      "default": 0
+    },
+    "overwrite_words": {
+      "type": "boolean",
+      "default": true,
+      "description": "Remove existing layout and text annotation below the TextLine level (otherwise skip line; no incremental annotation yet)."
+    },
+    "padding": {
+      "type": "number",
+      "format": "integer",
+      "description": "extend detected cell rectangles by this many (true) pixels",
+      "default": 0
+    },
+    "shrink_polygons": {
+      "type": "boolean",
+      "default": false,
+      "description": "annotate polygon coordinates instead of bounding box rectangles by projecting the convex hull of all symbols"
+    }
+  }
+}

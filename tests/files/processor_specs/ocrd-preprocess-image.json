@@ -1,0 +1,86 @@
+{
+  "executable": "ocrd-preprocess-image",
+  "categories": [
+    "Image preprocessing"
+  ],
+  "steps": [
+    "preprocessing/optimization"
+  ],
+  "description": "Convert or enhance images",
+  "input_file_grp": [
+    "OCR-D-IMG",
+    "OCR-D-SEG-PAGE",
+    "OCR-D-SEG-REGION",
+    "OCR-D-SEG-LINE"
+  ],
+  "output_file_grp": [
+    "OCR-D-IMG",
+    "OCR-D-SEG-PAGE",
+    "OCR-D-SEG-REGION",
+    "OCR-D-SEG-LINE"
+  ],
+  "parameters": {
+    "level-of-operation": {
+      "type": "string",
+      "enum": [
+        "page",
+        "region",
+        "line",
+        "word",
+        "glyph"
+      ],
+      "default": "page",
+      "description": "PAGE XML hierarchy level to operate on"
+    },
+    "input_feature_selector": {
+      "type": "string",
+      "default": "",
+      "description": "comma-separated list of required image features (e.g. binarized,despeckled)"
+    },
+    "input_feature_filter": {
+      "type": "string",
+      "default": "",
+      "description": "comma-separated list of forbidden image features (e.g. binarized,despeckled)"
+    },
+    "output_feature_added": {
+      "type": "string",
+      "required": true,
+      "description": "image feature(s) to be added after this operation (if multiple, separate by comma)"
+    },
+    "input_mimetype": {
+      "type": "string",
+      "default": "image/png",
+      "enum": [
+        "image/bmp",
+        "application/postscript",
+        "image/gif",
+        "image/jpeg",
+        "image/jp2",
+        "image/png",
+        "image/x-portable-pixmap",
+        "image/tiff"
+      ],
+      "description": "File format to save input images to (tool's expected input)"
+    },
+    "output_mimetype": {
+      "type": "string",
+      "default": "image/png",
+      "enum": [
+        "image/bmp",
+        "application/postscript",
+        "image/gif",
+        "image/jpeg",
+        "image/jp2",
+        "image/png",
+        "image/x-portable-pixmap",
+        "image/tiff"
+      ],
+      "description": "File format to load output images from (tool's expected output)"
+    },
+    "command": {
+      "type": "string",
+      "required": true,
+      "description": "shell command to operate on image files, with @INFILE as place-holder for the input file path, and @OUTFILE as place-holder for the output file path"
+    }
+  }
+}
