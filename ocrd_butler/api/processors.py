@@ -52,7 +52,7 @@ for name, config in PROCESSORS_ACTION.items():
     # Just take the first in-/output file group for now.
     # TODO: This is also connected to the choosen paramters.
     for key in ["input_file_grp", "output_file_grp"]:
-        config[key] = ''.join(config.get(key, []))
+        config[key] = ''.join(config.get(key, [])[:1])
 
 
 PROCESSORS_VIEW = []
