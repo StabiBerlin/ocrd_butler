@@ -14,6 +14,8 @@ from flask_testing import TestCase
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import create_app, db
 
+from . import requires_ocrd_all
+
 
 CURRENT_DIR = os.path.dirname(__file__)
 
@@ -116,6 +118,7 @@ class ApiTests(TestCase):
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
+    @requires_ocrd_all
     def test_task_tesserocr(self, mock_run_task):
         """Check if a new task is created."""
         response = self.client.post("/api/tasks", json=dict(
@@ -141,6 +144,7 @@ class ApiTests(TestCase):
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
+    @requires_ocrd_all
     def test_task_tess_cal(self, mock_run_task):
         """Check if a new task is created."""
         chain_response = self.client.post("/api/chains", json=dict(
@@ -183,6 +187,7 @@ class ApiTests(TestCase):
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
+    @requires_ocrd_all
     def test_task_ole_cal(self, mock_run_task):
         """Currently using /opt/calamari_models/fraktur_historical/0.ckpt.json
            as checkpoint file.
