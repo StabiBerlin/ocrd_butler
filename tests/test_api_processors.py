@@ -7,6 +7,8 @@ from flask_testing import TestCase
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import create_app
 
+from . import requires_ocrd_all
+
 
 class ApiTests(TestCase):
     """Test our api."""
@@ -20,6 +22,7 @@ class ApiTests(TestCase):
     def create_app(self):
         return create_app(config=TestingConfig)
 
+    @requires_ocrd_all
     def test_get_processors(self):
         """Check if our processors are getable."""
         response = self.client.get("/api/processors")
