@@ -14,7 +14,10 @@ from flask_testing import TestCase
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import create_app, db
 
-from . import requires_ocrd_all
+from . import (
+    skip_in_test_profile,
+    require_ocrd_processors,
+)
 
 
 CURRENT_DIR = os.path.dirname(__file__)
@@ -119,7 +122,13 @@ class ApiTests(TestCase):
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
-    @requires_ocrd_all
+    @skip_in_test_profile
+    @require_ocrd_processors(
+        "ocrd-tesserocr-segment-region",
+        "ocrd-tesserocr-segment-line",
+        "ocrd-tesserocr-segment-word",
+        "ocrd-tesserocr-recognize",
+    )
     def test_task_tesserocr(self, mock_run_task):
         """Check if a new task is created."""
         response = self.client.post("/api/tasks", json=dict(
@@ -145,7 +154,13 @@ class ApiTests(TestCase):
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
-    @requires_ocrd_all
+    @skip_in_test_profile
+    @require_ocrd_processors(
+        "ocrd-tesserocr-segment-region",
+        "ocrd-tesserocr-segment-line",
+        "ocrd-tesserocr-segment-word",
+        "ocrd-calamari-recognize",
+    )
     def test_task_tess_cal(self, mock_run_task):
         """Check if a new task is created."""
         chain_response = self.client.post("/api/chains", json=dict(
@@ -188,12 +203,20 @@ class ApiTests(TestCase):
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
-    @requires_ocrd_all
+    @skip_in_test_profile
+    @require_ocrd_processors(
+        'ocrd-olena-binarize',
+        'ocrd-tesserocr-segment-region',
+        'ocrd-tesserocr-segment-line',
+        'ocrd-calamari-recognize',
+    )
     def test_task_ole_cal(self, mock_run_task):
         """Currently using /opt/calamari_models/fraktur_historical/0.ckpt.json
            as checkpoint file.
         """
-        assert os.path.exists("{0}/calamari_models/0.ckpt.json".format(CURRENT_DIR))
+        assert os.path.exists(
+            "{0}/calamari_models/0.ckpt.json".format(CURRENT_DIR)
+        )
 
         chain_response = self.client.post("/api/chains", json=dict(
             name="TC Chain",
