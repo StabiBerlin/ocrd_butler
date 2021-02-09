@@ -57,31 +57,32 @@ class ApiTests(TestCase):
 
         testfiles = os.path.join(os.path.dirname(
             os.path.abspath(__file__)), "files")
-        with open("{0}/sbb-mets-PPN821929127.xml".format(testfiles), "r") as tfh:
-            responses.add(responses.GET, "http://foo.bar/mets.xml",
-                          body=tfh.read(), status=200)
-            tfh.close()
-        with open("{0}/00000001.jpg".format(testfiles), "rb") as tfh:
+
+        with open(
+            os.path.join(testfiles, "sbb-mets-PPN821929127.xml"),
+            "r", encoding="utf-8"
+        ) as tfh:
             responses.add(
-                responses.GET,
-                "http://content.staatsbibliothek-berlin.de/dms/"
-                "PPN821929127/800/0/00000001.jpg",
-                body=tfh.read(), status=200, content_type="image/jpg")
-            tfh.close()
-        with open("{0}/00000002.jpg".format(testfiles), "rb") as tfh:
-            responses.add(
-                responses.GET,
-                "http://content.staatsbibliothek-berlin.de/dms/"
-                "PPN821929127/800/0/00000002.jpg",
-                body=tfh.read(), status=200, content_type="image/jpg")
-            tfh.close()
-        with open("{0}/00000003.jpg".format(testfiles), "rb") as tfh:
-            responses.add(
-                responses.GET,
-                "http://content.staatsbibliothek-berlin.de/dms/"
-                "PPN821929127/800/0/00000003.jpg",
-                body=tfh.read(), status=200, content_type="image/jpg")
-            tfh.close()
+                method=responses.GET,
+                url="http://foo.bar/mets.xml",
+                body=tfh.read(),
+                status=200
+            )
+
+        for i in "123":
+            with open(
+                os.path.join(testfiles, f"0000000{i}.jpg"), "rb"
+            ) as tfh:
+                responses.add(
+                    method=responses.GET,
+                    url=(
+                        "http://content.staatsbibliothek-berlin.de/dms/"
+                        f"PPN821929127/800/0/0000000{i}.jpg"
+                    ),
+                    body=tfh.read(),
+                    status=200,
+                    content_type="image/jpg"
+                )
 
     def tearDown(self):
         """Remove the test database."""
