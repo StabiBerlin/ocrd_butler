@@ -127,8 +127,10 @@ class FrontendTests(TestCase):
         assert len(html.find('table > tr > td')) == 10
 
         delete_link = html.find('table > tr > td > a.delete-task')[0].attrs["href"]
-        # response = self.client.get(delete_link)
-        self.client.get("/task/delete/1")
+        assert delete_link == "/task/delete/1"
+        response = self.client.get(delete_link)
+        assert response.status == '302 FOUND'
+        assert response.status_code == 302
 
         response = self.client.get("/tasks")
         html = HTML(html=response.data)

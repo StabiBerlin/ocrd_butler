@@ -212,6 +212,8 @@ class ApiTests(TestCase):
             }
         ))
 
+        assert chain_response.json == {'id': 1, 'message': 'Chain created.'}
+
         task_response = self.client.post("/api/tasks", json=dict(
             chain_id=chain_response.json["id"],
             src="http://foo.bar/mets.xml",
@@ -227,8 +229,12 @@ class ApiTests(TestCase):
             }
         ))
 
-        response = self.client.post("/api/tasks/{0}/run".format(
-            task_response.json["id"]))
+        assert task_response.status_code == 201
+        assert task_response.json == {'id': 1, 'message': 'Task created.'}
+
+        response = self.client.post(
+            "/api/tasks/{0}/run".format(task_response.json["id"])
+        )
         assert response.status_code == 200
         assert response.json["status"] == "SUCCESS"
 
@@ -238,6 +244,8 @@ class ApiTests(TestCase):
         ocr_results = os.path.join(response.json["result_dir"],
                                    "OCR-D-OCR-CALAMARI")
         result_files = os.listdir(ocr_results)
-        with open(os.path.join(ocr_results, result_files[2])) as result_file:
+        with open(
+            os.path.join(ocr_results, result_files[2]), encoding='utf-8'
+        ) as result_file:
             text = result_file.read()
             assert "<pc:Unicode>Staatshibliothe</pc:Unicode>" in text
