@@ -7,6 +7,11 @@ import os
 import json
 import subprocess
 
+from .util import logger
+
+log = logger(__name__)
+DEFAULT_PROFILE = 'DEV'
+
 
 class Config(object):
     """
@@ -163,15 +168,57 @@ class TestingConfig(Config):
             return {}
 
 
-def profile_config() -> Config:
-    """ select a ``Config`` implementation based on the ``PROFILE`` environment variable
+def get_profile_var() -> str:
+    """ get value of ``PROFILE`` environment variable or default to
+    ``DEFAULT_PROFILE`` if not set or empty string.
+
+    >>> os.environ['PROFILE'] = ''
+    >>> get_profile_var()
+    'DEV'
+
+    >>> os.environ['PROFILE'] = 'prod'
+    >>> get_profile_var()
+    'PROD'
+
     """
-    return {
-        "test": TestingConfig,
-        "dev": DevelopmentConfig,
-        "prod": ProductionConfig,
+    val = os.environ.get(
+        "PROFILE", DEFAULT_PROFILE
+    ).upper()
+    if type(val) == str:
+        if len(val.strip()) < 1:
+            val = DEFAULT_PROFILE
+    return val or DEFAULT_PROFILE
+
+
+def profile_config() -> Config:
+    """ select a ``Config`` implementation based on the ``PROFILE`` environment
+    variable.
+
+    >>> os.environ['PROFILE'] = 'PROD'
+    >>> profile_config()
+    <class 'ocrd_butler.config.ProductionConfig'>
+
+    >>> os.environ['PROFILE'] = ''
+    >>> profile_config()
+    <class 'ocrd_butler.config.DevelopmentConfig'>
+
+    """
+    if 'PROFILE' in os.environ:
+        log.debug(
+            'Select config implementation based on PROFILE env var value `%s`.',
+            os.environ['PROFILE'],
+        )
+    else:
+        log.warning(
+            'Environment variable PROFILE not set. Defaulting to `%s`.',
+            DEFAULT_PROFILE,
+        )
+    config = {
+        "TEST": TestingConfig,
+        "DEV": DevelopmentConfig,
+        "PROD": ProductionConfig,
     }.get(
-        os.environ.get(
-            "PROFILE", "DEV"
-        ).lower()
+        get_profile_var()
     )
+    log.info('Selected config: %s.', config)
+    return config
