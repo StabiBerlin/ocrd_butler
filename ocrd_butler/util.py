@@ -13,6 +13,16 @@ logging.config.fileConfig(logging_conf_path)
 log = logging.getLogger(__name__)
 
 
+def logger(name: str) -> logging.Logger:
+    """ returns logger instance for given identifier.
+
+    >>> logger(__name__)
+    <Logger ocrd_butler.util (WARNING)>
+
+    """
+    return logging.getLogger(name)
+
+
 def camel_case_split(identifier):
     """CamelCase split"""
     matches = re.finditer(

@@ -3,7 +3,10 @@
 """Console script for ocrd_butler."""
 import sys
 import click
-from ocrd_butler.app import flask_app, log
+from ocrd_butler.app import flask_app
+from ocrd_butler.util import logger
+
+log = logger(__name__)
 
 
 @click.command('start')

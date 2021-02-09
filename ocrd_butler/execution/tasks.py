@@ -20,6 +20,9 @@ from ocrd_butler import celery
 from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.database import db
 from ocrd_butler.database.models import Task as db_model_Task
+from ocrd_butler.util import logger
+
+log = logger(__name__)
 
 
 @task_prerun.connect
@@ -44,6 +47,7 @@ def task_success_handler(sender, result, **kwargs):
 
 @task_failure.connect
 def task_failure_handler(sender, result, **kwargs):
+    log.error(f'handle task failure. sender={sender}, result={result}.')
     task = db_model_Task.query.filter_by(id=result["task_id"]).first()
     task.status = "FAILURE"
     db.session.commit()
