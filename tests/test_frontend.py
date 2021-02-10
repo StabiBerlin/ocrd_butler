@@ -136,27 +136,16 @@ class FrontendTests(TestCase):
         html = HTML(html=response.data)
         assert len(html.find('table > tr > td')) == 0
 
-    @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
-    @mock.patch("ocrd_butler.frontend.tasks.task_information")
-    def test_frontend_download_txt(self, mock_task_information, mock_fs):
+    @mock.patch("requests.get")
+    def test_frontend_download_txt(self, mock_requests_get):
         """Check if download txt is working."""
-        mock_task_information.return_value = {
-            "ready": True,
-            "result": {
-                "result_dir": "{0}/files/ocr_result_01".format(os.path.dirname(__file__)),
-                "task_id": 23
-            }
-        }
-        mock_fs\
-            .return_value.filter_by\
-            .return_value.first\
-            .return_value = type('', (object,), {
-                "chain_id": 1,
-                "processors": ["ocrd-calamari-recognize"]
-            })()
 
-        response = self.client.get("/download/txt/foobar")
+        mock_requests_get.return_value = type('', (object,), {
+            "text": "foobar",
+            "status_code": 200
+        })()
+
+        response = self.client.get("/download/txt/42")
 
         assert response.status_code == 200
-        assert response.content_type == "text/txt; charset=utf-8"
-        assert b"nen eer gbaun nonenronrndannn" in response.data
+        assert response.data == b"foobar"
