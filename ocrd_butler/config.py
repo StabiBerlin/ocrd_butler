@@ -108,8 +108,8 @@ class Config(object):
 
     @classmethod
     def processor_specs(cls, processor: str) -> dict:
-        """ retrieve OCRD processor specification from its ``--dump-json`` output
-        and return it as a dict.
+        """ retrieve OCRD processor specification from its ``--dump-json``
+        output and return it as a dict.
 
         Args:
             processor: name of a processor executable
@@ -144,9 +144,9 @@ class TestingConfig(Config):
 
     @classmethod
     def processor_specs(cls, processor: str) -> dict:
-        """ return fake processor specs from
-        ``tests/files/processor_specs`` resource folder in case the respective
-        binary can't be found within actual environment (i.e. `ocrd_all` is not installed).
+        """ return fake processor specs from ``tests/files/processor_specs``
+        resource folder in case the respective binary can't be found within
+        actual environment (i.e. `ocrd_all` is not installed).
         """
         try:
             return super().processor_specs(processor)
@@ -162,7 +162,7 @@ class TestingConfig(Config):
                 specs = json.load(f)
             return specs
         else:
-            print(
+            log.warn(
                 'file not found: {}'.format(filename)
             )
             return {}
@@ -205,7 +205,7 @@ def profile_config() -> Config:
     """
     if 'PROFILE' in os.environ:
         log.debug(
-            'Select config implementation based on PROFILE env var value `%s`.',
+            'Select config implementation based on PROFILE env var value `%s`',
             os.environ['PROFILE'],
         )
     else:

@@ -61,6 +61,7 @@ class ChainProcessorsField(fields.Raw):
         # return json.dumps(value)
         return value
 
+
 class ChainParametersField(fields.Raw):
     __schema_type__ = 'dict'
     __schema_format__ = 'JSON'
