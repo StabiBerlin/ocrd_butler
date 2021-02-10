@@ -146,7 +146,8 @@ class ApiTests(TestCase):
         result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[2])) as result_file:
             text = result_file.read()
-            assert "<pc:Unicode>Preußischer Kulturbesitz</pc:Unicode>" in text
+            assert text.startswith('<?xml version="1.0" encoding="UTF-8"?>')
+            assert "<pc:Unicode>" in text
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
@@ -194,7 +195,8 @@ class ApiTests(TestCase):
         result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[2])) as result_file:
             text = result_file.read()
-            assert "<pc:Unicode>Staatsbibliotnen</pc:Unicode>" in text
+            assert text.startswith('<?xml version="1.0" encoding="UTF-8"?>')
+            assert "<pc:Unicode>" in text
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
@@ -265,4 +267,5 @@ class ApiTests(TestCase):
             os.path.join(ocr_results, result_files[2]), encoding='utf-8'
         ) as result_file:
             text = result_file.read()
-            assert "<pc:Unicode>Staatshibliothe</pc:Unicode>" in text
+            assert text.startswith('<?xml version="1.0" encoding="UTF-8"?>')
+            assert "<pc:Unicode>" in text
