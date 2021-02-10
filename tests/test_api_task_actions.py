@@ -14,10 +14,7 @@ from flask_testing import TestCase
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import create_app, db
 
-from . import (
-    skip_in_test_profile,
-    require_ocrd_processors,
-)
+from . import require_ocrd_processors
 
 
 CURRENT_DIR = os.path.dirname(__file__)
@@ -122,7 +119,6 @@ class ApiTests(TestCase):
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
-    @skip_in_test_profile
     @require_ocrd_processors(
         "ocrd-tesserocr-segment-region",
         "ocrd-tesserocr-segment-line",
@@ -154,7 +150,6 @@ class ApiTests(TestCase):
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
-    @skip_in_test_profile
     @require_ocrd_processors(
         "ocrd-tesserocr-segment-region",
         "ocrd-tesserocr-segment-line",
@@ -203,7 +198,6 @@ class ApiTests(TestCase):
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
-    @skip_in_test_profile
     @require_ocrd_processors(
         'ocrd-olena-binarize',
         'ocrd-tesserocr-segment-region',
