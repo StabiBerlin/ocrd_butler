@@ -69,6 +69,6 @@ def require_ocrd_processors(*processors: List[str]) -> Callable:
 skip_in_test_profile = functools.partial(
     pytest.mark.skipif(
         test_profile_active(),
-        reason='Test requires full OCRD-All installation'
+        reason='Test not supposed to be run in `TEST` profile.'
     )
 )
