@@ -260,51 +260,24 @@ def task_run(task_id):
     return redirect("/tasks", code=302)
 
 
-@tasks_blueprint.route("/download/txt/<string:worker_task_id>")
-def download_txt(worker_task_id):
+@tasks_blueprint.route("/download/txt/<string:task_id>")
+def download_txt(task_id):
     """Define route to download the results as text."""
-    task_info = task_information(worker_task_id)
+    response = requests.get("{0}api/tasks/{1}/download_txt".format(
+        host_url(request),
+        task_id))
 
-    # Get the output group of the last step in the chain of the task.
-    task = db_model_Task.query.filter_by(worker_task_id=worker_task_id).first()
-    chain = db_model_Chain.query.filter_by(id=task.chain_id).first()
-    last_step = chain.processors[-1]
-    last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
-
-    page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
-    fulltext = ""
-
-    namespace = {
-        "page_2009-03-16": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2009-03-16",
-        "page_2010-01-12": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2010-01-12",
-        "page_2010-03-19": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2010-03-19",
-        "page_2013-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15",
-        "page_2016-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2016-07-15",
-        "page_2017-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2017-07-15",
-        "page_2018-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2018-07-15",
-        "page_2019-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15"
-    }
-
-    files = glob.glob("{}/*.xml".format(page_xml_dir))
-    files.sort()
-
-    for file in files:
-        tree = ET.parse(file)
-        xmlns = tree.getroot().tag.split("}")[0].strip("{")
-        if xmlns in namespace.values():
-            for regions in tree.iterfind(".//{%s}TextRegion" % xmlns):
-                fulltext += "\n"
-                for content in regions.findall(
-                        ".//{%s}TextLine//{%s}TextEquiv//{%s}Unicode" % (xmlns, xmlns, xmlns)):
-                    if content.text is not None:
-                        fulltext += content.text
+    if response.status_code != 200:
+        result = json.loads(response.content)
+        flash("An error occured: {0}".format(result.status))
+        return redirect("/tasks", code=302)
 
     return Response(
-        fulltext,
+        response.text,
         mimetype="text/txt",
         headers={
             "Content-Disposition":
-            "attachment;filename=fulltext_%s.txt" % task_info["result"]["task_id"]
+            "attachment;filename=fulltext_%s.txt" % task_id
         }
     )
 
