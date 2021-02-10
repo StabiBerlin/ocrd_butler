@@ -45,7 +45,7 @@ def celery_includes():
 # # @pytest.mark.usefixtures("config")
 # @pytest.mark.usefixtures('celery_session_app')
 # @pytest.mark.usefixtures('celery_session_worker')
-class ApiTests(TestCase):
+class ApiTaskActionRunTests(TestCase):
     """Test our api actions."""
 
     def setUp(self):
