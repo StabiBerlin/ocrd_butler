@@ -49,6 +49,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -f .coverage
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
+	rm tests/calamari_models/*
 
 lint: ## check style with flake8
 	flake8 ocrd_butler tests
@@ -61,7 +62,7 @@ test-init: ## download current checkpoint data files from Calamari OCR github re
         endif
 
 test: test-init ## run tests quickly with the default Python
-	TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata py.test
+	PROFILE=test TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata py.test
 
 test-all: ## run tests on every Python version with tox
 	tox

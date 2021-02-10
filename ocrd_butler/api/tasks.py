@@ -25,7 +25,9 @@ from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 
 from ocrd_butler.execution.tasks import run_task
-from ocrd_butler.util import to_json
+from ocrd_butler.util import logger, to_json
+
+log = logger(__name__)
 
 task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 
@@ -178,6 +180,7 @@ class TaskActions(TasksBase):
         # worker_task = run_task.apply_async(args=[task.to_json()],
         #                                    countdown=20)
         # worker_task = run_task(task.to_json())
+        log.info(f'run task: {task}')
         worker_task = run_task.delay(task.to_json())
         task.worker_task_id = worker_task.id
         db.session.commit()

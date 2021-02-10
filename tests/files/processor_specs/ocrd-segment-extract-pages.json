@@ -1,0 +1,41 @@
+{
+  "executable": "ocrd-segment-extract-pages",
+  "categories": [
+    "Image preprocessing"
+  ],
+  "description": "Extract page segmentation as page images (deskewed according to `/Page/@orientation` and cropped+masked along `/Page/Border`) + JSON (including region coordinates/classes and meta-data), as binarized images, and as mask images (segments filled with colors encoding classes) + COCO detection format JSON (for all pages). Output fileGrp format is `raw[,binarized[,mask]]` (i.e. fall back to first group).",
+  "input_file_grp": [
+    "OCR-D-SEG-PAGE",
+    "OCR-D-GT-SEG-PAGE",
+    "OCR-D-SEG-BLOCK",
+    "OCR-D-GT-SEG-BLOCK"
+  ],
+  "output_file_grp": [
+    "OCR-D-IMG-CROP"
+  ],
+  "steps": [
+    "layout/analysis"
+  ],
+  "parameters": {
+    "mimetype": {
+      "type": "string",
+      "enum": [
+        "image/bmp",
+        "application/postscript",
+        "image/gif",
+        "image/jpeg",
+        "image/jp2",
+        "image/png",
+        "image/x-portable-pixmap",
+        "image/tiff"
+      ],
+      "default": "image/png",
+      "description": "File format to save extracted images in."
+    },
+    "transparency": {
+      "type": "boolean",
+      "default": true,
+      "description": "Add alpha channels with segment masks to the images"
+    }
+  }
+}

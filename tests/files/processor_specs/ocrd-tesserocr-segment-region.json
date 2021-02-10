@@ -1,0 +1,57 @@
+{
+  "executable": "ocrd-tesserocr-segment-region",
+  "categories": [
+    "Layout analysis"
+  ],
+  "description": "Segment page into regions with Tesseract",
+  "input_file_grp": [
+    "OCR-D-IMG",
+    "OCR-D-SEG-PAGE",
+    "OCR-D-GT-SEG-PAGE"
+  ],
+  "output_file_grp": [
+    "OCR-D-SEG-BLOCK"
+  ],
+  "steps": [
+    "layout/segmentation/region"
+  ],
+  "parameters": {
+    "dpi": {
+      "type": "number",
+      "format": "float",
+      "description": "pixel density in dots per inch (overrides any meta-data in the images); disabled when negative",
+      "default": 0
+    },
+    "overwrite_regions": {
+      "type": "boolean",
+      "default": true,
+      "description": "Remove existing layout and text annotation below the Page level (otherwise skip page; no incremental annotation yet)."
+    },
+    "padding": {
+      "type": "number",
+      "format": "integer",
+      "description": "extend detected region rectangles by this many (true) pixels",
+      "default": 0
+    },
+    "shrink_polygons": {
+      "type": "boolean",
+      "default": false,
+      "description": "annotate polygon coordinates instead of bounding box rectangles by projecting the convex hull of all symbols"
+    },
+    "crop_polygons": {
+      "type": "boolean",
+      "default": false,
+      "description": "annotate polygon coordinates instead of bounding box rectangles"
+    },
+    "find_tables": {
+      "type": "boolean",
+      "default": true,
+      "description": "recognise tables as table regions (textord_tabfind_find_tables)"
+    },
+    "sparse_text": {
+      "type": "boolean",
+      "default": false,
+      "description": "use 'sparse text' page segmentation mode (find as much text as possible in no particular order): only text regions, single lines without vertical or horizontal space"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+    "version": "0.0.1",
+    "git_url": "https://github.com/qurator-spk/sbb_textline_detection",
+    "tools": {
+      "ocrd-sbb-textline-detector": {
+        "executable": "ocrd-sbb-textline-detector",
+        "categories": ["Layout analysis"],
+        "description": "Printspace, region and textline detection",
+        "steps": ["layout/segmentation/region", "layout/segmentation/line"],
+        "input_file_grp": [
+          "OCR-D-IMG"
+        ],
+        "output_file_grp": [
+          "OCR-D-SBB-SEG-LINE"
+        ],
+        "parameters": {
+          "model": {
+            "type": "string",
+            "format": "file",
+            "cacheable": true,
+            "description": "Path to directory containing models to be used (See https://qurator-data.de/sbb_textline_detector/)"
+          }
+        }
+      }
+    }
+  }

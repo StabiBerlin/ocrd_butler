@@ -14,6 +14,8 @@ from flask_testing import TestCase
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import create_app, db
 
+from . import require_ocrd_processors
+
 
 CURRENT_DIR = os.path.dirname(__file__)
 
@@ -55,31 +57,32 @@ class ApiTests(TestCase):
 
         testfiles = os.path.join(os.path.dirname(
             os.path.abspath(__file__)), "files")
-        with open("{0}/sbb-mets-PPN821929127.xml".format(testfiles), "r") as tfh:
-            responses.add(responses.GET, "http://foo.bar/mets.xml",
-                          body=tfh.read(), status=200)
-            tfh.close()
-        with open("{0}/00000001.jpg".format(testfiles), "rb") as tfh:
+
+        with open(
+            os.path.join(testfiles, "sbb-mets-PPN821929127.xml"),
+            "r", encoding="utf-8"
+        ) as tfh:
             responses.add(
-                responses.GET,
-                "http://content.staatsbibliothek-berlin.de/dms/"
-                "PPN821929127/800/0/00000001.jpg",
-                body=tfh.read(), status=200, content_type="image/jpg")
-            tfh.close()
-        with open("{0}/00000002.jpg".format(testfiles), "rb") as tfh:
-            responses.add(
-                responses.GET,
-                "http://content.staatsbibliothek-berlin.de/dms/"
-                "PPN821929127/800/0/00000002.jpg",
-                body=tfh.read(), status=200, content_type="image/jpg")
-            tfh.close()
-        with open("{0}/00000003.jpg".format(testfiles), "rb") as tfh:
-            responses.add(
-                responses.GET,
-                "http://content.staatsbibliothek-berlin.de/dms/"
-                "PPN821929127/800/0/00000003.jpg",
-                body=tfh.read(), status=200, content_type="image/jpg")
-            tfh.close()
+                method=responses.GET,
+                url="http://foo.bar/mets.xml",
+                body=tfh.read(),
+                status=200
+            )
+
+        for i in "123":
+            with open(
+                os.path.join(testfiles, f"0000000{i}.jpg"), "rb"
+            ) as tfh:
+                responses.add(
+                    method=responses.GET,
+                    url=(
+                        "http://content.staatsbibliothek-berlin.de/dms/"
+                        f"PPN821929127/800/0/0000000{i}.jpg"
+                    ),
+                    body=tfh.read(),
+                    status=200,
+                    content_type="image/jpg"
+                )
 
     def tearDown(self):
         """Remove the test database."""
@@ -116,6 +119,12 @@ class ApiTests(TestCase):
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
+    @require_ocrd_processors(
+        "ocrd-tesserocr-segment-region",
+        "ocrd-tesserocr-segment-line",
+        "ocrd-tesserocr-segment-word",
+        "ocrd-tesserocr-recognize",
+    )
     def test_task_tesserocr(self, mock_run_task):
         """Check if a new task is created."""
         response = self.client.post("/api/tasks", json=dict(
@@ -137,10 +146,17 @@ class ApiTests(TestCase):
         result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[2])) as result_file:
             text = result_file.read()
-            assert "<pc:Unicode>Preußischer Kulturbesitz</pc:Unicode>" in text
+            assert text.startswith('<?xml version="1.0" encoding="UTF-8"?>')
+            assert "<pc:Unicode>" in text
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
+    @require_ocrd_processors(
+        "ocrd-tesserocr-segment-region",
+        "ocrd-tesserocr-segment-line",
+        "ocrd-tesserocr-segment-word",
+        "ocrd-calamari-recognize",
+    )
     def test_task_tess_cal(self, mock_run_task):
         """Check if a new task is created."""
         chain_response = self.client.post("/api/chains", json=dict(
@@ -179,15 +195,24 @@ class ApiTests(TestCase):
         result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[2])) as result_file:
             text = result_file.read()
-            assert "<pc:Unicode>Staatsbibliotnen</pc:Unicode>" in text
+            assert text.startswith('<?xml version="1.0" encoding="UTF-8"?>')
+            assert "<pc:Unicode>" in text
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
+    @require_ocrd_processors(
+        'ocrd-olena-binarize',
+        'ocrd-tesserocr-segment-region',
+        'ocrd-tesserocr-segment-line',
+        'ocrd-calamari-recognize',
+    )
     def test_task_ole_cal(self, mock_run_task):
         """Currently using /opt/calamari_models/fraktur_historical/0.ckpt.json
            as checkpoint file.
         """
-        assert os.path.exists("{0}/calamari_models/0.ckpt.json".format(CURRENT_DIR))
+        assert os.path.exists(
+            "{0}/calamari_models/0.ckpt.json".format(CURRENT_DIR)
+        )
 
         chain_response = self.client.post("/api/chains", json=dict(
             name="TC Chain",
@@ -206,6 +231,8 @@ class ApiTests(TestCase):
             }
         ))
 
+        assert chain_response.json == {'id': 1, 'message': 'Chain created.'}
+
         task_response = self.client.post("/api/tasks", json=dict(
             chain_id=chain_response.json["id"],
             src="http://foo.bar/mets.xml",
@@ -221,8 +248,12 @@ class ApiTests(TestCase):
             }
         ))
 
-        response = self.client.post("/api/tasks/{0}/run".format(
-            task_response.json["id"]))
+        assert task_response.status_code == 201
+        assert task_response.json == {'id': 1, 'message': 'Task created.'}
+
+        response = self.client.post(
+            "/api/tasks/{0}/run".format(task_response.json["id"])
+        )
         assert response.status_code == 200
         assert response.json["status"] == "SUCCESS"
 
@@ -232,6 +263,9 @@ class ApiTests(TestCase):
         ocr_results = os.path.join(response.json["result_dir"],
                                    "OCR-D-OCR-CALAMARI")
         result_files = os.listdir(ocr_results)
-        with open(os.path.join(ocr_results, result_files[2])) as result_file:
+        with open(
+            os.path.join(ocr_results, result_files[2]), encoding='utf-8'
+        ) as result_file:
             text = result_file.read()
-            assert "<pc:Unicode>Staatshibliothe</pc:Unicode>" in text
+            assert text.startswith('<?xml version="1.0" encoding="UTF-8"?>')
+            assert "<pc:Unicode>" in text

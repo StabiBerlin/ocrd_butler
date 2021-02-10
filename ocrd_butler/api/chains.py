@@ -67,6 +67,7 @@ class ChainBase(Resource):
 
         return data
 
+
 @chain_namespace.route("")
 class Chains(ChainBase):
     """ Add chains and list all of it. """

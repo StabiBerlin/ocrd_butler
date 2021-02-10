@@ -1,0 +1,43 @@
+{
+  "executable": "ocrd-pc-segmentation",
+  "categories": [
+    "Layout analysis"
+  ],
+  "description": "Segment page into regions using a pixel classifier based on a Fully Convolutional Network (FCN)",
+  "input_file_grp": [
+    "OCR-D-IMG-BIN"
+  ],
+  "output_file_grp": [
+    "OCR-D-SEG-BLOCK"
+  ],
+  "steps": [
+    "layout/segmentation/region"
+  ],
+  "parameters": {
+    "overwrite_regions": {
+      "type": "boolean",
+      "default": true,
+      "description": "remove existing layout and text annotation below the Page level"
+    },
+    "xheight": {
+      "type": "integer",
+      "description": "height of character x in pixels used during training",
+      "default": 8
+    },
+    "model": {
+      "type": "string",
+      "description": "trained model for pixel classifier",
+      "default": "__DEFAULT__"
+    },
+    "gpu_allow_growth": {
+      "type": "boolean",
+      "default": false,
+      "description": "required for GPU use with some graphic cards (set to true, if you get CUDNN_INTERNAL_ERROR)"
+    },
+    "resize_height": {
+      "type": "integer",
+      "default": 300,
+      "description": "scale down pixelclassifier output to this height for postprocessing (performance/quality tradeoff). Independent of training."
+    }
+  }
+}
