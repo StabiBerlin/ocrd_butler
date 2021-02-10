@@ -49,6 +49,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -f .coverage
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
+	rm tests/calamari_models/*
 
 lint: ## check style with flake8
 	flake8 ocrd_butler tests
