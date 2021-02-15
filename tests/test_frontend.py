@@ -165,6 +165,32 @@ class FrontendTests(TestCase):
         assert response.data[:10] == b"foobar"
 
     @mock.patch("requests.get")
+    def test_frontend_page_zip_error(self, mock_requests_get):
+        """ Check whether download page requests yields redirect if
+        something goes wrong.
+        """
+        mock_requests_get.return_value = type(
+            '', (object,),
+            {
+                "status_code": 404,
+                "content": json.dumps(
+                    {
+                        "status": "Unknown task for id \"23\".",
+                        "statusCode": "404",
+                        "message": (
+                            "Unknown task. You have requested this URI"
+                            " [/api/tasks/23/download_page] but did you mean"
+                            " /download/page/<string:task_id> ?"
+                        )
+                    }
+                ),
+            }
+        )()
+        response = self.client.get('/download/page/23')
+        assert response.status_code == 302
+        assert response.headers.get('Location').endswith('/tasks')
+
+    @mock.patch("requests.get")
     def test_frontend_pageviewer_zip(self, mock_requests_get):
         """Check if download files for pageviewer is working."""
 
