@@ -324,45 +324,23 @@ def download_pageviewer_zip(task_id):
         }
     )
 
-@tasks_blueprint.route("/download/alto/<string:worker_task_id>")
-def download_alto_zip(worker_task_id):
+@tasks_blueprint.route("/download/alto/<string:task_id>")
+def download_alto_zip(task_id):
     """Define route to download the alto xml results as zip file."""
-    task_info = task_information(worker_task_id)
+    response = requests.get("{0}api/tasks/{1}/download_pageviewer".format(
+        host_url(request),
+        task_id))
 
-    # Get the output group of the last step in the chain of the task.
-    task = db_model_Task.query.filter_by(worker_task_id=worker_task_id).first()
-    chain = db_model_Chain.query.filter_by(id=task.chain_id).first()
-    last_step = chain.processors[-1]
-    last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+    if response.status_code != 200:
+        result = json.loads(response.content)
+        flash(f"An error occured: {result.status}")
+        return redirect("/tasks", code=302)
 
-    # BUG?: java.lang.IllegalArgumentException:
-    # Variable value 'TextTypeSimpleType.CAPTION' is not in the list of valid values.
-    # possible reason: https://github.com/OCR-D/core/issues/451 ??
-    alto_xml_dir = os.path.join(task_info["result"]["result_dir"], "OCR-D-OCR-ALTO")
-    alto_path = pathlib.Path(alto_xml_dir)
-
-    if not os.path.exists(alto_path):
-        mets_url = "{}/mets.xml".format(task_info["result"]["result_dir"])
-        run_cli(
-            "ocrd-fileformat-transform",
-            mets_url=mets_url,
-            resolver=Resolver(),
-            log_level="DEBUG",
-            input_file_grp=last_output,
-            output_file_grp="OCR-D-OCR-ALTO",
-            parameter='{"from-to": "page alto"}'
-        )
-
-    data = io.BytesIO()
-    with zipfile.ZipFile(data, mode='w') as zip_file:
-        for f_name in alto_path.iterdir():
-            arcname = "{0}/{1}".format(last_output, os.path.basename(f_name))
-            zip_file.write(f_name, arcname=arcname)
-    data.seek(0)
-
-    return send_file(
-        data,
+    return Response(
+        response.data,
         mimetype="application/zip",
-        as_attachment=True,
-        attachment_filename="ocr_alto_xml_%s.zip" % task_info["result"]["task_id"]
+        headers={
+            "Content-Disposition":
+            f"attachment;filename=ocr_alto_{task_id}.zip"
+        }
     )

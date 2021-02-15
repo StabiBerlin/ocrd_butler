@@ -203,6 +203,17 @@
         <mets:FLocat xmlns:xlink="http://www.w3.org/1999/xlink" LOCTYPE="OTHER" OTHERLOCTYPE="FILE" xlink:href="OCR-D-OCR-CALAMARI/FILE_0003_OCR-D-OCR-CALAMARI.xml"/>
       </mets:file>
     </mets:fileGrp>
+    <mets:fileGrp USE="OCR-D-OCR-ALTO">
+      <mets:file MIMETYPE="application/alto+xml" ID="FILE_0001_OCR-D-OCR-ALTO">
+        <mets:FLocat xmlns:xlink="http://www.w3.org/1999/xlink" LOCTYPE="OTHER" OTHERLOCTYPE="FILE" xlink:href="OCR-D-OCR-ALTO/FILE_0001_OCR-D-OCR-ALTO.xml"/>
+      </mets:file>
+      <mets:file MIMETYPE="application/alto+xml" ID="FILE_0002_OCR-D-OCR-ALTO">
+        <mets:FLocat xmlns:xlink="http://www.w3.org/1999/xlink" LOCTYPE="OTHER" OTHERLOCTYPE="FILE" xlink:href="OCR-D-OCR-ALTO/FILE_0002_OCR-D-OCR-ALTO.xml"/>
+      </mets:file>
+      <mets:file MIMETYPE="application/alto+xml" ID="FILE_0003_OCR-D-OCR-ALTO">
+        <mets:FLocat xmlns:xlink="http://www.w3.org/1999/xlink" LOCTYPE="OTHER" OTHERLOCTYPE="FILE" xlink:href="OCR-D-OCR-ALTO/FILE_0003_OCR-D-OCR-ALTO.xml"/>
+      </mets:file>
+    </mets:fileGrp>
   </mets:fileSec>
   <mets:structMap TYPE="LOGICAL">
     <mets:div ADMID="AMD" CONTENTIDS="http://resolver.staatsbibliothek-berlin.de/SBB0001990D00000000" DMDID="DMDLOG_0000" ID="LOG_0000" LABEL="Berliner Frontabschnitt 29. April 1945 SOWJETTRUPPEN IM STADTKERN BERLINS" ORDERLABEL="Berliner Frontabschnitt 29. April 1945 SOWJETTRUPPEN IM STADTKERN BERLINS" TYPE="monograph">
@@ -220,6 +231,7 @@
         <mets:fptr FILEID="FILE_0001_OCR-D-SEG-LINE"/>
         <mets:fptr FILEID="FILE_0001_OCR-D-SEG-WORD"/>
         <mets:fptr FILEID="FILE_0001_OCR-D-OCR-CALAMARI"/>
+        <mets:fptr FILEID="FILE_0001_OCR-D-OCR-ALTO"/>
       </mets:div>
       <mets:div CONTENTIDS="http://resolver.staatsbibliothek-berlin.de/SBB0001990D00000002" ID="PHYS_0002" ORDER="2" ORDERLABEL=" - " TYPE="page">
         <mets:fptr FILEID="FILE_0002_DEFAULT"/>
@@ -230,6 +242,7 @@
         <mets:fptr FILEID="FILE_0002_OCR-D-SEG-LINE"/>
         <mets:fptr FILEID="FILE_0002_OCR-D-SEG-WORD"/>
         <mets:fptr FILEID="FILE_0002_OCR-D-OCR-CALAMARI"/>
+        <mets:fptr FILEID="FILE_0002_OCR-D-OCR-ALTO"/>
       </mets:div>
       <mets:div CONTENTIDS="http://resolver.staatsbibliothek-berlin.de/SBB0001990D00000003" ID="PHYS_0003" ORDER="3" ORDERLABEL=" - " TYPE="page">
         <mets:fptr FILEID="FILE_0003_DEFAULT"/>
@@ -240,6 +253,7 @@
         <mets:fptr FILEID="FILE_0003_OCR-D-SEG-LINE"/>
         <mets:fptr FILEID="FILE_0003_OCR-D-SEG-WORD"/>
         <mets:fptr FILEID="FILE_0003_OCR-D-OCR-CALAMARI"/>
+        <mets:fptr FILEID="FILE_0003_OCR-D-OCR-ALTO"/>
       </mets:div>
     </mets:div>
   </mets:structMap>
