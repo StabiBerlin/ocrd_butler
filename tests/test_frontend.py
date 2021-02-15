@@ -177,3 +177,17 @@ class FrontendTests(TestCase):
 
         assert response.status_code == 200
         assert response.data[:10] == b"foobar"
+
+    @mock.patch("requests.get")
+    def test_frontend_alto_zip(self, mock_requests_get):
+        """Check if download alto files is working."""
+
+        mock_requests_get.return_value = type('', (object,), {
+            "data": b"foobar",
+            "status_code": 200
+        })()
+
+        response = self.client.get("/download/alto/42")
+
+        assert response.status_code == 200
+        assert response.data[:10] == b"foobar"

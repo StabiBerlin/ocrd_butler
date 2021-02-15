@@ -22,6 +22,8 @@ from flask_restx import (
 )
 import requests
 
+from ocrd.processor.base import run_cli
+from ocrd.resolver import Resolver
 from ocrd_validators import ParameterValidator
 
 from ocrd_butler.api.restx import api
@@ -97,7 +99,8 @@ class TasksBase(Resource):
             "results",
             "download_txt",
             "download_page",
-            "download_pageviewer")
+            "download_pageviewer",
+            "download_alto")
         self.post_actions = ("run", "rerun", "stop")
 
     def task_data(self, json_data):
@@ -318,7 +321,45 @@ class TaskActions(TasksBase):
 
     def download_alto(self, task):
         """ Download the results of the task as ALTO XML. """
-        pass
+        task_info = task_information(task.worker_task_id)
+
+        # Get the output group of the last step in the chain of the task.
+        task_data = db_model_Task.query.filter_by(worker_task_id=task.worker_task_id).first()
+        chain_data = db_model_Chain.query.filter_by(id=task_data.chain_id).first()
+        last_step = chain_data.processors[-1]
+        last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+
+        # BUG?: java.lang.IllegalArgumentException:
+        # Variable value 'TextTypeSimpleType.CAPTION' is not in the list of valid values.
+        # possible reason: https://github.com/OCR-D/core/issues/451 ??
+        alto_xml_dir = os.path.join(task_info["result"]["result_dir"], "OCR-D-OCR-ALTO")
+        alto_path = pathlib.Path(alto_xml_dir)
+
+        if not os.path.exists(alto_path):
+            mets_url = "{}/mets.xml".format(task_info["result"]["result_dir"])
+            run_cli(
+                "ocrd-fileformat-transform",
+                mets_url=mets_url,
+                resolver=Resolver(),
+                log_level="DEBUG",
+                input_file_grp=last_output,
+                output_file_grp="OCR-D-OCR-ALTO",
+                parameter='{"from-to": "page alto"}'
+            )
+
+        data = io.BytesIO()
+        with zipfile.ZipFile(data, mode='w') as zip_file:
+            for f_name in alto_path.iterdir():
+                arcname = "{0}/{1}".format(last_output, os.path.basename(f_name))
+                zip_file.write(f_name, arcname=arcname)
+        data.seek(0)
+
+        return send_file(
+            data,
+            mimetype="application/zip",
+            as_attachment=True,
+            attachment_filename="ocr_alto_xml_%s.zip" % task_info["result"]["task_id"]
+        )
 
     def download_txt(self, task):
         """ Download the results of the task as text. """
