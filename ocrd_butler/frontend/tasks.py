@@ -6,13 +6,7 @@ from datetime import (
     datetime,
     timedelta
 )
-import io
-import glob
 import json
-import os
-import pathlib
-import xml.etree.ElementTree as ET
-import zipfile
 
 import requests
 
@@ -23,8 +17,7 @@ from flask import (
     redirect,
     render_template,
     request,
-    Response,
-    send_file
+    Response
 )
 
 from flask_wtf import FlaskForm
@@ -40,10 +33,6 @@ from wtforms.validators import (
     URL
 )
 
-from ocrd.processor.base import run_cli
-from ocrd.resolver import Resolver
-
-from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import host_url
@@ -69,15 +58,14 @@ def task_information(uid):
     if uid is None:
         return None
 
-    response = requests.get("http://localhost:5555/api/task/info/{0}".format(uid))
+    response = requests.get(f"http://localhost:5555/api/task/info/{uid}")
     if response.status_code == 404:
         current_app.logger.warning("Can't find task '{0}'".format(uid))
         return None
     try:
         task_info = json.loads(response.content)
     except json.decoder.JSONDecodeError as exc:
-        current_app.logger.error("Can't read response for task '{0}'. ({1})".format(
-            uid, exc.__str__()))
+        current_app.logger.error(f"Can't read response for task '{uid}'. ({exc.__str__()})")
         return None
 
     task_info["ready"] = task_info["state"] == "SUCCESS"
@@ -124,9 +112,9 @@ def current_tasks():
 
         if task_info is not None and task_info["ready"]:
             task["result"].update({
-                "page": "/download/page/{}".format(result.worker_task_id),
-                "alto": "/download/alto/{}".format(result.worker_task_id),
-                "txt": "/download/txt/{}".format(result.worker_task_id),
+                "page": f"/download/page/{result.worker_task_id}",
+                "alto": f"/download/alto/{result.worker_task_id}",
+                "txt": f"/download/txt/{result.worker_task_id}",
             })
 
             if task_info["received"] is not None:
@@ -145,11 +133,10 @@ def current_tasks():
                     "runtime": timedelta(seconds=task_info["runtime"])
                 })
 
-        task["flower_url"] = "{0}{1}task/{2}".format(
-            request.host_url.replace("5000", "5555"),  # A bit hacky, but for devs on localhost.
-            "flower/" if "localhost:5000" not in request.host_url else "",
-            task["worker_task_id"]
-        )
+        # A bit hacky, but for devs on localhost.
+        flower_host_url = request.host_url.replace("5000", "5555")
+        flower_path = "flower/" if "localhost:5000" not in request.host_url else ""
+        task["flower_url"] = f"{flower_host_url}{flower_path}task/{task['worker_task_id']}"
 
         cur_tasks.append(task)
 
@@ -205,8 +192,8 @@ def new_task():
             flash("Can't create new task. Status {0}, Error '{1}': '{2}'.".format(
                 result["statusCode"], result["message"], result["status"]))
         except Exception as exc:
-            flash("Exception while displaying error message in new_task. Exc: {0}."
-                  " Is the proxy active?".format(exc.__str__()))
+            flash(f"Exception while displaying error message in new_task. Exc: {exc.__str__()}."
+                  " Is the proxy active?")
 
     return redirect("/tasks", code=302)
 
@@ -228,15 +215,14 @@ def tasks():
 @tasks_blueprint.route("/task/delete/<int:task_id>")
 def task_delete(task_id):
     """Delete the task with the given id."""
-    response = requests.delete("{0}api/tasks/{1}".format(
-        host_url(request),
-        task_id))
+    response = requests.delete(f"{host_url(request)}api/tasks/{task_id}")
 
     if response.status_code in (200, 201):
-        flash("Task {0} deleted.".format(task_id))
+        flash(f"Task {task_id} deleted.")
     else:
         result = json.loads(response.content)
         flash("An error occured: {0}".format(result.status))
+
     return redirect("/tasks", code=302)
 
 
@@ -244,28 +230,25 @@ def task_delete(task_id):
 def task_run(task_id):
     """Run the task with the given id."""
     # pylint: disable=broad-except
-    response = requests.post("{0}api/tasks/{1}/run".format(
-        host_url(request),
-        task_id))
+    response = requests.post(f"host_url(request)api/tasks/{task_id}/run")
+
     if response.status_code in (200, 201):
-        flash("Task {0} started.".format(task_id))
+        flash(f"Task {task_id} started.")
     else:
         try:
             result = json.loads(response.content)
-            flash("An error occured: {0}".format(result["status"]))
+            flash(f"An error occured: {result['status']}")
         except Exception as exc:
             result = response.content
-            flash("An error occured: {0}. (Exception: {1})".format(
-                result, exc.__str__()))
+            flash(f"An error occured: {result}. (Exception: {exc.__str__()})")
+
     return redirect("/tasks", code=302)
 
 
 @tasks_blueprint.route("/download/txt/<string:task_id>")
 def download_txt(task_id):
     """Define route to download the results as text."""
-    response = requests.get("{0}api/tasks/{1}/download_txt".format(
-        host_url(request),
-        task_id))
+    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_txt")
 
     if response.status_code != 200:
         result = json.loads(response.content)
@@ -277,7 +260,7 @@ def download_txt(task_id):
         mimetype="text/txt",
         headers={
             "Content-Disposition":
-            "attachment;filename=fulltext_%s.txt" % task_id
+            f"attachment;filename=fulltext_{task_id}.txt"
         }
     )
 
@@ -285,9 +268,7 @@ def download_txt(task_id):
 @tasks_blueprint.route("/download/page/<string:task_id>")
 def download_page_zip(task_id):
     """Define route to download the page xml results as zip file."""
-    response = requests.get("{0}api/tasks/{1}/download_page".format(
-        host_url(request),
-        task_id))
+    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_page")
 
     if response.status_code != 200:
         result = json.loads(response.content)
@@ -306,9 +287,7 @@ def download_page_zip(task_id):
 @tasks_blueprint.route("/download/pageviewer/<string:task_id>")
 def download_pageviewer_zip(task_id):
     """Define route to download the page xml results as zip file."""
-    response = requests.get("{0}api/tasks/{1}/download_pageviewer".format(
-        host_url(request),
-        task_id))
+    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_pageviewer")
 
     if response.status_code != 200:
         result = json.loads(response.content)
@@ -327,9 +306,7 @@ def download_pageviewer_zip(task_id):
 @tasks_blueprint.route("/download/alto/<string:task_id>")
 def download_alto_zip(task_id):
     """Define route to download the alto xml results as zip file."""
-    response = requests.get("{0}api/tasks/{1}/download_pageviewer".format(
-        host_url(request),
-        task_id))
+    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_pageviewer")
 
     if response.status_code != 200:
         result = json.loads(response.content)

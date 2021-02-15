@@ -3,20 +3,13 @@
 """Testing the api for `ocrd_butler` package."""
 
 import json
-
-import pytest
 import os
-import glob
-import responses
-import requests
-import shutil
 from unittest import mock
 
-from flask import current_app
 from flask_testing import TestCase
 
 from ocrd_butler.config import TestingConfig
-from ocrd_butler.factory import create_app, db
+from ocrd_butler.factory import create_app
 
 CURRENT_DIR = os.path.dirname(__file__)
 
@@ -47,7 +40,7 @@ class ApiTaskActions(TestCase):
         mock_task_information.return_value = {
             "ready": True,
             "result": {
-                "result_dir": "{0}/files/ocr_result_01".format(os.path.dirname(__file__)),
+                "result_dir": f"{CURRENT_DIR}/files/ocr_result_01",
                 "task_id": 23
             }
         }
@@ -83,7 +76,7 @@ class ApiTaskActions(TestCase):
         mock_task_information.return_value = {
             "ready": True,
             "result": {
-                "result_dir": "{0}/files/ocr_result_01".format(os.path.dirname(__file__)),
+                "result_dir": f"{CURRENT_DIR}/files/ocr_result_01",
                 "task_id": 23
             }
         }
@@ -120,7 +113,7 @@ class ApiTaskActions(TestCase):
         mock_task_information.return_value = {
             "ready": True,
             "result": {
-                "result_dir": "{0}/files/ocr_result_01".format(os.path.dirname(__file__)),
+                "result_dir": f"{CURRENT_DIR}/files/ocr_result_01",
                 "task_id": 23
             }
         }
@@ -157,7 +150,7 @@ class ApiTaskActions(TestCase):
         mock_task_information.return_value = {
             "ready": True,
             "result": {
-                "result_dir": "{0}/files/ocr_result_01".format(os.path.dirname(__file__)),
+                "result_dir": f"{CURRENT_DIR}/files/ocr_result_01",
                 "task_id": 23
             }
         }
@@ -170,10 +163,7 @@ class ApiTaskActions(TestCase):
                 "processors": ["ocrd-calamari-recognize"]
             })()
 
-        try:
-            response = self.client.get("/api/tasks/foobar/download_alto")
-        except Exception as exc:
-            import ipdb; ipdb.set_trace()
+        response = self.client.get("/api/tasks/foobar/download_alto")
 
         assert response.status_code == 200
         assert response.content_type == "application/zip"
