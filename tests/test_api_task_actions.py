@@ -21,12 +21,6 @@ class ApiTaskActions(TestCase):
         return create_app(config=TestingConfig)
 
     def setUp(self):
-        pass
-
-    @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
-    @mock.patch("ocrd_butler.api.tasks.task_information")
-    def test_api_task_download_txt(self, mock_task_information, mock_fs):
-        """Check if download txt is working."""
         data = json.dumps({
             "description": "task_description",
             "src": "src",
@@ -35,8 +29,12 @@ class ApiTaskActions(TestCase):
             "parameters": "{}"
         })
         headers = {"Content-Type": "application/json"}
-        response = self.client.post("/api/tasks", data=data, headers=headers)
+        self.client.post("/api/tasks", data=data, headers=headers)
 
+    def setup_mocks(self, mock_task_information, mock_fs):
+        """Setup the mocks for patching task_information and flask_sqlalchemy
+           query getter.
+        """
         mock_task_information.return_value = {
             "ready": True,
             "result": {
@@ -52,6 +50,12 @@ class ApiTaskActions(TestCase):
                 "worker_task_id": 42,
                 "processors": ["ocrd-calamari-recognize"]
             })()
+
+    @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
+    @mock.patch("ocrd_butler.api.tasks.task_information")
+    def test_api_task_download_txt(self, mock_task_information, mock_fs):
+        """Check if download txt is working."""
+        self.setup_mocks(mock_task_information, mock_fs)
 
         response = self.client.get("/api/tasks/foobar/download_txt")
 
@@ -63,31 +67,7 @@ class ApiTaskActions(TestCase):
     @mock.patch("ocrd_butler.api.tasks.task_information")
     def test_api_task_page_zip(self, mock_task_information, mock_fs):
         """Check if download txt is working."""
-        data = json.dumps({
-            "description": "task_description",
-            "src": "src",
-            "file_grp": "DEFAULT",
-            "chain_id": "chain_id",
-            "parameters": "{}"
-        })
-        headers = {"Content-Type": "application/json"}
-        response = self.client.post("/api/tasks", data=data, headers=headers)
-
-        mock_task_information.return_value = {
-            "ready": True,
-            "result": {
-                "result_dir": f"{CURRENT_DIR}/files/ocr_result_01",
-                "task_id": 23
-            }
-        }
-        mock_fs\
-            .return_value.filter_by\
-            .return_value.first\
-            .return_value = type('', (object,), {
-                "chain_id": 1,
-                "worker_task_id": 42,
-                "processors": ["ocrd-calamari-recognize"]
-            })()
+        self.setup_mocks(mock_task_information, mock_fs)
 
         response = self.client.get("/api/tasks/foobar/download_page")
 
@@ -100,31 +80,7 @@ class ApiTaskActions(TestCase):
     @mock.patch("ocrd_butler.api.tasks.task_information")
     def test_api_task_pageviewer_zip(self, mock_task_information, mock_fs):
         """Check if download txt is working."""
-        data = json.dumps({
-            "description": "task_description",
-            "src": "src",
-            "file_grp": "DEFAULT",
-            "chain_id": "chain_id",
-            "parameters": "{}"
-        })
-        headers = {"Content-Type": "application/json"}
-        response = self.client.post("/api/tasks", data=data, headers=headers)
-
-        mock_task_information.return_value = {
-            "ready": True,
-            "result": {
-                "result_dir": f"{CURRENT_DIR}/files/ocr_result_01",
-                "task_id": 23
-            }
-        }
-        mock_fs\
-            .return_value.filter_by\
-            .return_value.first\
-            .return_value = type('', (object,), {
-                "chain_id": 1,
-                "worker_task_id": 42,
-                "processors": ["ocrd-calamari-recognize"]
-            })()
+        self.setup_mocks(mock_task_information, mock_fs)
 
         response = self.client.get("/api/tasks/foobar/download_pageviewer")
 
@@ -137,31 +93,7 @@ class ApiTaskActions(TestCase):
     @mock.patch("ocrd_butler.api.tasks.task_information")
     def test_api_task_alto_zip(self, mock_task_information, mock_fs):
         """Check if download txt is working."""
-        data = json.dumps({
-            "description": "task_description",
-            "src": "src",
-            "file_grp": "DEFAULT",
-            "chain_id": "chain_id",
-            "parameters": "{}"
-        })
-        headers = {"Content-Type": "application/json"}
-        response = self.client.post("/api/tasks", data=data, headers=headers)
-
-        mock_task_information.return_value = {
-            "ready": True,
-            "result": {
-                "result_dir": f"{CURRENT_DIR}/files/ocr_result_01",
-                "task_id": 23
-            }
-        }
-        mock_fs\
-            .return_value.filter_by\
-            .return_value.first\
-            .return_value = type('', (object,), {
-                "chain_id": 1,
-                "worker_task_id": 42,
-                "processors": ["ocrd-calamari-recognize"]
-            })()
+        self.setup_mocks(mock_task_information, mock_fs)
 
         response = self.client.get("/api/tasks/foobar/download_alto")
 
