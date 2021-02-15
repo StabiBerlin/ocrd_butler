@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 from flask import (
+    current_app,
     make_response,
     jsonify,
     request,
@@ -71,15 +72,14 @@ def task_information(uid):
     if uid is None:
         return None
 
-    response = requests.get("http://localhost:5555/api/task/info/{0}".format(uid))
+    response = requests.get(f"http://localhost:5555/api/task/info/{uid}")
     if response.status_code == 404:
-        current_app.logger.warning("Can't find task '{0}'".format(uid))
+        current_app.logger.warning(f"Can't find task '{uid}'")
         return None
     try:
         task_info = json.loads(response.content)
     except json.decoder.JSONDecodeError as exc:
-        current_app.logger.error("Can't read response for task '{0}'. ({1})".format(
-            uid, exc.__str__()))
+        current_app.logger.error(f"Can't read response for task '{uid}'. ({exc.__str__()})")
         return None
 
     task_info["ready"] = task_info["state"] == "SUCCESS"
@@ -92,8 +92,8 @@ def task_information(uid):
 class TasksBase(Resource):
     """Base methods for tasks."""
 
-    def __init__(self, api=None, *args, **kwargs):
-        super().__init__(api, *args, **kwargs)
+    def __init__(self, api_obj, *args, **kwargs):
+        super().__init__(api_obj, *args, **kwargs)
         self.get_actions = (
             "status",
             "results",
@@ -119,8 +119,7 @@ class TasksBase(Resource):
             chain = db_model_Chain.query.filter_by(id=data["chain_id"]).first()
             if chain is None:
                 task_namespace.abort(400, "Wrong parameter.",
-                                     status="Unknow chain with id {}.".format(
-                                         data["chain_id"]),
+                                     status=f"Unknow chain with id {data['chain_id']}.",
                                      statusCode="400")
 
         for processor in data["parameters"].keys():
@@ -129,8 +128,8 @@ class TasksBase(Resource):
             if not report.is_valid:
                 task_namespace.abort(
                     400, "Wrong parameter.",
-                    status="Unknown parameter \"{0}\" for processor \"{1}\".".format(
-                        data["parameters"][processor], processor),
+                    status=f"Unknown parameter \"{data['parameters'][processor]}\" "
+                           f"for processor \"{processor}\".",
                     statusCode="400")
 
         data["parameters"] = json.dumps(data["parameters"])
@@ -141,17 +140,17 @@ class TasksBase(Resource):
 
 @task_namespace.route("")
 class Task(TasksBase):
+    """Restful methods for tasks."""
 
     @api.doc(responses={201: "Created", 400: "Missing parameter"})
     @api.expect(task_model)
     def post(self):
+        """Create a new Task."""
         data = self.task_data(request.json)
 
         task = db_model_Task(**data)
         db.session.add(task)
         db.session.commit()
-
-        headers = dict(Location="/tasks/{0}".format(task.id))
 
         return make_response({
             "message": "Task created.",
@@ -172,13 +171,13 @@ class TaskActions(TasksBase):
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
-                status="Unknown task for id \"{0}\".".format(task_id),
+                status=f"Unknown task for id \"{task_id}\".",
                 statusCode="404")
 
         if action not in self.post_actions:
             task_namespace.abort(
                 400, "Unknown action.",
-                status="Unknown action \"{0}\".".format(action),
+                status=f"Unknown action \"{action}\".",
                 statusCode="400")
 
         action = getattr(self, action)
@@ -187,7 +186,7 @@ class TaskActions(TasksBase):
         except Exception as exc:
             task_namespace.abort(
                 500, "Error.",
-                status="Unexpected error \"{0}\".".format(exc.__str__()),
+                status=f"Unexpected error \"{exc.__str__()}\".",
                 statusCode="400")
 
     @api.doc(responses={200: "OK", 400: "Unknown action",
@@ -200,13 +199,13 @@ class TaskActions(TasksBase):
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
-                status="Unknown task for id \"{0}\".".format(task_id),
+                status=f"Unknown task for id \"{task_id}\".",
                 statusCode="404")
 
         if action not in self.get_actions:
             task_namespace.abort(
                 400, "Unknown action.",
-                status="Unknown action \"{0}\".".format(action),
+                status=f"Unknown action \"{action}\".",
                 statusCode="400")
 
         action = getattr(self, action)
@@ -215,7 +214,7 @@ class TaskActions(TasksBase):
         except Exception as exc:
             task_namespace.abort(
                 500, "Error.",
-                status="Unexpected error \"{0}\".".format(exc.__str__()),
+                status=f"Unexpected error \"{exc.__str__()}\".",
                 statusCode="400")
 
     def run(self, task):
@@ -223,7 +222,7 @@ class TaskActions(TasksBase):
         # worker_task = run_task.apply_async(args=[task.to_json()],
         #                                    countdown=20)
         # worker_task = run_task(task.to_json())
-        log.info(f'run task: {task}')
+        log.info("run task: %s", task)
         worker_task = run_task.delay(task.to_json())
         task.worker_task_id = worker_task.id
         db.session.commit()
@@ -243,7 +242,6 @@ class TaskActions(TasksBase):
     def re_run(self, task):
         """ Run this task once again. """
         # Basically delete all and run again.
-        pass
 
     def status(self, task):
         """ Run this task. """
@@ -336,7 +334,7 @@ class TaskActions(TasksBase):
         alto_path = pathlib.Path(alto_xml_dir)
 
         if not os.path.exists(alto_path):
-            mets_url = "{}/mets.xml".format(task_info["result"]["result_dir"])
+            mets_url = f"{task_info['result']['result_dir']}/mets.xml"
             run_cli(
                 "ocrd-fileformat-transform",
                 mets_url=mets_url,
@@ -350,7 +348,7 @@ class TaskActions(TasksBase):
         data = io.BytesIO()
         with zipfile.ZipFile(data, mode='w') as zip_file:
             for f_name in alto_path.iterdir():
-                arcname = "{0}/{1}".format(last_output, os.path.basename(f_name))
+                arcname = f"{last_output}/{os.path.basename(f_name)}"
                 zip_file.write(f_name, arcname=arcname)
         data.seek(0)
 
@@ -385,7 +383,7 @@ class TaskActions(TasksBase):
             "page_2019-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15"
         }
 
-        files = glob.glob("{}/*.xml".format(page_xml_dir))
+        files = glob.glob(f"{page_xml_dir}/*.xml")
         files.sort()
 
         for file in files:
@@ -410,30 +408,31 @@ class TaskActions(TasksBase):
 
 @task_namespace.route("/<string:task_id>")
 class Task(TasksBase):
+    """Methods for a specific task."""
 
     @api.doc(responses={200: "OK", 400: "Unknown task id"})
     def get(self, task_id):
-        """ Get the task by given id. """
+        """Get the task by given id."""
         task = db_model_Task.query.filter_by(id=task_id).first()
 
         if task is None:
             task_namespace.abort(
                 404, "Wrong parameter",
-                status="Can't find a task with the id \"{0}\".".format(
-                    task_id),
+                status=f"Can't find a task with the id \"{task_id}\".",
                 statusCode="404")
 
         return jsonify(task.to_json())
 
     @api.doc(responses={200: "OK", 404: "Unknown task id"})
     def put(self, task_id):
+        """Update the task of given id."""
         res = db_model_Task.query.filter_by(id=task_id)
         task = res.first()
 
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
-                status="Can't find a task with the id \"{0}\".".format(task_id),
+                status=f"Can't find a task with the id \"{task_id}\".",
                 statusCode="404")
 
         fields = task.to_json().keys()
@@ -444,7 +443,7 @@ class Task(TasksBase):
         db.session.commit()
 
         return jsonify({
-            "message": "Task \"{0}\" updated.".format(task_id)
+            "message": f"Task \"{task_id}\" updated."
         })
 
     @api.doc(responses={200: "OK", 404: "Unknown task id"})
@@ -456,10 +455,10 @@ class Task(TasksBase):
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
-                status="Can't find a task with the id \"{0}\".".format(task_id),
+                status=f"Can't find a task with the id \"{task_id}\".",
                 statusCode="404")
 
-        message = "Task \"{0}\" deleted.".format(task.id)
+        message = f"Task \"{task.id}\" deleted."
         res.delete()
         db.session.commit()
 

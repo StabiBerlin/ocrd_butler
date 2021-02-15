@@ -4,7 +4,6 @@ Testing the frontend of `ocrd_butler` package.
 """
 
 import json
-import os
 from unittest import mock
 from flask_testing import TestCase
 
@@ -25,7 +24,7 @@ class FrontendTests(TestCase):
     def setUp(self):
         db.create_all()
 
-        def create_api_task_callback(request):
+        def create_api_task_callback():
             db_task = db_model_Task(
                 uid="id",
                 src="mets_url",
@@ -39,7 +38,7 @@ class FrontendTests(TestCase):
             # "message": "Task created."
             return (201, headers, json.dumps({"task_id": 1, "created": True}))
 
-        def delete_api_task_callback(request):
+        def delete_api_task_callback():
             db_model_Task.query.filter_by(id=1).delete()
             db.session.commit()
             return (200, {}, json.dumps({"task_id": 1, "deleted": True}))
@@ -55,7 +54,7 @@ class FrontendTests(TestCase):
             responses.DELETE, "http://localhost/api/tasks/1",
             callback=delete_api_task_callback)
 
-        def api_get_taskinfo_callback(request):
+        def api_get_taskinfo_callback():
             return (200, {}, json.dumps({
                 "task_id": 1,
                 "state": "PENDING",
@@ -83,6 +82,7 @@ class FrontendTests(TestCase):
         assert len(html.find('table > tr > td')) == 0
 
     def get_chain_id(self):
+        """Create a chain for the tests."""
         chain_response = self.client.post("/api/chains", json=dict(
             name="TC Chain",
             description="Chain with tesseract and calamari recog.",
