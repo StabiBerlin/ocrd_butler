@@ -65,6 +65,16 @@ class FrontendTests(TestCase):
             responses.GET, "http://localhost:5555/api/task/info/worker_task.id",
             callback=api_get_taskinfo_callback)
 
+        responses.add(
+            method=responses.POST,
+            url="http://localhost/api/tasks/1/run",
+            body=json.dumps({
+                "worker_task_id": "1",
+                "status": "SUCCESS",
+            }),
+            status=200
+        )
+
     def tearDown(self):
         db.session.remove()
         db.drop_all()
@@ -135,6 +145,14 @@ class FrontendTests(TestCase):
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
         assert len(html.find('table > tr > td')) == 0
+
+    @responses.activate
+    def test_frontend_run_task(self):
+        """ Test whether frontend view calls correct API endpoint.
+        """
+        response = self.client.get("/task/run/1")
+        assert response.status_code == 302
+        assert response.headers.get('Location').endswith('/tasks')
 
     @mock.patch("requests.get")
     def test_frontend_download_txt(self, mock_requests_get):
