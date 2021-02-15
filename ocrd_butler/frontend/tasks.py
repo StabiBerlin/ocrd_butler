@@ -303,6 +303,27 @@ def download_page_zip(task_id):
         }
     )
 
+@tasks_blueprint.route("/download/pageviewer/<string:task_id>")
+def download_pageviewer_zip(task_id):
+    """Define route to download the page xml results as zip file."""
+    response = requests.get("{0}api/tasks/{1}/download_pageviewer".format(
+        host_url(request),
+        task_id))
+
+    if response.status_code != 200:
+        result = json.loads(response.content)
+        flash(f"An error occured: {result.status}")
+        return redirect("/tasks", code=302)
+
+    return Response(
+        response.data,
+        mimetype="application/zip",
+        headers={
+            "Content-Disposition":
+            f"attachment;filename=ocr_pageviewer_{task_id}.zip"
+        }
+    )
+
 @tasks_blueprint.route("/download/alto/<string:worker_task_id>")
 def download_alto_zip(worker_task_id):
     """Define route to download the alto xml results as zip file."""
