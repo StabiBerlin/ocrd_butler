@@ -149,3 +149,17 @@ class FrontendTests(TestCase):
 
         assert response.status_code == 200
         assert response.data == b"foobar"
+
+    @mock.patch("requests.get")
+    def test_frontend_page_zip(self, mock_requests_get):
+        """Check if download page files is working."""
+
+        mock_requests_get.return_value = type('', (object,), {
+            "data": b"foobar",
+            "status_code": 200
+        })()
+
+        response = self.client.get("/download/page/42")
+
+        assert response.status_code == 200
+        assert response.data[:10] == b"foobar"
