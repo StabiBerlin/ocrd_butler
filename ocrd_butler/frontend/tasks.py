@@ -230,7 +230,7 @@ def task_delete(task_id):
 def task_run(task_id):
     """Run the task with the given id."""
     # pylint: disable=broad-except
-    response = requests.post(f"host_url(request)api/tasks/{task_id}/run")
+    response = requests.post(f"{host_url(request)}api/tasks/{task_id}/run")
 
     if response.status_code in (200, 201):
         flash(f"Task {task_id} started.")
