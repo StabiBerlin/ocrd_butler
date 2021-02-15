@@ -221,7 +221,7 @@ def task_delete(task_id):
         flash(f"Task {task_id} deleted.")
     else:
         result = json.loads(response.content)
-        flash("An error occured: {0}".format(result.status))
+        flash(f"An error occured: {result['status']}")
 
     return redirect("/tasks", code=302)
 
@@ -245,18 +245,43 @@ def task_run(task_id):
     return redirect("/tasks", code=302)
 
 
+def validate_and_wrap_response(
+    response: Response,
+    payload_field: str,
+    **kwargs
+) -> Response:
+    """ Create a new response based on the given reponse's status.
+
+    If it's ok, then a new response is being created from all passed keyword parameters,
+    and the value of the given response's member with the name specified
+    by the ``payload_field`` parameter als payload.
+
+    If it is not (status anything but 200), then a redirect to path ``/tasks`` is being
+    returned.
+    """
+    if response.status_code != 200:
+        flash(
+            "An error occured: {0}".format(
+                json.loads(
+                    response.content
+                ).get('status')
+            )
+        )
+        return redirect("/tasks", code=302)
+    else:
+        return Response(
+            getattr(response, payload_field),
+            **kwargs
+        )
+
+
 @tasks_blueprint.route("/download/txt/<string:task_id>")
 def download_txt(task_id):
     """Define route to download the results as text."""
     response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_txt")
 
-    if response.status_code != 200:
-        result = json.loads(response.content)
-        flash("An error occured: {0}".format(result.status))
-        return redirect("/tasks", code=302)
-
-    return Response(
-        response.text,
+    return validate_and_wrap_response(
+        response, 'text',
         mimetype="text/txt",
         headers={
             "Content-Disposition":
@@ -270,13 +295,8 @@ def download_page_zip(task_id):
     """Define route to download the page xml results as zip file."""
     response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_page")
 
-    if response.status_code != 200:
-        result = json.loads(response.content)
-        flash(f"An error occured: {result.status}")
-        return redirect("/tasks", code=302)
-
-    return Response(
-        response.data,
+    return validate_and_wrap_response(
+        response, 'data',
         mimetype="application/zip",
         headers={
             "Content-Disposition":
@@ -284,18 +304,14 @@ def download_page_zip(task_id):
         }
     )
 
+
 @tasks_blueprint.route("/download/pageviewer/<string:task_id>")
 def download_pageviewer_zip(task_id):
     """Define route to download the page xml results as zip file."""
     response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_pageviewer")
 
-    if response.status_code != 200:
-        result = json.loads(response.content)
-        flash(f"An error occured: {result.status}")
-        return redirect("/tasks", code=302)
-
-    return Response(
-        response.data,
+    return validate_and_wrap_response(
+        response, 'data',
         mimetype="application/zip",
         headers={
             "Content-Disposition":
@@ -303,18 +319,14 @@ def download_pageviewer_zip(task_id):
         }
     )
 
+
 @tasks_blueprint.route("/download/alto/<string:task_id>")
 def download_alto_zip(task_id):
     """Define route to download the alto xml results as zip file."""
     response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_pageviewer")
 
-    if response.status_code != 200:
-        result = json.loads(response.content)
-        flash(f"An error occured: {result.status}")
-        return redirect("/tasks", code=302)
-
-    return Response(
-        response.data,
+    return validate_and_wrap_response(
+        response, 'data',
         mimetype="application/zip",
         headers={
             "Content-Disposition":
