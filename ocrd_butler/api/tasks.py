@@ -2,15 +2,19 @@
 
 """Restx task routes."""
 import glob
+import io
 import json
+import pathlib
 import os
 import uuid
 import xml.etree.ElementTree as ET
+import zipfile
 
 from flask import (
     make_response,
     jsonify,
-    request
+    request,
+    send_file
 )
 from flask_restx import (
     Resource,
@@ -88,7 +92,11 @@ class TasksBase(Resource):
 
     def __init__(self, api=None, *args, **kwargs):
         super().__init__(api, *args, **kwargs)
-        self.get_actions = ("status", "results", "download_txt")
+        self.get_actions = (
+            "status",
+            "results",
+            "download_txt",
+            "download_page")
         self.post_actions = ("run", "rerun", "stop")
 
     def task_data(self, json_data):
@@ -245,7 +253,31 @@ class TaskActions(TasksBase):
 
     def download_page(self, task):
         """ Download the results of the task as PAGE XML. """
-        pass
+        task_info = task_information(task.worker_task_id)
+
+        # Get the output group of the last step in the chain of the task.
+        task_data = db_model_Task.query.filter_by(worker_task_id=task.worker_task_id).first()
+        chain_data = db_model_Chain.query.filter_by(id=task_data.chain_id).first()
+        last_step = chain_data.processors[-1]
+        last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+
+        page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
+        base_path = pathlib.Path(page_xml_dir)
+
+        data = io.BytesIO()
+        with zipfile.ZipFile(data, mode='w') as zip_file:
+            for f_name in base_path.iterdir():
+                arcname = f"{last_output}/{os.path.basename(f_name)}"
+                zip_file.write(f_name, arcname=arcname)
+        data.seek(0)
+
+        return send_file(
+            data,
+            mimetype="application/zip",
+            as_attachment=True,
+            attachment_filename=f"ocr_page_xml_{task_info['result']['task_id']}.zip"
+        )
+
 
     def download_alto(self, task):
         """ Download the results of the task as ALTO XML. """
@@ -256,9 +288,9 @@ class TaskActions(TasksBase):
         task_info = task_information(task.worker_task_id)
 
         # Get the output group of the last step in the chain of the task.
-        task = db_model_Task.query.filter_by(worker_task_id=task.worker_task_id).first()
-        chain = db_model_Chain.query.filter_by(id=task.chain_id).first()
-        last_step = chain.processors[-1]
+        task_data = db_model_Task.query.filter_by(worker_task_id=task.worker_task_id).first()
+        chain_data = db_model_Chain.query.filter_by(id=task_data.chain_id).first()
+        last_step = chain_data.processors[-1]
         last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
 
         page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
