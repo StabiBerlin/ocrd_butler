@@ -96,7 +96,8 @@ class TasksBase(Resource):
             "status",
             "results",
             "download_txt",
-            "download_page")
+            "download_page",
+            "download_pageviewer")
         self.post_actions = ("run", "rerun", "stop")
 
     def task_data(self, json_data):
@@ -267,6 +268,42 @@ class TaskActions(TasksBase):
         data = io.BytesIO()
         with zipfile.ZipFile(data, mode='w') as zip_file:
             for f_name in base_path.iterdir():
+                arcname = f"{last_output}/{os.path.basename(f_name)}"
+                zip_file.write(f_name, arcname=arcname)
+        data.seek(0)
+
+        return send_file(
+            data,
+            mimetype="application/zip",
+            as_attachment=True,
+            attachment_filename=f"ocr_page_xml_{task_info['result']['task_id']}.zip"
+        )
+
+
+    def download_pageviewer(self, task):
+        """ Download the results of the task for pageviewer, including PAGE XML,
+            METS file and DEFAULT images.
+        """
+        task_info = task_information(task.worker_task_id)
+
+        # Get the output group of the last step in the chain of the task.
+        task_data = db_model_Task.query.filter_by(worker_task_id=task.worker_task_id).first()
+        chain_data = db_model_Chain.query.filter_by(id=task_data.chain_id).first()
+        last_step = chain_data.processors[-1]
+        last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+
+        page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
+        page_xml_path = pathlib.Path(page_xml_dir)
+        img_dir = os.path.join(f"{task_info['result']['result_dir']}/DEFAULT")
+        img_path = pathlib.Path(img_dir)
+
+        data = io.BytesIO()
+        with zipfile.ZipFile(data, mode='w') as zip_file:
+            zip_file.write(f"{task_info['result']['result_dir']}/mets.xml", arcname="mets.xml")
+            for f_name in img_path.iterdir():
+                arcname = f"DEFAULT/{os.path.basename(f_name)}"
+                zip_file.write(f_name, arcname=arcname)
+            for f_name in page_xml_path.iterdir():
                 arcname = f"{last_output}/{os.path.basename(f_name)}"
                 zip_file.write(f_name, arcname=arcname)
         data.seek(0)
