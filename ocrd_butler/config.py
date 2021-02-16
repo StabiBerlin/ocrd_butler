@@ -13,6 +13,19 @@ log = logger(__name__)
 DEFAULT_PROFILE = 'DEV'
 
 
+def exec_processor_dump_json(processor: str) -> dict:
+    """ tries to call processor with command line argument ``-J``
+    (``--dump-json``) and return result, or throw exception if processor
+    can not be found.
+
+    Throws:
+        FileNotFoundError
+    """
+    return json.loads(
+        subprocess.check_output([processor, "-J"])
+    )
+
+
 class Config(object):
     """
     Base config, uses staging database server.
@@ -114,9 +127,11 @@ class Config(object):
         Args:
             processor: name of a processor executable
         """
-        return json.loads(
-            subprocess.check_output([processor, "-J"])
-        )
+        try:
+            return exec_processor_dump_json(processor)
+        except FileNotFoundError:
+            log.error('OCRD processor `%s` not found!', processor)
+            return {}
 
 
 class ProductionConfig(Config):
@@ -148,10 +163,9 @@ class TestingConfig(Config):
         resource folder in case the respective binary can't be found within
         actual environment (i.e. `ocrd_all` is not installed).
         """
-        try:
-            return super().processor_specs(processor)
-        except Exception:
-            pass
+        specs = super().processor_specs(processor)
+        if len(specs) > 0:
+            return specs
 
         filename = os.path.join(
             *'tests/files/processor_specs'.split('/'),
