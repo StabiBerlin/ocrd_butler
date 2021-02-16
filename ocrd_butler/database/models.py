@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*-
 """OCRD Butler database models."""
 
+from __future__ import annotations
+
 from ocrd_butler.database import db
-from ocrd_butler.util import to_json
+from ocrd_butler.util import (
+    logger,
+    to_json,
+)
 # from sqlalchemy.dialects.postgresql import JSON
+
+log = logger(__name__)
 
 
 class Task(db.Model):
@@ -86,3 +93,66 @@ class Chain(db.Model):
 
     def __repr__(self):
         return "Chain {0} ({1})".format(self.name, self.description)
+
+
+def delete(model: type, id: str) -> bool:
+    """ delete the db model instance identified by ID if it exists,
+    return ``False`` otherwise.
+    """
+    matches = model.query.filter_by(id=id)
+    if matches.count() > 0:
+        matches.delete()
+        db.session.commit()
+        return True
+    else:
+        log.info("Can't delete {model.__name__} `{task_id}`: not found!")
+        return False
+
+
+def save(obj: db.Model) -> db.Model:
+    """ save a db model instance to session and commit this change.
+    """
+    db.session.add(obj)
+    db.session.commit()
+    return obj
+
+
+def get(model: type, **kwargs) -> db.Model:
+    """ look up a db model instance by ID.
+    """
+    return model.query.filter_by(**kwargs).first()
+
+
+def create(model: type, **data) -> db.Model:
+    """ create a new instance of the specified db model, without saving it.
+    """
+    return model(**data)
+
+
+def add(model: type, **data) -> db.Model:
+    """ create a new instance of the specified db model, and save it to session.
+    """
+    return create(model, **data).save()
+
+
+def count(model: type) -> int:
+    """ count number of db model instances.
+    """
+    return model.query.count()
+
+
+def _add_model_operations():
+    """ equip both db model classes with convenience functions for creation,
+    deletion, item count, and so on.
+    """
+    for model in [Task, Chain]:
+        model.save = save
+        for func in [
+            get, create, add, count, delete
+        ]:
+            setattr(
+                model, func.__name__, classmethod(func)
+            )
+
+
+_add_model_operations()
