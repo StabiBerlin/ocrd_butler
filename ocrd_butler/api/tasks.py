@@ -116,7 +116,7 @@ class TasksBase(Resource):
                                  status="Missing chain for task.",
                                  statusCode="400")
         else:
-            chain = db_model_Chain.query.filter_by(id=data["chain_id"]).first()
+            chain = db_model_Chain.get(id=data["chain_id"])
             if chain is None:
                 task_namespace.abort(400, "Wrong parameter.",
                                      status=f"Unknow chain with id {data['chain_id']}.",
@@ -139,18 +139,16 @@ class TasksBase(Resource):
 
 
 @task_namespace.route("")
-class Task(TasksBase):
+class TaskRoot(TasksBase):
     """Restful methods for tasks."""
 
     @api.doc(responses={201: "Created", 400: "Missing parameter"})
     @api.expect(task_model)
     def post(self):
         """Create a new Task."""
-        data = self.task_data(request.json)
-
-        task = db_model_Task(**data)
-        db.session.add(task)
-        db.session.commit()
+        task = db_model_Task.add(
+            **self.task_data(request.json)
+        )
 
         return make_response({
             "message": "Task created.",
@@ -167,7 +165,7 @@ class TaskActions(TasksBase):
     def post(self, task_id, action):
         """ Execute the given action for the task. """
         # TODO: Return the actions as OPTIONS.
-        task = db_model_Task.query.filter_by(id=task_id).first()
+        task = db_model_Task.get(id=task_id)
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
@@ -194,7 +192,7 @@ class TaskActions(TasksBase):
     def get(self, task_id, action):
         """ Get some information for the task. """
         # TODO: Return the actions as OPTIONS.
-        task = db_model_Task.query.filter_by(id=task_id).first()
+        task = db_model_Task.get(id=task_id)
 
         if task is None:
             task_namespace.abort(
@@ -239,9 +237,10 @@ class TaskActions(TasksBase):
 
         return jsonify(result)
 
-    def re_run(self, task):
+    def rerun(self, task):
         """ Run this task once again. """
         # Basically delete all and run again.
+        raise NotImplementedError
 
     def status(self, task):
         """ Run this task. """
@@ -258,8 +257,8 @@ class TaskActions(TasksBase):
         task_info = task_information(task.worker_task_id)
 
         # Get the output group of the last step in the chain of the task.
-        task_data = db_model_Task.query.filter_by(worker_task_id=task.worker_task_id).first()
-        chain_data = db_model_Chain.query.filter_by(id=task_data.chain_id).first()
+        task_data = db_model_Task.get(worker_task_id=task.worker_task_id)
+        chain_data = db_model_Chain.get(id=task_data.chain_id)
         last_step = chain_data.processors[-1]
         last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
 
@@ -279,7 +278,6 @@ class TaskActions(TasksBase):
             as_attachment=True,
             attachment_filename=f"ocr_page_xml_{task_info['result']['task_id']}.zip"
         )
-
 
     def download_pageviewer(self, task):
         """ Download the results of the task for pageviewer, including PAGE XML,
@@ -315,7 +313,6 @@ class TaskActions(TasksBase):
             as_attachment=True,
             attachment_filename=f"ocr_page_xml_{task_info['result']['task_id']}.zip"
         )
-
 
     def download_alto(self, task):
         """ Download the results of the task as ALTO XML. """
