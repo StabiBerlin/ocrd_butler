@@ -39,8 +39,9 @@ class ProcessorsTests(TestCase):
         assert PROCESSORS_CONFIG["ocrd-tesserocr-recognize"]["executable"] ==\
             "ocrd-tesserocr-recognize"
         assert "ocrd-tesserocr-segment-region" in PROCESSORS_CONFIG
-        assert PROCESSORS_CONFIG["ocrd-tesserocr-segment-region"]["executable"] ==\
-            "ocrd-tesserocr-segment-region"
+        assert PROCESSORS_CONFIG["ocrd-tesserocr-segment-region"][
+            "executable"
+        ] == "ocrd-tesserocr-segment-region"
         assert "ocrd-tesserocr-segment-line" in PROCESSORS_CONFIG
         assert "ocrd-tesserocr-segment-word" in PROCESSORS_CONFIG
         assert "ocrd-tesserocr-crop" in PROCESSORS_CONFIG
