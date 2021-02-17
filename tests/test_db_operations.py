@@ -35,6 +35,13 @@ class DatabaseModelTests(TestCase):
         models.Task.delete(task.id)
         assert models.Task.count() == count
 
+    def test_get_all_tasks(self):
+        for i in range(3):
+            models.Task.add(**task_data)
+        tasks = models.Task.get_all()
+        assert models.Task.count() == len(tasks)
+        assert type(tasks[0]) == models.Task
+
     def test_delete_task(self):
         task = models.Task.create(**task_data).save()
         assert models.Task.count() > 0

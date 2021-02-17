@@ -2,6 +2,7 @@
 """OCRD Butler database models."""
 
 from __future__ import annotations
+from typing import List
 
 from ocrd_butler.database import db
 from ocrd_butler.util import (
@@ -105,7 +106,7 @@ def delete(model: type, id: str) -> bool:
         db.session.commit()
         return True
     else:
-        log.info("Can't delete {model.__name__} `{task_id}`: not found!")
+        log.info(f"Can't delete {model.__name__} `{id}`: not found!")
         return False
 
 
@@ -123,6 +124,12 @@ def get(model: type, **kwargs) -> db.Model:
     return model.query.filter_by(**kwargs).first()
 
 
+def get_all(model: type) -> List[db.Model]:
+    """ returns all instances of db model.
+    """
+    return model.query.all()
+
+
 def create(model: type, **data) -> db.Model:
     """ create a new instance of the specified db model, without saving it.
     """
@@ -130,7 +137,8 @@ def create(model: type, **data) -> db.Model:
 
 
 def add(model: type, **data) -> db.Model:
-    """ create a new instance of the specified db model, and save it to session.
+    """ create a new instance of the specified db model, and save it to
+    session.
     """
     return create(model, **data).save()
 
@@ -148,7 +156,7 @@ def _add_model_operations():
     for model in [Task, Chain]:
         model.save = save
         for func in [
-            get, create, add, count, delete
+            get, create, add, count, delete, get_all
         ]:
             setattr(
                 model, func.__name__, classmethod(func)
