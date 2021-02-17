@@ -50,9 +50,12 @@ def compare():
     Page for create a comparisation between two OCR text versions.
     """
     compare_form = CompareForm()
-    cur_tasks = db_model_Task.query.all()
-    compare_form.task_from.choices = [(task.id, task.work_id) for task in cur_tasks]
-    compare_form.task_to.choices = [(task.id, task.work_id) for task in cur_tasks]
+    task_choices = [
+        (task.id, task.worker_task_id)
+        for task in db_model_Task.get_all()
+    ]
+    compare_form.task_from.choices = task_choices
+    compare_form.task_to.choices = task_choices[::]
 
     return render_template(
         "compare.html",
