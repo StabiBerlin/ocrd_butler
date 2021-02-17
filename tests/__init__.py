@@ -28,9 +28,10 @@ def ocrd_processor_available(processor: str) -> bool:
                 ['which', processor]
             ) is not None
         except Exception:
-            return log.error(
+            log.error(
                 'No executable found for processor `%s`', processor
             )
+            return False
 
 
 def require_ocrd_processors(*processors: List[str]) -> Callable:

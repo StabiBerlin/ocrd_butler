@@ -79,12 +79,12 @@ def current_tasks():
     """
     Collect and prepare the current tasks.
     """
-    results = db_model_Task.query.all()
+    results = db_model_Task.get_all()
 
     cur_tasks = []
 
     for result in results:
-        chain = db_model_Chain.query.filter_by(id=result.chain_id).first()
+        chain = db_model_Chain.get(id=result.chain_id)
         task = {
             "repr": result.__str__(),
             "description": result.description,
@@ -203,7 +203,7 @@ def tasks():
     """Define the page presenting the created tasks."""
     # new_task_form = NewTaskForm(csrf_enabled=False)
     new_task_form = NewTaskForm()
-    chains = db_model_Chain.query.all()
+    chains = db_model_Chain.get_all()
     new_task_form.chain_id.choices = [(chain.id, chain.name) for chain in chains]
 
     return render_template(
