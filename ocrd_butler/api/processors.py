@@ -4,34 +4,39 @@
 Extract predefined processors information.
 """
 
-import json
 import copy
-import subprocess
 
 from flask import jsonify
 from flask_restx import Resource
 
 from ocrd_butler.api.restx import api
-from ocrd_butler.util import log
-from ocrd_butler.config import Config
+from ocrd_butler.util import logger
+from ocrd_butler import config as ocrd_config
 
-ocrd_config = Config()
+
+log = logger(__name__)
 
 processors_namespace = api.namespace(
     "processors",
     description="Get the processors known by our butler.")
 
-PROCESSORS_CONFIG = {}
-
-for package in ocrd_config.PROCESSORS:
-    ocrd_tool = subprocess.check_output([package, "--dump-json"])
-    PROCESSORS_CONFIG[package] = {"package": {"name": package}}
-    PROCESSORS_CONFIG[package].update(json.loads(ocrd_tool))
+PROCESSORS_CONFIG = {
+    package: {
+        "package": {"name": package},
+        **ocrd_config.processor_specs(package)
+    }
+    for package in ocrd_config.PROCESSORS
+}
 
 PROCESSOR_NAMES = PROCESSORS_CONFIG.keys()
 
-# We prepare an usable action configuration from the config itself.
+# We prepare usable action configurations from the config itself.
 PROCESSORS_ACTION = copy.deepcopy(PROCESSORS_CONFIG)
+for processor in ['ocrd-olena-binarize', 'ocrd-sbb-binarize']:
+    PROCESSORS_ACTION.get(
+        processor, {}
+    )['output_file_grp'] = ['OCR-D-IMG-BINPAGE']
+
 for name, config in PROCESSORS_ACTION.items():
 
     if "package" in config:
@@ -46,28 +51,18 @@ for name, config in PROCESSORS_ACTION.items():
 
     # Just take the first in-/output file group for now.
     # TODO: This is also connected to the choosen paramters.
-    try:
-        config["input_file_grp"] = config["input_file_grp"][0]
-    except (KeyError, IndexError) as exc:
-        log.error(exc)
+    for key in ["input_file_grp", "output_file_grp"]:
+        config[key] = ''.join(config.get(key, [])[:1])
 
-    # TODO: Move this fixed setting to a configuration like place. (tbi)
-    if name == "ocrd-olena-binarize":
-        config["output_file_grp"] = "OCR-D-IMG-BINPAGE"
-    if name == "ocrd-sbb-binarize":
-        config["output_file_grp"] = "OCR-D-IMG-BINPAGE"
-    else:
-        try:
-            config["output_file_grp"] = config["output_file_grp"][0]
-        except (KeyError, IndexError) as exc:
-            log.error(exc)
 
 PROCESSORS_VIEW = []
 for name, config in PROCESSORS_CONFIG.items():
-    processor = {"name": name}
-    the_config = copy.deepcopy(config)
-    processor.update(the_config)
-    PROCESSORS_VIEW.append(processor)
+    PROCESSORS_VIEW.append(
+        {
+            "name": name,
+            **copy.deepcopy(config),
+        }
+    )
 
 
 @processors_namespace.route("")

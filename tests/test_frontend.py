@@ -4,10 +4,11 @@ Testing the frontend of `ocrd_butler` package.
 """
 
 import json
+from unittest import mock
+from flask_testing import TestCase
+
 import responses
 from requests_html import HTML
-
-from flask_testing import TestCase
 
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import (
@@ -64,6 +65,16 @@ class FrontendTests(TestCase):
             responses.GET, "http://localhost:5555/api/task/info/worker_task.id",
             callback=api_get_taskinfo_callback)
 
+        responses.add(
+            method=responses.POST,
+            url="http://localhost/api/tasks/1/run",
+            body=json.dumps({
+                "worker_task_id": "1",
+                "status": "SUCCESS",
+            }),
+            status=200
+        )
+
     def tearDown(self):
         db.session.remove()
         db.drop_all()
@@ -81,6 +92,7 @@ class FrontendTests(TestCase):
         assert len(html.find('table > tr > td')) == 0
 
     def get_chain_id(self):
+        """Create a chain for the tests."""
         chain_response = self.client.post("/api/chains", json=dict(
             name="TC Chain",
             description="Chain with tesseract and calamari recog.",
@@ -125,9 +137,101 @@ class FrontendTests(TestCase):
         assert len(html.find('table > tr > td')) == 10
 
         delete_link = html.find('table > tr > td > a.delete-task')[0].attrs["href"]
-        # response = self.client.get(delete_link)
-        self.client.get("/task/delete/1")
+        assert delete_link == "/task/delete/1"
+        response = self.client.get(delete_link)
+        assert response.status == '302 FOUND'
+        assert response.status_code == 302
 
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
         assert len(html.find('table > tr > td')) == 0
+
+    @responses.activate
+    def test_frontend_run_task(self):
+        """ Test whether frontend view calls correct API endpoint.
+        """
+        response = self.client.get("/task/run/1")
+        assert response.status_code == 302
+        assert response.headers.get('Location').endswith('/tasks')
+
+    @mock.patch("requests.get")
+    def test_frontend_download_txt(self, mock_requests_get):
+        """Check if download txt is working."""
+
+        mock_requests_get.return_value = type('', (object,), {
+            "text": "foobar",
+            "status_code": 200
+        })()
+
+        response = self.client.get("/download/txt/42")
+
+        assert response.status_code == 200
+        assert response.data == b"foobar"
+
+    @mock.patch("requests.get")
+    def test_frontend_page_zip(self, mock_requests_get):
+        """Check if download page files is working."""
+
+        mock_requests_get.return_value = type('', (object,), {
+            "data": b"foobar",
+            "status_code": 200
+        })()
+
+        response = self.client.get("/download/page/42")
+
+        assert response.status_code == 200
+        assert response.data[:10] == b"foobar"
+
+    @mock.patch("requests.get")
+    def test_frontend_page_zip_error(self, mock_requests_get):
+        """ Check whether download page requests yields redirect if
+        something goes wrong.
+        """
+        mock_requests_get.return_value = type(
+            '', (object,),
+            {
+                "status_code": 404,
+                "content": json.dumps(
+                    {
+                        "status": "Unknown task for id \"23\".",
+                        "statusCode": "404",
+                        "message": (
+                            "Unknown task. You have requested this URI"
+                            " [/api/tasks/23/download_page] but did you mean"
+                            " /download/page/<string:task_id> ?"
+                        )
+                    }
+                ),
+            }
+        )()
+        response = self.client.get('/download/page/23')
+        assert response.status_code == 302
+        assert response.headers.get('Location').endswith('/tasks')
+
+    @mock.patch("requests.get")
+    def test_frontend_pageviewer_zip(self, mock_requests_get):
+        """Check if download files for pageviewer is working."""
+
+        mock_requests_get.return_value = type('', (object,), {
+            "data": b"foobar",
+            "status_code": 200
+        })()
+
+        response = self.client.get("/download/pageviewer/42")
+
+        assert response.status_code == 200
+        assert response.data[:10] == b"foobar"
+
+    @mock.patch("requests.get")
+    def test_frontend_alto_zip(self, mock_requests_get):
+        """Check if download alto files is working."""
+
+        mock_requests_get.return_value = type('', (object,), {
+            "data": b"foobar",
+            "status_code": 200
+        })()
+
+        response = self.client.get("/download/alto/42")
+
+        assert response.status_code == 200
+        assert response.data[:10] == b"foobar"

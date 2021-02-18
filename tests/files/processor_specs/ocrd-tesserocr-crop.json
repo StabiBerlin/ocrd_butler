@@ -1,0 +1,30 @@
+{
+  "executable": "ocrd-tesserocr-crop",
+  "categories": [
+    "Image preprocessing"
+  ],
+  "description": "Poor man's cropping via region segmentation",
+  "input_file_grp": [
+    "OCR-D-IMG"
+  ],
+  "output_file_grp": [
+    "OCR-D-SEG-PAGE"
+  ],
+  "steps": [
+    "preprocessing/optimization/cropping"
+  ],
+  "parameters": {
+    "dpi": {
+      "type": "number",
+      "format": "float",
+      "description": "pixel density in dots per inch (overrides any meta-data in the images); disabled when negative",
+      "default": 0
+    },
+    "padding": {
+      "type": "number",
+      "format": "integer",
+      "description": "extend detected border by this many (true) pixels on every side",
+      "default": 4
+    }
+  }
+}

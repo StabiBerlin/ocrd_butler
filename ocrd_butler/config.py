@@ -3,6 +3,15 @@ Default configuration for the butler.
 https://flask.palletsprojects.com/en/1.1.x/config/
 """
 
+import os
+import json
+import subprocess
+
+from .util import logger
+
+log = logger(__name__)
+DEFAULT_PROFILE = 'DEV'
+
 
 class Config(object):
     """
@@ -97,6 +106,18 @@ class Config(object):
         # "ocrd-skimage-normalize",
     ]
 
+    @classmethod
+    def processor_specs(cls, processor: str) -> dict:
+        """ retrieve OCRD processor specification from its ``--dump-json``
+        output and return it as a dict.
+
+        Args:
+            processor: name of a processor executable
+        """
+        return json.loads(
+            subprocess.check_output([processor, "-J"])
+        )
+
 
 class ProductionConfig(Config):
     """
@@ -120,3 +141,84 @@ class TestingConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     OCRD_BUTLER_RESULTS = "/tmp/ocrd_butler_results_testing"
+
+    @classmethod
+    def processor_specs(cls, processor: str) -> dict:
+        """ return fake processor specs from ``tests/files/processor_specs``
+        resource folder in case the respective binary can't be found within
+        actual environment (i.e. `ocrd_all` is not installed).
+        """
+        try:
+            return super().processor_specs(processor)
+        except Exception:
+            pass
+
+        filename = os.path.join(
+            *'tests/files/processor_specs'.split('/'),
+            '{}.json'.format(processor)
+        )
+        if os.path.exists(filename):
+            with open(filename, 'r') as f:
+                specs = json.load(f)
+            return specs
+        else:
+            log.warn(
+                'file not found: {}'.format(filename)
+            )
+            return {}
+
+
+def get_profile_var() -> str:
+    """ get value of ``PROFILE`` environment variable or default to
+    ``DEFAULT_PROFILE`` if not set or empty string.
+
+    >>> os.environ['PROFILE'] = ''
+    >>> get_profile_var()
+    'DEV'
+
+    >>> os.environ['PROFILE'] = 'prod'
+    >>> get_profile_var()
+    'PROD'
+
+    """
+    val = os.environ.get(
+        "PROFILE", DEFAULT_PROFILE
+    ).upper()
+    if type(val) == str:
+        if len(val.strip()) < 1:
+            val = DEFAULT_PROFILE
+    return val or DEFAULT_PROFILE
+
+
+def profile_config() -> Config:
+    """ select a ``Config`` implementation based on the ``PROFILE`` environment
+    variable.
+
+    >>> os.environ['PROFILE'] = 'PROD'
+    >>> profile_config()
+    <class 'ocrd_butler.config.ProductionConfig'>
+
+    >>> os.environ['PROFILE'] = ''
+    >>> profile_config()
+    <class 'ocrd_butler.config.DevelopmentConfig'>
+
+    """
+    if 'PROFILE' in os.environ:
+        log.debug(
+            'Select config implementation based on PROFILE env var value `%s`',
+            os.environ['PROFILE'],
+        )
+    else:
+        log.warning(
+            'Environment variable PROFILE not set. Defaulting to `%s`.',
+            DEFAULT_PROFILE,
+        )
+    config = {
+        "TEST": TestingConfig,
+        "DEV": DevelopmentConfig,
+        "PROD": ProductionConfig,
+    }.get(
+        get_profile_var()
+    )
+    log.info('Selected config: %s.', config)
+    return config

@@ -4,13 +4,12 @@
 
 from ocrd_butler import (
     factory,
-    make_celery
+    make_celery,
+    config,
 )
-from ocrd_butler.config import DevelopmentConfig
 from ocrd_butler.util import log
 
 
-config = DevelopmentConfig()
 flask_app = factory.create_app(
     celery=make_celery(config=config),
     config=config)

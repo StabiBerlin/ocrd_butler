@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pc:PcGts xmlns:pc="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15/pagecontent.xsd" pcGtsId="FILE_0002_OCR-D-SEG-WORD">
+    <pc:Metadata>
+        <pc:Creator>OCR-D/core 2.21.0</pc:Creator>
+        <pc:Created>2021-01-29T16:29:40.990116</pc:Created>
+        <pc:LastChange>2021-01-29T16:29:40.990116</pc:LastChange>
+        <pc:MetadataItem type="processingStep" name="layout/segmentation/region" value="ocrd-tesserocr-recognize">
+            <pc:Labels externalModel="ocrd-tool" externalId="parameters">
+                <pc:Label value="0" type="dpi"/>
+                <pc:Label value="0" type="padding"/>
+                <pc:Label value="False" type="shrink_polygons"/>
+                <pc:Label value="True" type="find_tables"/>
+                <pc:Label value="False" type="sparse_text"/>
+                <pc:Label value="True" type="overwrite_segments"/>
+                <pc:Label value="region" type="segmentation_level"/>
+                <pc:Label value="region" type="textequiv_level"/>
+                <pc:Label value="False" type="block_polygons"/>
+                <pc:Label value="True" type="overwrite_text"/>
+                <pc:Label value="False" type="raw_lines"/>
+                <pc:Label value="" type="char_whitelist"/>
+                <pc:Label value="" type="char_blacklist"/>
+                <pc:Label value="" type="char_unblacklist"/>
+                <pc:Label value="{}" type="tesseract_parameters"/>
+            </pc:Labels>
+            <pc:Labels externalModel="ocrd-tool" externalId="version">
+                <pc:Label value="0.10.1 (tesseract 5.0.0-alpha-20201224)" type="ocrd-tesserocr-recognize"/>
+                <pc:Label value="2.21.0" type="ocrd/core"/>
+            </pc:Labels>
+        </pc:MetadataItem>
+        <pc:MetadataItem type="processingStep" name="layout/segmentation/region" value="ocrd-tesserocr-recognize">
+            <pc:Labels externalModel="ocrd-tool" externalId="parameters">
+                <pc:Label value="0" type="dpi"/>
+                <pc:Label value="0" type="padding"/>
+                <pc:Label value="False" type="shrink_polygons"/>
+                <pc:Label value="True" type="overwrite_segments"/>
+                <pc:Label value="line" type="segmentation_level"/>
+                <pc:Label value="line" type="textequiv_level"/>
+                <pc:Label value="True" type="overwrite_text"/>
+                <pc:Label value="False" type="block_polygons"/>
+                <pc:Label value="True" type="find_tables"/>
+                <pc:Label value="False" type="sparse_text"/>
+                <pc:Label value="False" type="raw_lines"/>
+                <pc:Label value="" type="char_whitelist"/>
+                <pc:Label value="" type="char_blacklist"/>
+                <pc:Label value="" type="char_unblacklist"/>
+                <pc:Label value="{}" type="tesseract_parameters"/>
+            </pc:Labels>
+            <pc:Labels externalModel="ocrd-tool" externalId="version">
+                <pc:Label value="0.10.1 (tesseract 5.0.0-alpha-20201224)" type="ocrd-tesserocr-recognize"/>
+                <pc:Label value="2.21.0" type="ocrd/core"/>
+            </pc:Labels>
+        </pc:MetadataItem>
+        <pc:MetadataItem type="processingStep" name="layout/segmentation/region" value="ocrd-tesserocr-recognize">
+            <pc:Labels externalModel="ocrd-tool" externalId="parameters">
+                <pc:Label value="0" type="dpi"/>
+                <pc:Label value="0" type="padding"/>
+                <pc:Label value="False" type="shrink_polygons"/>
+                <pc:Label value="True" type="overwrite_segments"/>
+                <pc:Label value="word" type="segmentation_level"/>
+                <pc:Label value="word" type="textequiv_level"/>
+                <pc:Label value="True" type="overwrite_text"/>
+                <pc:Label value="False" type="block_polygons"/>
+                <pc:Label value="True" type="find_tables"/>
+                <pc:Label value="False" type="sparse_text"/>
+                <pc:Label value="False" type="raw_lines"/>
+                <pc:Label value="" type="char_whitelist"/>
+                <pc:Label value="" type="char_blacklist"/>
+                <pc:Label value="" type="char_unblacklist"/>
+                <pc:Label value="{}" type="tesseract_parameters"/>
+            </pc:Labels>
+            <pc:Labels externalModel="ocrd-tool" externalId="version">
+                <pc:Label value="0.10.1 (tesseract 5.0.0-alpha-20201224)" type="ocrd-tesserocr-recognize"/>
+                <pc:Label value="2.21.0" type="ocrd/core"/>
+            </pc:Labels>
+        </pc:MetadataItem>
+    </pc:Metadata>
+    <pc:Page imageFilename="DEFAULT/FILE_0002_DEFAULT.jpg" imageWidth="800" imageHeight="1073">
+        <pc:ReadingOrder>
+            <pc:OrderedGroup id="reading-order">
+                <pc:RegionRefIndexed index="0" regionRef="region0000"/>
+                <pc:RegionRefIndexed index="2" regionRef="region0002"/>
+                <pc:RegionRefIndexed index="3" regionRef="region0003"/>
+                <pc:RegionRefIndexed index="5" regionRef="region0005"/>
+                <pc:RegionRefIndexed index="6" regionRef="region0006"/>
+                <pc:RegionRefIndexed index="7" regionRef="region0007"/>
+                <pc:RegionRefIndexed index="9" regionRef="region0009"/>
+                <pc:RegionRefIndexed index="11" regionRef="region0011"/>
+                <pc:RegionRefIndexed index="12" regionRef="region0012"/>
+            </pc:OrderedGroup>
+        </pc:ReadingOrder>
+        <pc:TextRegion id="region0000" orientation="-1.767405896450413" readingDirection="left-to-right" textLineOrder="top-to-bottom">
+            <pc:Coords points="136,204 673,204 673,239 136,239"/>
+            <pc:TextLine id="region0000_line0000">
+                <pc:Coords points="673,209 484,204 137,204 137,217 673,234"/>
+                <pc:Word id="region0000_line0000_word0000">
+                    <pc:Coords points="171,218 171,206 137,204 137,217"/>
+                </pc:Word>
+                <pc:Word id="region0000_line0000_word0001">
+                    <pc:Coords points="210,219 210,206 184,205 184,218"/>
+                </pc:Word>
+                <pc:Word id="region0000_line0000_word0002">
+                    <pc:Coords points="414,225 415,209 255,204 223,204 223,219"/>
+                </pc:Word>
+                <pc:Word id="region0000_line0000_word0003">
+                    <pc:Coords points="434,208 464,209 464,223 434,222"/>
+                </pc:Word>
+                <pc:Word id="region0000_line0000_word0004">
+                    <pc:Coords points="481,205 578,208 577,228 481,225"/>
+                </pc:Word>
+                <pc:Word id="region0000_line0000_word0005">
+                    <pc:Coords points="673,209 596,208 596,224 673,225"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0000_line0001">
+                <pc:Coords points="564,239 564,231 137,217 136,237 197,239"/>
+                <pc:Word id="region0000_line0001_word0000">
+                    <pc:Coords points="282,239 282,226 136,221 136,237 197,239"/>
+                </pc:Word>
+                <pc:Word id="region0000_line0001_word0001">
+                    <pc:Coords points="329,239 329,225 294,224 294,239"/>
+                </pc:Word>
+                <pc:Word id="region0000_line0001_word0002">
+                    <pc:Coords points="412,226 340,224 340,239 447,239 447,227"/>
+                </pc:Word>
+                <pc:Word id="region0000_line0001_word0003">
+                    <pc:Coords points="564,233 459,229 459,239 564,239"/>
+                </pc:Word>
+            </pc:TextLine>
+        </pc:TextRegion>
+        <pc:TextRegion id="region0002" orientation="-1.767405896450413" readingDirection="left-to-right" textLineOrder="top-to-bottom">
+            <pc:Coords points="130,262 672,262 672,476 130,476"/>
+            <pc:TextLine id="region0002_line0000">
+                <pc:Coords points="672,266 506,262 172,262 172,278 672,293"/>
+                <pc:Word id="region0002_line0000_word0000">
+                    <pc:Coords points="172,262 211,263 211,279 172,278"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0000_word0001">
+                    <pc:Coords points="223,262 223,278 370,283 371,266 252,262"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0000_word0002">
+                    <pc:Coords points="386,263 429,265 429,282 386,280"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0000_word0003">
+                    <pc:Coords points="446,266 472,267 472,282 446,281"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0000_word0004">
+                    <pc:Coords points="488,265 581,268 581,284 488,281"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0000_word0005">
+                    <pc:Coords points="672,266 601,265 601,282 672,283"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0002_line0001">
+                <pc:Coords points="174,283 658,298 657,321 174,306"/>
+                <pc:Word id="region0002_line0001_word0000">
+                    <pc:Coords points="174,286 250,288 250,305 174,303"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0001_word0001">
+                    <pc:Coords points="261,288 340,291 340,306 261,303"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0001_word0002">
+                    <pc:Coords points="355,289 445,292 445,307 355,304"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0001_word0003">
+                    <pc:Coords points="657,309 645,309 644,320 657,321"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0002_line0002">
+                <pc:Coords points="173,314 668,329 667,353 173,338"/>
+                <pc:Word id="region0002_line0002_word0000">
+                    <pc:Coords points="173,321 251,323 251,340 173,338"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0002_word0001">
+                    <pc:Coords points="268,322 352,324 352,340 268,338"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0002_word0002">
+                    <pc:Coords points="364,324 446,326 446,342 364,340"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0002_word0003">
+                    <pc:Coords points="494,347 494,326 458,324 458,346 483,347"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0002_word0004">
+                    <pc:Coords points="511,325 595,328 595,344 511,341"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0002_word0005">
+                    <pc:Coords points="613,327 613,346 667,347 668,329"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0002_line0003">
+                <pc:Coords points="134,334 531,347 530,369 133,356"/>
+                <pc:Word id="region0002_line0003_word0000">
+                    <pc:Coords points="213,358 214,337 134,334 133,356"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0003_word0001">
+                    <pc:Coords points="223,342 257,343 256,358 222,357"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0003_word0002">
+                    <pc:Coords points="267,344 347,346 346,361 266,359"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0003_word0003">
+                    <pc:Coords points="361,343 429,346 428,361 360,358"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0003_word0004">
+                    <pc:Coords points="439,344 439,364 530,367 531,347"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0002_line0004">
+                <pc:Coords points="172,368 667,383 666,407 171,392"/>
+                <pc:Word id="region0002_line0004_word0000">
+                    <pc:Coords points="172,373 320,377 319,396 171,392"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0004_word0001">
+                    <pc:Coords points="337,379 359,379 359,393 337,393"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0004_word0002">
+                    <pc:Coords points="379,377 477,380 476,396 378,393"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0004_word0003">
+                    <pc:Coords points="511,402 551,403 552,381 494,380 493,401"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0004_word0004">
+                    <pc:Coords points="567,384 591,385 591,397 567,396"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0004_word0005">
+                    <pc:Coords points="666,407 667,383 607,381 607,405"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0002_line0005">
+                <pc:Coords points="133,385 666,402 665,427 132,410"/>
+                <pc:Word id="region0002_line0005_word0000">
+                    <pc:Coords points="133,399 165,400 164,411 132,410"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0005_word0001">
+                    <pc:Coords points="327,391 172,387 171,411 393,417 393,393"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0005_word0002">
+                    <pc:Coords points="423,419 453,420 454,399 412,398 411,418"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0005_word0003">
+                    <pc:Coords points="591,424 592,402 467,398 466,420"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0005_word0004">
+                    <pc:Coords points="665,427 666,402 607,400 607,425"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0002_line0006">
+                <pc:Coords points="132,405 665,422 665,447 131,430"/>
+                <pc:Word id="region0002_line0006_word0000">
+                    <pc:Coords points="131,430 361,437 361,412 132,405"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0006_word0001">
+                    <pc:Coords points="452,415 368,413 368,437 482,440 482,416"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0006_word0002">
+                    <pc:Coords points="569,443 569,419 492,417 492,441"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0006_word0003">
+                    <pc:Coords points="577,420 604,421 604,445 577,444"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0006_word0004">
+                    <pc:Coords points="665,447 665,422 611,420 611,445"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0002_line0007">
+                <pc:Coords points="132,425 665,442 664,467 131,450"/>
+                <pc:Word id="region0002_line0007_word0000">
+                    <pc:Coords points="131,450 353,457 353,432 132,425"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0007_word0001">
+                    <pc:Coords points="473,460 474,436 366,433 365,457"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0007_word0002">
+                    <pc:Coords points="488,438 517,439 516,455 487,454"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0007_word0003">
+                    <pc:Coords points="569,463 570,439 524,438 523,462 566,463"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0007_word0004">
+                    <pc:Coords points="664,467 665,442 580,439 580,464"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0002_line0008">
+                <pc:Coords points="662,476 663,463 131,446 131,469 349,476"/>
+                <pc:Word id="region0002_line0008_word0000">
+                    <pc:Coords points="131,469 263,473 263,450 131,446"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0008_word0001">
+                    <pc:Coords points="280,451 363,454 363,475 280,472"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0008_word0002">
+                    <pc:Coords points="376,458 402,459 402,474 376,473"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0008_word0003">
+                    <pc:Coords points="414,457 484,459 484,475 414,473"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0008_word0004">
+                    <pc:Coords points="576,476 576,461 496,459 496,475 536,476"/>
+                </pc:Word>
+                <pc:Word id="region0002_line0008_word0005">
+                    <pc:Coords points="663,463 588,461 588,475 613,476 662,476"/>
+                </pc:Word>
+            </pc:TextLine>
+        </pc:TextRegion>
+        <pc:TextRegion id="region0003" orientation="-1.767405896450413" readingDirection="left-to-right" textLineOrder="top-to-bottom">
+            <pc:Coords points="128,501 590,501 590,520 128,520"/>
+            <pc:TextLine id="region0003_line0000">
+                <pc:Coords points="590,506 425,501 129,501 129,516 260,520 589,520"/>
+                <pc:Word id="region0003_line0000_word0000">
+                    <pc:Coords points="129,516 242,519 243,503 167,501 129,501"/>
+                </pc:Word>
+                <pc:Word id="region0003_line0000_word0001">
+                    <pc:Coords points="366,520 367,505 254,502 253,519 260,520"/>
+                </pc:Word>
+                <pc:Word id="region0003_line0000_word0002">
+                    <pc:Coords points="381,504 431,505 431,520 381,519"/>
+                </pc:Word>
+                <pc:Word id="region0003_line0000_word0003">
+                    <pc:Coords points="560,520 560,507 446,504 446,519 484,520"/>
+                </pc:Word>
+                <pc:Word id="region0003_line0000_word0004">
+                    <pc:Coords points="575,520 575,506 570,505 567,505 567,520"/>
+                </pc:Word>
+                <pc:Word id="region0003_line0000_word0005">
+                    <pc:Coords points="590,506 584,506 584,510 589,510"/>
+                </pc:Word>
+            </pc:TextLine>
+        </pc:TextRegion>
+        <pc:TextRegion id="region0005" orientation="-1.767405896450413" type="caption" readingDirection="left-to-right" textLineOrder="top-to-bottom">
+            <pc:Coords points="168,528 704,528 704,570 168,570"/>
+            <pc:TextLine id="region0005_line0000">
+                <pc:Coords points="168,530 571,543 571,529 540,528 168,528"/>
+                <pc:Word id="region0005_line0000_word0000">
+                    <pc:Coords points="571,529 540,528 168,528 168,530 571,543"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0005_line0001">
+                <pc:Coords points="704,528 671,528 169,528 169,567 269,570 704,570"/>
+                <pc:Word id="region0005_line0001_word0000">
+                    <pc:Coords points="169,552 199,552 199,566 169,566"/>
+                </pc:Word>
+                <pc:Word id="region0005_line0001_word0001">
+                    <pc:Coords points="336,570 337,541 212,537 211,568 273,570"/>
+                </pc:Word>
+                <pc:Word id="region0005_line0001_word0002">
+                    <pc:Coords points="348,552 407,554 407,568 348,566"/>
+                </pc:Word>
+                <pc:Word id="region0005_line0001_word0003">
+                    <pc:Coords points="419,552 481,554 481,569 419,567"/>
+                </pc:Word>
+                <pc:Word id="region0005_line0001_word0004">
+                    <pc:Coords points="493,553 532,554 532,569 493,568"/>
+                </pc:Word>
+                <pc:Word id="region0005_line0001_word0005">
+                    <pc:Coords points="545,553 577,554 577,570 545,569"/>
+                </pc:Word>
+                <pc:Word id="region0005_line0001_word0006">
+                    <pc:Coords points="593,555 610,555 610,570 593,570"/>
+                </pc:Word>
+                <pc:Word id="region0005_line0001_word0007">
+                    <pc:Coords points="704,528 666,528 627,528 627,570 704,570"/>
+                </pc:Word>
+            </pc:TextLine>
+        </pc:TextRegion>
+        <pc:TextRegion id="region0006" orientation="-1.767405896450413" readingDirection="left-to-right" textLineOrder="top-to-bottom">
+            <pc:Coords points="163,576 658,576 658,735 163,735"/>
+            <pc:TextLine id="region0006_line0000">
+                <pc:Coords points="165,576 165,590 486,600 487,580 358,576"/>
+                <pc:Word id="region0006_line0000_word0000">
+                    <pc:Coords points="259,592 259,578 196,576 165,576 165,590"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0000_word0001">
+                    <pc:Coords points="272,576 272,590 339,592 339,577 305,576"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0000_word0002">
+                    <pc:Coords points="487,580 351,576 350,595 486,600"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0006_line0001">
+                <pc:Coords points="658,615 166,601 165,625 658,640"/>
+                <pc:Word id="region0006_line0001_word0000">
+                    <pc:Coords points="228,626 229,611 166,609 165,625"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0001_word0001">
+                    <pc:Coords points="241,610 288,612 287,627 241,625"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0001_word0002">
+                    <pc:Coords points="301,610 334,611 334,626 301,625"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0001_word0003">
+                    <pc:Coords points="346,610 383,612 383,627 346,625"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0001_word0004">
+                    <pc:Coords points="395,610 462,612 462,628 395,626"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0001_word0005">
+                    <pc:Coords points="474,611 524,613 524,629 474,627"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0001_word0006">
+                    <pc:Coords points="537,613 565,614 565,629 537,628"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0001_word0007">
+                    <pc:Coords points="658,615 582,614 581,634 658,636"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0006_line0002">
+                <pc:Coords points="166,626 658,641 657,667 166,652"/>
+                <pc:Word id="region0006_line0002_word0000">
+                    <pc:Coords points="166,633 271,636 271,655 166,652"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0002_word0001">
+                    <pc:Coords points="278,636 309,637 309,651 278,650"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0002_word0002">
+                    <pc:Coords points="315,633 443,637 443,654 315,650"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0002_word0003">
+                    <pc:Coords points="448,637 540,639 540,659 448,657"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0002_word0004">
+                    <pc:Coords points="658,641 546,638 546,653 657,655"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0006_line0003">
+                <pc:Coords points="166,669 657,684 656,713 165,698"/>
+                <pc:Word id="region0006_line0003_word0000">
+                    <pc:Coords points="219,699 220,682 166,680 165,698"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0003_word0001">
+                    <pc:Coords points="239,679 300,681 299,700 238,698"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0003_word0002">
+                    <pc:Coords points="319,680 408,682 407,702 318,700"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0003_word0003">
+                    <pc:Coords points="430,681 586,686 585,706 429,701"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0003_word0004">
+                    <pc:Coords points="603,682 603,705 656,707 657,684"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0006_line0004">
+                <pc:Coords points="441,735 442,711 164,703 163,733 232,735"/>
+                <pc:Word id="region0006_line0004_word0000">
+                    <pc:Coords points="257,735 258,716 164,713 163,733 232,735"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0004_word0001">
+                    <pc:Coords points="273,715 313,716 312,734 272,733"/>
+                </pc:Word>
+                <pc:Word id="region0006_line0004_word0002">
+                    <pc:Coords points="442,711 331,708 330,734 367,735 441,735"/>
+                </pc:Word>
+            </pc:TextLine>
+        </pc:TextRegion>
+        <pc:TextRegion id="region0007" orientation="-1.767405896450413" readingDirection="left-to-right" textLineOrder="top-to-bottom">
+            <pc:Coords points="122,760 489,760 489,778 122,778"/>
+            <pc:TextLine id="region0007_line0000">
+                <pc:Coords points="489,766 289,760 123,760 123,772 322,778 488,778"/>
+                <pc:Word id="region0007_line0000_word0000">
+                    <pc:Coords points="123,772 322,778 488,778 489,766 289,760 123,760"/>
+                </pc:Word>
+            </pc:TextLine>
+        </pc:TextRegion>
+        <pc:TextRegion id="region0009" orientation="-1.767405896450413" readingDirection="left-to-right" textLineOrder="top-to-bottom">
+            <pc:Coords points="257,806 635,806 635,929 257,929"/>
+            <pc:TextLine id="region0009_line0000">
+                <pc:Coords points="362,807 532,812 531,838 361,833"/>
+                <pc:Word id="region0009_line0000_word0000">
+                    <pc:Coords points="362,807 532,812 531,838 361,833"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0009_line0001">
+                <pc:Coords points="258,839 635,851 634,877 257,865"/>
+                <pc:Word id="region0009_line0001_word0000">
+                    <pc:Coords points="295,866 296,851 258,849 257,865"/>
+                </pc:Word>
+                <pc:Word id="region0009_line0001_word0001">
+                    <pc:Coords points="312,849 417,852 416,867 311,864"/>
+                </pc:Word>
+                <pc:Word id="region0009_line0001_word0002">
+                    <pc:Coords points="432,850 508,852 507,868 431,866"/>
+                </pc:Word>
+                <pc:Word id="region0009_line0001_word0003">
+                    <pc:Coords points="528,853 539,853 538,865 527,865"/>
+                </pc:Word>
+                <pc:Word id="region0009_line0001_word0004">
+                    <pc:Coords points="561,849 635,851 634,873 560,871"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0009_line0002">
+                <pc:Coords points="635,879 258,868 257,897 635,909"/>
+                <pc:Word id="region0009_line0002_word0000">
+                    <pc:Coords points="295,898 296,880 258,878 257,897"/>
+                </pc:Word>
+                <pc:Word id="region0009_line0002_word0001">
+                    <pc:Coords points="310,879 348,880 347,898 309,897"/>
+                </pc:Word>
+                <pc:Word id="region0009_line0002_word0002">
+                    <pc:Coords points="424,902 425,882 363,880 362,900"/>
+                </pc:Word>
+                <pc:Word id="region0009_line0002_word0003">
+                    <pc:Coords points="446,882 457,883 456,895 445,894"/>
+                </pc:Word>
+                <pc:Word id="region0009_line0002_word0004">
+                    <pc:Coords points="479,880 530,882 529,896 478,894"/>
+                </pc:Word>
+                <pc:Word id="region0009_line0002_word0005">
+                    <pc:Coords points="635,879 545,877 544,899 635,902"/>
+                </pc:Word>
+            </pc:TextLine>
+            <pc:TextLine id="region0009_line0003">
+                <pc:Coords points="487,929 488,908 411,905 410,929"/>
+                <pc:Word id="region0009_line0003_word0000">
+                    <pc:Coords points="488,908 411,905 410,929 487,929"/>
+                </pc:Word>
+            </pc:TextLine>
+        </pc:TextRegion>
+        <pc:TextRegion id="region0011" orientation="-1.767405896450413" readingDirection="left-to-right" textLineOrder="top-to-bottom">
+            <pc:Coords points="412,958 467,958 467,978 412,978"/>
+            <pc:TextLine id="region0011_line0000">
+                <pc:Coords points="467,959 413,958 412,978 467,978"/>
+                <pc:Word id="region0011_line0000_word0000">
+                    <pc:Coords points="467,959 413,958 412,978 467,978"/>
+                </pc:Word>
+            </pc:TextLine>
+        </pc:TextRegion>
+        <pc:ImageRegion id="region0012" orientation="-1.767405896450413">
+            <pc:Coords points="0,0 800,0 800,1073 0,1073"/>
+        </pc:ImageRegion>
+        <pc:SeparatorRegion id="region0001">
+            <pc:Coords points="135,218 569,218 569,251 135,251"/>
+        </pc:SeparatorRegion>
+        <pc:SeparatorRegion id="region0004">
+            <pc:Coords points="128,513 571,513 571,542 128,542"/>
+        </pc:SeparatorRegion>
+        <pc:SeparatorRegion id="region0008">
+            <pc:Coords points="122,771 648,771 648,801 122,801"/>
+        </pc:SeparatorRegion>
+        <pc:SeparatorRegion id="region0010">
+            <pc:Coords points="118,924 645,924 645,957 118,957"/>
+        </pc:SeparatorRegion>
+    </pc:Page>
+</pc:PcGts>

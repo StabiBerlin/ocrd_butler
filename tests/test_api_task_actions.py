@@ -2,236 +2,101 @@
 
 """Testing the api for `ocrd_butler` package."""
 
-import pytest
+import json
 import os
-import glob
-import responses
-import shutil
 from unittest import mock
 
 from flask_testing import TestCase
 
 from ocrd_butler.config import TestingConfig
-from ocrd_butler.factory import create_app, db
-
+from ocrd_butler.factory import create_app
 
 CURRENT_DIR = os.path.dirname(__file__)
 
 
-@pytest.fixture(scope='session')
-def celery_config():
-    return {
-        'broker_url': 'amqp://',
-        'result_backend': 'redis://'
-    }
-
-
-@pytest.fixture(scope='session')
-def celery_enable_logging():
-    return True
-
-
-@pytest.fixture(scope='session')
-def celery_includes():
-    return [
-        'ocrd_butler.execution.tasks',
-        # 'proj.tests.celery_signal_handlers',
-    ]
-
-
-# https://medium.com/@scythargon/how-to-use-celery-pytest-fixtures-for-celery-intergration-testing-6d61c91775d9
-# # @pytest.mark.usefixtures("config")
-# @pytest.mark.usefixtures('celery_session_app')
-# @pytest.mark.usefixtures('celery_session_worker')
-class ApiTests(TestCase):
-    """Test our api actions."""
-
-    def setUp(self):
-
-        from ocrd_butler import celery
-        celery.conf.task_always_eager = True
-
-        db.create_all()
-
-        testfiles = os.path.join(os.path.dirname(
-            os.path.abspath(__file__)), "files")
-        with open("{0}/sbb-mets-PPN821929127.xml".format(testfiles), "r") as tfh:
-            responses.add(responses.GET, "http://foo.bar/mets.xml",
-                          body=tfh.read(), status=200)
-            tfh.close()
-        with open("{0}/00000001.jpg".format(testfiles), "rb") as tfh:
-            responses.add(
-                responses.GET,
-                "http://content.staatsbibliothek-berlin.de/dms/"
-                "PPN821929127/800/0/00000001.jpg",
-                body=tfh.read(), status=200, content_type="image/jpg")
-            tfh.close()
-        with open("{0}/00000002.jpg".format(testfiles), "rb") as tfh:
-            responses.add(
-                responses.GET,
-                "http://content.staatsbibliothek-berlin.de/dms/"
-                "PPN821929127/800/0/00000002.jpg",
-                body=tfh.read(), status=200, content_type="image/jpg")
-            tfh.close()
-        with open("{0}/00000003.jpg".format(testfiles), "rb") as tfh:
-            responses.add(
-                responses.GET,
-                "http://content.staatsbibliothek-berlin.de/dms/"
-                "PPN821929127/800/0/00000003.jpg",
-                body=tfh.read(), status=200, content_type="image/jpg")
-            tfh.close()
-
-    def tearDown(self):
-        """Remove the test database."""
-        db.session.remove()
-        db.drop_all()
-        # self.clearTestDir()
-
-    def clearTestDir(self, config):
-        config = TestingConfig()
-        test_dirs = glob.glob("%s/*" % config.OCRD_BUTLER_RESULTS)
-        for test_dir in test_dirs:
-            shutil.rmtree(test_dir, ignore_errors=True)
+class ApiTaskActions(TestCase):
+    """Test our tasks actions."""
 
     def create_app(self):
         return create_app(config=TestingConfig)
 
-    def t_chain(self):
-        response = self.client.post("/api/chains", json=dict(
-            name="T Chain",
-            description="Some foobar chain.",
-            processors=[
-                "ocrd-tesserocr-segment-region",
-                "ocrd-tesserocr-segment-line",
-                "ocrd-tesserocr-segment-word",
-                "ocrd-tesserocr-recognize",
-            ],
-            parameters={
-                "ocrd-tesserocr-recognize": {
-                    "model": "deu"
-                }
-            }
-        ))
-        return response.json["id"]
+    def setUp(self):
+        data = json.dumps({
+            "description": "task_description",
+            "src": "src",
+            "file_grp": "DEFAULT",
+            "chain_id": "chain_id",
+            "parameters": "{}"
+        })
+        headers = {"Content-Type": "application/json"}
+        self.client.post("/api/tasks", data=data, headers=headers)
 
-    @mock.patch("ocrd_butler.execution.tasks.run_task")
-    @responses.activate
-    def test_task_tesserocr(self, mock_run_task):
-        """Check if a new task is created."""
-        response = self.client.post("/api/tasks", json=dict(
-            chain_id=self.t_chain(),
-            src="http://foo.bar/mets.xml",
-            description="Tesserocr task."
-        ))
-
-        response = self.client.post("/api/tasks/1/run")
-        assert response.status_code == 200
-        assert response.json["status"] == "SUCCESS"
-
-        response = self.client.get("/api/tasks/1/status")
-        assert response.json["status"] == "SUCCESS"
-
-        response = self.client.get("/api/tasks/1/results")
-        ocr_results = os.path.join(response.json["result_dir"],
-                                   "OCR-D-SEG-REGION")
-        result_files = os.listdir(ocr_results)
-        with open(os.path.join(ocr_results, result_files[2])) as result_file:
-            text = result_file.read()
-            assert "<pc:Unicode>Preußischer Kulturbesitz</pc:Unicode>" in text
-
-    @mock.patch("ocrd_butler.execution.tasks.run_task")
-    @responses.activate
-    def test_task_tess_cal(self, mock_run_task):
-        """Check if a new task is created."""
-        chain_response = self.client.post("/api/chains", json=dict(
-            name="TC Chain",
-            description="Chain with tesseract and calamari recog.",
-            processors=[
-                "ocrd-tesserocr-segment-region",
-                "ocrd-tesserocr-segment-line",
-                "ocrd-tesserocr-segment-word",
-                "ocrd-calamari-recognize"
-            ]
-        ))
-
-        task_response = self.client.post("/api/tasks", json=dict(
-            chain_id=chain_response.json["id"],
-            src="http://foo.bar/mets.xml",
-            description="Tesserocr calamari task.",
-            parameters={
-                "ocrd-calamari-recognize": {
-                    "checkpoint": "{0}/calamari_models/*ckpt.json".format(
-                        CURRENT_DIR)
-                }
-            }
-        ))
-
-        response = self.client.post("/api/tasks/{0}/run".format(
-            task_response.json["id"]))
-        assert response.status_code == 200
-        assert response.json["status"] == "SUCCESS"
-
-        response = self.client.get("/api/tasks/{0}/results".format(
-            task_response.json["id"]))
-
-        ocr_results = os.path.join(response.json["result_dir"],
-                                   "OCR-D-OCR-CALAMARI")
-        result_files = os.listdir(ocr_results)
-        with open(os.path.join(ocr_results, result_files[2])) as result_file:
-            text = result_file.read()
-            assert "<pc:Unicode>Staatsbibliotnen</pc:Unicode>" in text
-
-    @mock.patch("ocrd_butler.execution.tasks.run_task")
-    @responses.activate
-    def test_task_ole_cal(self, mock_run_task):
-        """Currently using /opt/calamari_models/fraktur_historical/0.ckpt.json
-           as checkpoint file.
+    def setup_mocks(self, mock_task_information, mock_fs):
+        """Setup the mocks for patching task_information and flask_sqlalchemy
+           query getter.
         """
-        assert os.path.exists("{0}/calamari_models/0.ckpt.json".format(CURRENT_DIR))
-
-        chain_response = self.client.post("/api/chains", json=dict(
-            name="TC Chain",
-            description="Chain with olena binarization, tesseract segmentation"
-                        " and calamari recog.",
-            processors=[
-                "ocrd-olena-binarize",
-                "ocrd-tesserocr-segment-region",
-                "ocrd-tesserocr-segment-line",
-                "ocrd-calamari-recognize"
-            ],
-            parameters={
-                "ocrd-olena-binarize": {
-                    "impl": "sauvola-ms-split"
-                }
+        mock_task_information.return_value = {
+            "ready": True,
+            "result": {
+                "result_dir": f"{CURRENT_DIR}/files/ocr_result_01",
+                "task_id": 23
             }
-        ))
+        }
+        mock_fs\
+            .return_value.filter_by\
+            .return_value.first\
+            .return_value = type('', (object,), {
+                "chain_id": 1,
+                "worker_task_id": 42,
+                "processors": ["ocrd-calamari-recognize"]
+            })()
 
-        task_response = self.client.post("/api/tasks", json=dict(
-            chain_id=chain_response.json["id"],
-            src="http://foo.bar/mets.xml",
-            description="Olena calamari task.",
-            parameters={
-                "ocrd-olena-binarize": {
-                    "impl": "sauvola-ms-split"
-                },
-                "ocrd-calamari-recognize": {
-                    "checkpoint": "{0}/calamari_models/*.ckpt.json".format(
-                        CURRENT_DIR)
-                }
-            }
-        ))
+    @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
+    @mock.patch("ocrd_butler.api.tasks.task_information")
+    def test_api_task_download_txt(self, mock_task_information, mock_fs):
+        """Check if download txt is working."""
+        self.setup_mocks(mock_task_information, mock_fs)
 
-        response = self.client.post("/api/tasks/{0}/run".format(
-            task_response.json["id"]))
+        response = self.client.get("/api/tasks/foobar/download_txt")
+
         assert response.status_code == 200
-        assert response.json["status"] == "SUCCESS"
+        assert response.content_type == "text/txt; charset=utf-8"
+        assert b"nen eer gbaun nonenronrndannn" in response.data
 
-        response = self.client.get("/api/tasks/{0}/results".format(
-            task_response.json["id"]))
+    @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
+    @mock.patch("ocrd_butler.api.tasks.task_information")
+    def test_api_task_page_zip(self, mock_task_information, mock_fs):
+        """Check if download txt is working."""
+        self.setup_mocks(mock_task_information, mock_fs)
 
-        ocr_results = os.path.join(response.json["result_dir"],
-                                   "OCR-D-OCR-CALAMARI")
-        result_files = os.listdir(ocr_results)
-        with open(os.path.join(ocr_results, result_files[2])) as result_file:
-            text = result_file.read()
-            assert "<pc:Unicode>Staatshibliothe</pc:Unicode>" in text
+        response = self.client.get("/api/tasks/foobar/download_page")
+
+        assert response.status_code == 200
+        assert response.content_type == "application/zip"
+        assert response.data[:10] == b'PK\x03\x04\x14\x00\x00\x00\x00\x00'
+
+
+    @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
+    @mock.patch("ocrd_butler.api.tasks.task_information")
+    def test_api_task_pageviewer_zip(self, mock_task_information, mock_fs):
+        """Check if download txt is working."""
+        self.setup_mocks(mock_task_information, mock_fs)
+
+        response = self.client.get("/api/tasks/foobar/download_pageviewer")
+
+        assert response.status_code == 200
+        assert response.content_type == "application/zip"
+        assert response.data[:10] == b'PK\x03\x04\x14\x00\x00\x00\x00\x00'
+
+
+    @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
+    @mock.patch("ocrd_butler.api.tasks.task_information")
+    def test_api_task_alto_zip(self, mock_task_information, mock_fs):
+        """Check if download txt is working."""
+        self.setup_mocks(mock_task_information, mock_fs)
+
+        response = self.client.get("/api/tasks/foobar/download_alto")
+
+        assert response.status_code == 200
+        assert response.content_type == "application/zip"
+        assert response.data[:10] == b'PK\x03\x04\x14\x00\x00\x00\x00\x00'

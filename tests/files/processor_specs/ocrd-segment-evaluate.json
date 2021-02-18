@@ -1,0 +1,15 @@
+{
+  "executable": "ocrd-segment-evaluate",
+  "categories": [
+    "Layout analysis"
+  ],
+  "description": "Compare region segmentations",
+  "input_file_grp": [
+    "OCR-D-GT-SEG-BLOCK",
+    "OCR-D-SEG-BLOCK"
+  ],
+  "steps": [
+    "layout/analysis"
+  ],
+  "parameters": {}
+}

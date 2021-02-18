@@ -7,9 +7,18 @@ __email__ = 'marco.scheidhuber@sbb.spk-berlin.de'
 __version__ = '0.1.0'
 
 from celery import Celery
-from ocrd_butler.config import DevelopmentConfig
-from ocrd_butler.config import ProductionConfig
-from ocrd_butler.config import TestingConfig
+
+from . import config as butler_config
+
+
+def get_config() -> butler_config.Config:
+    """ Returns one of ``DevelopmentConfig``, ``TestingConfig``, or ``ProductionConfig``,
+    based on the ``PROFILE`` environment variable.
+    ``PROFILE`` may take the values ``DEV``, ``TEST``, or ``PROD``.
+    If variable is not set, ``DEV`` is being assumed.
+    """
+    return butler_config.profile_config()
+
 
 def make_celery(app_name=__name__, config=None):
     """
@@ -20,13 +29,13 @@ def make_celery(app_name=__name__, config=None):
     Returns:
         celery object
     """
-    # TODO: Choose from an environment variable what config to use?
-    if config is None:
-        config = DevelopmentConfig()
+    config = config or get_config()
 
     return Celery(app_name,
                   backend=config.CELERY_RESULT_BACKEND_URL,
                   broker=config.CELERY_BROKER_URL)
 
+
+config = get_config()
 # The base celery object of the app.
 celery = make_celery()

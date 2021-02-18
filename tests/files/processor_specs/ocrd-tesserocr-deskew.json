@@ -1,0 +1,40 @@
+{
+  "executable": "ocrd-tesserocr-deskew",
+  "categories": [
+    "Image preprocessing"
+  ],
+  "description": "Detect script, orientation and skew angle for pages or regions",
+  "input_file_grp": [
+    "OCR-D-IMG",
+    "OCR-D-SEG-BLOCK"
+  ],
+  "output_file_grp": [
+    "OCR-D-DESKEW-BLOCK"
+  ],
+  "steps": [
+    "preprocessing/optimization/deskewing"
+  ],
+  "parameters": {
+    "dpi": {
+      "type": "number",
+      "format": "float",
+      "description": "pixel density in dots per inch (overrides any meta-data in the images); disabled when negative",
+      "default": 0
+    },
+    "operation_level": {
+      "type": "string",
+      "enum": [
+        "page",
+        "region"
+      ],
+      "default": "region",
+      "description": "PAGE XML hierarchy level to operate on"
+    },
+    "min_orientation_confidence": {
+      "type": "number",
+      "format": "float",
+      "default": 1.5,
+      "description": "Minimum confidence score to apply orientation as detected by OSD"
+    }
+  }
+}
