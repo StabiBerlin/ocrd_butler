@@ -24,6 +24,7 @@ tests:
   script:
     - export PROFILE=test
     - pytest tests --doctest-modules ocrd_butler
+    - coverage xml
   artifacts:
     when: always
     paths:
