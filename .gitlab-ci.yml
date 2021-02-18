@@ -3,7 +3,9 @@
 image: "python:3.7"
 
 before_script:
-  - python --versino
+  - export HTTP_PROXY=http://proxy.sbb.spk-berlin.de:3128
+  - export HTTPS_PROXY=http://proxy.sbb.spk-berlin.de:3128
+  - python --version
   - pip install -r requirements.txt
   - pip install -r requirements-dev.txt
 
@@ -15,13 +17,13 @@ stages:
 linting:
   stage: analysis
   script:
-    - flake8 ocrd_butler/
+    - flake8 --exit-zero --statistics --doctests ocrd_butler/ tests/
 
 tests:
   stage: test
   script:
     - export PROFILE=test
-    - pytest
+    - pytest tests --doctest-modules ocrd_butler
   artifacts:
     when: always
     paths:
