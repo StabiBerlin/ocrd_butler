@@ -1,0 +1,34 @@
+---
+
+image: "python:3.7"
+
+before_script:
+  - python --versino
+  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
+
+stages:
+  - analysis
+  - test
+
+
+linting:
+  stage: analysis
+  script:
+    - flake8 ocrd_butler/
+
+tests:
+  stage: test
+  script:
+    - export PROFILE=test
+    - pytest
+  artifacts:
+    when: always
+    paths:
+      - coverage.xml
+      - test-report.xml
+    reports:
+      junit: test-report.xml
+      cobertura: coverage.xml
+
+...
