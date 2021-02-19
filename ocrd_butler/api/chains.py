@@ -78,9 +78,7 @@ class Chains(ChainBase):
         """ Add a new chain. """
 
         data = self.chain_data(request.json)
-        chain = db_model_Chain(**data)
-        db.session.add(chain)
-        db.session.commit()
+        chain = db_model_Chain.add(**data)
 
         return make_response({
             "message": "Chain created.",
@@ -90,7 +88,7 @@ class Chains(ChainBase):
     @api.doc(responses={200: "Found"})
     def get(self):
         """ Get all chains. """
-        chains = db_model_Chain.query.all()
+        chains = db_model_Chain.get_all()
         results = [chain.to_json() for chain in chains]
         return jsonify(results)
 
@@ -102,7 +100,7 @@ class Chain(ChainBase):
     @api.doc(responses={200: "Found", 404: "Not known chain id."})
     def get(self, chain_id):
         """ Get the chain by given id. """
-        chain = db_model_Chain.query.filter_by(id=chain_id).first()
+        chain = db_model_Chain.get(id=chain_id)
 
         if chain is None:
             chain_namespace.abort(
@@ -116,7 +114,7 @@ class Chain(ChainBase):
     @api.expect(chain_model)
     def put(self, chain_id):
         """ Update the chain. """
-        chain = db_model_Chain.query.filter_by(id=chain_id).first()
+        chain = db_model_Chain.get(id=chain_id)
         if chain is None:
             chain_namespace.abort(
                 404, "Wrong parameter",

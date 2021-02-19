@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 def logger(name: str) -> logging.Logger:
     """ returns logger instance for given identifier.
 
-    >>> logger(__name__)
+    >>> l=logger(__name__); l.setLevel('WARN'); l
     <Logger ocrd_butler.util (WARNING)>
 
     """

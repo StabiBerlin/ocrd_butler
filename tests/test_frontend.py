@@ -235,3 +235,32 @@ class FrontendTests(TestCase):
 
         assert response.status_code == 200
         assert response.data[:10] == b"foobar"
+
+    @mock.patch("ocrd_butler.database.models.Task.get_all")
+    def test_frontend_compare_select(self, db_model_task_mock_get_all):
+        db_model_task_mock_get_all.return_value = [
+            db_model_Task.create(**{
+                "uid": "1",
+                "chain_id": "1",
+                "src": "src",
+            })
+        ]
+        response = self.client.get("/compare")
+        assert response.status_code == 200
+
+    @mock.patch("ocrd_butler.database.models.Task.get")
+    def test_frontend_compare(self, db_model_task_mock_get):
+        db_model_task_mock_get.return_value = db_model_Task.create(
+            **{
+                'uid': '1', 'chain_id': '1', 'src': 'src',
+            }
+        )
+        # response = self.client.post(
+        #     "/compare",
+        #     data={
+        #         "task_from": "1",
+        #         "task_to": "1",
+        #     }
+        # )
+        # assert response.status_code == 200
+        # assert db_model_task_mock_get.call_count == 2

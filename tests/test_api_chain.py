@@ -7,8 +7,10 @@ from flask_testing import TestCase
 
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import create_app, db
-from ocrd_butler.api.models import chain_model
-from ocrd_butler.api.models import ChainParametersField
+from ocrd_butler.api.models import (
+    chain_model,
+    ChainParametersField,
+)
 
 
 class ApiTests(TestCase):
@@ -142,16 +144,16 @@ class ApiTests(TestCase):
 
     def test_get_chains(self):
         """Check if a new chain can be retrieved."""
-        response = self.client.post("/api/chains", json=dict(
+        assert self.client.post("/api/chains", json=dict(
             name="First Chain",
             description="Some foobar chain.",
             processors=["ocrd-olena-binarize"],
-        ))
-        response = self.client.post("/api/chains", json=dict(
+        )).status_code == 201
+        assert self.client.post("/api/chains", json=dict(
             name="Second Chain",
             description="Some barfoo chain.",
             processors=["ocrd-sbb-textline-detector"],
-        ))
+        )).status_code == 201
         response = self.client.get("/api/chains")
 
         assert response.status_code == 200
