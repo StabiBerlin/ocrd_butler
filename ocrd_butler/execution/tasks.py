@@ -3,8 +3,11 @@
 """Celery tasks definitions."""
 
 import json
-
-from flask import current_app
+from pathlib import PurePosixPath
+from urllib.parse import (
+    urlparse,
+    unquote
+)
 
 from celery.signals import (
     task_failure,
@@ -12,6 +15,8 @@ from celery.signals import (
     task_prerun,
     task_success,
 )
+
+from flask import current_app
 
 from ocrd.resolver import Resolver
 from ocrd.processor.base import run_cli
@@ -55,19 +60,10 @@ def task_failure_handler(sender, result, **kwargs):
                             task.id, task.worker_task_id)
 
 
-@celery.task(bind=True)
-def run_task(self, task):
-    """ Create a task an run the given chain. """
-    # TODO: Check if there is the active problem in olena_binarize with
-    #       other basenames than mets.xml.
-    # mets_basename = "{}.xml".format(task["id"])
+def prepare_workspace(task, resolver, dst_dir):
+    """Prepare a workspace and return it."""
     mets_basename = "mets.xml"
 
-    # Create workspace
-    dst_dir = "{}/{}".format(current_app.config["OCRD_BUTLER_RESULTS"],
-                             task["uid"])
-
-    resolver = Resolver()
     workspace = resolver.workspace_from_url(
         task["src"],
         dst_dir=dst_dir,
@@ -75,13 +71,49 @@ def run_task(self, task):
         clobber_mets=True
     )
 
-    for file_name in workspace.mets.find_files(
-        fileGrp=task["default_file_grp"]
-    ):
-        if not file_name.local_filename:
-            workspace.download_file(file_name)
+    parsed_url = urlparse(task["src"])
+    is_sbb = parsed_url.hostname == current_app.config["SBB_CONTENT_SERVER_HOST"]
+
+    if is_sbb and \
+      task["default_file_grp"] == "MAX" and \
+      "MAX" not in workspace.mets.file_groups:
+        for file_name in workspace.mets.find_files(
+                fileGrp="DEFAULT"
+        ):
+            url_path = PurePosixPath(unquote(urlparse(file_name.url).path))
+            ppn = url_path.parts[2]
+            img_nr = url_path.parts[5].split(".")[0]
+            iiif_max_url = current_app.config["SBB_IIIF_FULL_TIF_URL"].format(ppn, img_nr)
+            file_id = file_name.ID.replace("DEFAULT", "MAX")
+            max_file = workspace.add_file(
+                file_grp="MAX",
+                pageId=file_name.pageId,
+                url=iiif_max_url,
+                ID=file_id,
+                mimetype="image/tif",
+                extension=".tif")
+            workspace.download_file(max_file)
+    else:
+        for file_name in workspace.mets.find_files(
+                fileGrp=task["default_file_grp"]
+        ):
+            if not file_name.local_filename:
+                workspace.download_file(file_name)
 
     workspace.save_mets()
+
+    return workspace
+
+
+@celery.task(bind=True)
+def run_task(self, task):
+    """ Create a task an run the given chain. """
+
+    # Create workspace
+    dst_dir = "{}/{}".format(current_app.config["OCRD_BUTLER_RESULTS"],
+                             task["uid"])
+    resolver = Resolver()
+    workspace = prepare_workspace(task, resolver, dst_dir)
 
     # TODO: Steps could be saved along the other task information to get a
     # more informational task.

@@ -59,13 +59,20 @@ class ApiTaskActionRunTests(TestCase):
             os.path.abspath(__file__)), "files")
 
         with open(
-            os.path.join(testfiles, "sbb-mets-PPN821929127.xml"),
-            "r", encoding="utf-8"
+                os.path.join(testfiles, "sbb-mets-PPN821929127.xml"),
+                "r", encoding="utf-8"
         ) as tfh:
+            mets_file = tfh.read()
             responses.add(
                 method=responses.GET,
                 url="http://foo.bar/mets.xml",
-                body=tfh.read(),
+                body=mets_file,
+                status=200
+            )
+            responses.add(
+                method=responses.GET,
+                url="http://content.staatsbibliothek-berlin.de/mets.xml",
+                body=mets_file,
                 status=200
             )
 
@@ -73,13 +80,24 @@ class ApiTaskActionRunTests(TestCase):
             with open(
                 os.path.join(testfiles, f"0000000{i}.jpg"), "rb"
             ) as tfh:
+                img_file = tfh.read()
                 responses.add(
                     method=responses.GET,
                     url=(
                         "http://content.staatsbibliothek-berlin.de/dms/"
                         f"PPN821929127/800/0/0000000{i}.jpg"
                     ),
-                    body=tfh.read(),
+                    body=img_file,
+                    status=200,
+                    content_type="image/jpg"
+                )
+                responses.add(
+                    method=responses.GET,
+                    url=(
+                        "https://content.staatsbibliothek-berlin.de/dc/"
+                        f"PPN821929127-0000000{i}/full/full/0/default.tif"
+                    ),
+                    body=img_file,
                     status=200,
                     content_type="image/jpg"
                 )
@@ -100,6 +118,7 @@ class ApiTaskActionRunTests(TestCase):
         return create_app(config=TestingConfig)
 
     def t_chain(self):
+        """Creates a chain with tesseract processors."""
         response = self.client.post("/api/chains", json=dict(
             name="T Chain",
             description="Some foobar chain.",
@@ -116,6 +135,33 @@ class ApiTaskActionRunTests(TestCase):
             }
         ))
         return response.json["id"]
+
+    def empty_chain(self):
+        """Creates a chain without processors."""
+        response = self.client.post("/api/chains", json=dict(
+            name="Empty Chain",
+            description="Empty but not useless chain.",
+            processors=[],
+            parameters={}
+        ))
+        return response.json["id"]
+
+    @responses.activate
+    def test_task_max_file_download(self):
+        """Check if the workspace is created."""
+        self.client.post("/api/tasks", json=dict(
+            chain_id=self.empty_chain(),
+            src="http://content.staatsbibliothek-berlin.de/mets.xml",
+            description="Check workspace task.",
+            default_file_grp="MAX"
+        ))
+        self.client.post("/api/tasks/1/run")
+        result_response = self.client.get("/api/tasks/1/results")
+        max_file_dir = os.path.join(result_response.json["result_dir"], "MAX")
+        max_files = os.listdir(max_file_dir)
+        with open(os.path.join(max_file_dir, max_files[2]), "rb") as img_file:
+            content = img_file.read()
+            assert content.startswith(b"\xff\xd8\xff\xe0\x00\x10JFIF")
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
