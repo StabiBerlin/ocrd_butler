@@ -112,12 +112,14 @@ class FrontendTests(TestCase):
             task_id="foobar",
             description="barfoo",
             src="http://foo.bar/mets.xml",
-            chain_id=self.get_chain_id()
+            chain_id=self.get_chain_id(),
+            default_file_grp="file_grp"
         ))
 
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
         assert len(html.find('table > tr > td')) == 10
+        assert html.find('table > tr > td')[2].text == "file_grp"
         assert html.find('table > tr > td')[6].text == "worker_task.id"
         self.client.get("/task/delete/1")
 
