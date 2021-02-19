@@ -62,11 +62,10 @@ class ApiTaskActionRunTests(TestCase):
                 os.path.join(testfiles, "sbb-mets-PPN821929127.xml"),
                 "r", encoding="utf-8"
         ) as tfh:
-            mets_file = tfh.read()
             responses.add(
                 method=responses.GET,
                 url="http://foo.bar/mets.xml",
-                body=mets_file,
+                body=tfh.read(),
                 status=200
             )
 
