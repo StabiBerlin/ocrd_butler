@@ -69,16 +69,10 @@ class ApiTaskActionRunTests(TestCase):
                 body=mets_file,
                 status=200
             )
-            responses.add(
-                method=responses.GET,
-                url="http://content.staatsbibliothek-berlin.de/mets.xml",
-                body=mets_file,
-                status=200
-            )
 
         for i in "123":
             with open(
-                os.path.join(testfiles, f"0000000{i}.jpg"), "rb"
+                    os.path.join(testfiles, f"0000000{i}.jpg"), "rb"
             ) as tfh:
                 img_file = tfh.read()
                 responses.add(
@@ -110,7 +104,7 @@ class ApiTaskActionRunTests(TestCase):
 
     def clearTestDir(self, config):
         config = TestingConfig()
-        test_dirs = glob.glob("%s/*" % config.OCRD_BUTLER_RESULTS)
+        test_dirs = glob.glob(f"{config.OCRD_BUTLER_RESULTS}/*")
         for test_dir in test_dirs:
             shutil.rmtree(test_dir, ignore_errors=True)
 
@@ -151,7 +145,7 @@ class ApiTaskActionRunTests(TestCase):
         """Check if the workspace is created."""
         self.client.post("/api/tasks", json=dict(
             chain_id=self.empty_chain(),
-            src="http://content.staatsbibliothek-berlin.de/mets.xml",
+            src="http://foo.bar/mets.xml",
             description="Check workspace task.",
             default_file_grp="MAX"
         ))
