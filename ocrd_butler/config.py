@@ -159,6 +159,7 @@ class TestingConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     OCRD_BUTLER_RESULTS = "/tmp/ocrd_butler_results_testing"
+    SBB_CONTENT_SERVER_HOST = "foo.bar"
 
     @classmethod
     def processor_specs(cls, processor: str) -> dict:
