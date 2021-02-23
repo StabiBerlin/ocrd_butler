@@ -18,6 +18,7 @@ from celery.signals import (
 
 from flask import current_app
 
+from ocrd_models import OcrdFile
 from ocrd.resolver import Resolver
 from ocrd.processor.base import run_cli
 from ocrd.workspace import Workspace
@@ -61,6 +62,26 @@ def task_failure_handler(sender, result, **kwargs):
                             task.id, task.worker_task_id)
 
 
+def add_max_file_to_workspace(workspace: Workspace, file_name: OcrdFile) -> OcrdFile:
+    """ Uses the :const:`~.ocrd_butler.config.Config.SBB_IIIF_FULL_TIF_URL` URL template
+    to locate a remote TIFF representation of a given workspace file, and add the
+    corresponding file entry to the workspace.
+    """
+    url_path = PurePosixPath(unquote(urlparse(file_name.url).path))
+    ppn = url_path.parts[2]
+    img_nr = url_path.parts[5].split(".")[0]
+    iiif_max_url = current_app.config["SBB_IIIF_FULL_TIF_URL"].format(ppn, img_nr)
+    file_id = file_name.ID.replace("DEFAULT", "MAX")
+    return workspace.add_file(
+        file_grp="MAX",
+        pageId=file_name.pageId,
+        url=iiif_max_url,
+        ID=file_id,
+        mimetype="image/tiff",
+        extension=".tif"
+    )
+
+
 def prepare_workspace(task: dict, resolver: Resolver, dst_dir: str) -> Workspace:
     """Prepare a workspace and return it."""
     mets_basename = "mets.xml"
@@ -81,19 +102,11 @@ def prepare_workspace(task: dict, resolver: Resolver, dst_dir: str) -> Workspace
         for file_name in workspace.mets.find_files(
                 fileGrp="DEFAULT"
         ):
-            url_path = PurePosixPath(unquote(urlparse(file_name.url).path))
-            ppn = url_path.parts[2]
-            img_nr = url_path.parts[5].split(".")[0]
-            iiif_max_url = current_app.config["SBB_IIIF_FULL_TIF_URL"].format(ppn, img_nr)
-            file_id = file_name.ID.replace("DEFAULT", "MAX")
-            max_file = workspace.add_file(
-                file_grp="MAX",
-                pageId=file_name.pageId,
-                url=iiif_max_url,
-                ID=file_id,
-                mimetype="image/tiff",
-                extension=".tif")
-            workspace.download_file(max_file)
+            workspace.download_file(
+                add_max_file_to_workspace(
+                    workspace, file_name
+                )
+            )
     else:
         for file_name in workspace.mets.find_files(
                 fileGrp=task["default_file_grp"]
