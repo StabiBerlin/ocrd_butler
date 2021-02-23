@@ -74,9 +74,9 @@ def prepare_workspace(task, resolver, dst_dir):
     parsed_url = urlparse(task["src"])
     is_sbb = parsed_url.hostname == current_app.config["SBB_CONTENT_SERVER_HOST"]
 
-    if is_sbb and \
-      task["default_file_grp"] == "MAX" and \
-      "MAX" not in workspace.mets.file_groups:
+    if is_sbb and task[
+        "default_file_grp"
+    ] == "MAX" and "MAX" not in workspace.mets.file_groups:
         for file_name in workspace.mets.find_files(
                 fileGrp="DEFAULT"
         ):
