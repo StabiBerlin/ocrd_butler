@@ -20,6 +20,7 @@ from flask import current_app
 
 from ocrd.resolver import Resolver
 from ocrd.processor.base import run_cli
+from ocrd.workspace import Workspace
 
 from ocrd_butler import celery
 from ocrd_butler.api.processors import PROCESSORS_ACTION
@@ -60,7 +61,7 @@ def task_failure_handler(sender, result, **kwargs):
                             task.id, task.worker_task_id)
 
 
-def prepare_workspace(task, resolver, dst_dir):
+def prepare_workspace(task: dict, resolver: Resolver, dst_dir: str) -> Workspace:
     """Prepare a workspace and return it."""
     mets_basename = "mets.xml"
 
@@ -75,7 +76,7 @@ def prepare_workspace(task, resolver, dst_dir):
     is_sbb = parsed_url.hostname == current_app.config["SBB_CONTENT_SERVER_HOST"]
 
     if is_sbb and task[
-        "default_file_grp"
+            "default_file_grp"
     ] == "MAX" and "MAX" not in workspace.mets.file_groups:
         for file_name in workspace.mets.find_files(
                 fileGrp="DEFAULT"
