@@ -90,7 +90,7 @@ def prepare_workspace(task, resolver, dst_dir):
                 pageId=file_name.pageId,
                 url=iiif_max_url,
                 ID=file_id,
-                mimetype="image/tif",
+                mimetype="image/tiff",
                 extension=".tif")
             workspace.download_file(max_file)
     else:
