@@ -176,7 +176,7 @@ def new_task():
     data = json.dumps({
         "description": request.form.get("task_description"),
         "src": request.form.get("src"),
-        "file_grp": request.form.get("input_file_grp") or "DEFAULT",
+        "default_file_grp": request.form.get("input_file_grp") or "DEFAULT",
         "chain_id": request.form.get("chain_id"),
         "parameters": parameters
     })
