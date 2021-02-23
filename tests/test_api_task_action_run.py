@@ -92,7 +92,7 @@ class ApiTaskActionRunTests(TestCase):
                     ),
                     body=img_file,
                     status=200,
-                    content_type="image/jpg"
+                    content_type="image/tiff"
                 )
 
     def tearDown(self):
