@@ -142,6 +142,7 @@ class ProductionConfig(Config):
     Uses production database server.
     """
     SQLALCHEMY_DATABASE_URI = 'sqlite:///./production.db'
+    OCRD_BUTLER_RESULTS = "/data/ocrd_butler_results"
 
 
 class DevelopmentConfig(Config):
