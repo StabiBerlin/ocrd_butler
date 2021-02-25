@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """Restx model definitions."""
-import json
 
 from flask_restx import fields
 from ocrd_butler.api.restx import api
@@ -61,6 +60,7 @@ class ChainProcessorsField(fields.Raw):
     def format(self, value):
         # return json.dumps(value)
         return value
+
 
 class ChainParametersField(fields.Raw):
     __schema_type__ = 'dict'

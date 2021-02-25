@@ -7,6 +7,8 @@ from flask_testing import TestCase
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import create_app
 
+from . import require_ocrd_processors
+
 
 class ApiTests(TestCase):
     """Test our api."""
@@ -20,9 +22,11 @@ class ApiTests(TestCase):
     def create_app(self):
         return create_app(config=TestingConfig)
 
+    @require_ocrd_processors()
     def test_get_processors(self):
         """Check if our processors are getable."""
         response = self.client.get("/api/processors")
         assert response.status_code == 200
-        assert response.json[0]["executable"] == "ocrd-olena-binarize"
-        assert response.json[5]["package"]["git_url"] == "https://github.com/OCR-D/ocrd_tesserocr"
+        assert len(response.json) == len(TestingConfig.PROCESSORS)
+        for i, processor in enumerate(response.json):
+            assert processor["executable"] == TestingConfig.PROCESSORS[i]

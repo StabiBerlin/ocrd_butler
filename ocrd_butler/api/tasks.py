@@ -1,26 +1,35 @@
 # -*- coding: utf-8 -*-
 
 """Restx task routes."""
+import glob
+import io
 import json
+import pathlib
+import os
 import uuid
+import xml.etree.ElementTree as ET
+import zipfile
 
 from flask import (
+    current_app,
     make_response,
     jsonify,
-    request
+    request,
+    send_file
 )
 from flask_restx import (
     Resource,
     marshal
 )
+import requests
 
-from celery.signals import task_success
-from sqlalchemy.orm.exc import NoResultFound
-
+from ocrd.processor.base import run_cli
+from ocrd.resolver import Resolver
 from ocrd_validators import ParameterValidator
 
 from ocrd_butler.api.restx import api
 from ocrd_butler.api.models import task_model
+from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.api.processors import PROCESSORS_CONFIG
 
 from ocrd_butler.database import db
@@ -28,7 +37,9 @@ from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 
 from ocrd_butler.execution.tasks import run_task
-from ocrd_butler.util import to_json
+from ocrd_butler.util import logger, to_json
+
+log = logger(__name__)
 
 task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 
@@ -54,12 +65,42 @@ task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 # - downloadable and (even better) live log showing
 
 
+def task_information(uid):
+    """
+    Get information for the task based on its uid.
+    """
+    if uid is None:
+        return None
+
+    response = requests.get(f"http://localhost:5555/api/task/info/{uid}")
+    if response.status_code == 404:
+        current_app.logger.warning(f"Can't find task '{uid}'")
+        return None
+    try:
+        task_info = json.loads(response.content)
+    except json.decoder.JSONDecodeError as exc:
+        current_app.logger.error(f"Can't read response for task '{uid}'. ({exc.__str__()})")
+        return None
+
+    task_info["ready"] = task_info["state"] == "SUCCESS"
+    if task_info["result"] is not None:
+        task_info["result"] = json.loads(task_info["result"].replace("'", '"'))
+
+    return task_info
+
+
 class TasksBase(Resource):
     """Base methods for tasks."""
 
-    def __init__(self, api=None, *args, **kwargs):
-        super().__init__(api, *args, **kwargs)
-        self.get_actions = ("status", "results")
+    def __init__(self, api_obj, *args, **kwargs):
+        super().__init__(api_obj, *args, **kwargs)
+        self.get_actions = (
+            "status",
+            "results",
+            "download_txt",
+            "download_page",
+            "download_pageviewer",
+            "download_alto")
         self.post_actions = ("run", "rerun", "stop")
 
     def task_data(self, json_data):
@@ -75,11 +116,10 @@ class TasksBase(Resource):
                                  status="Missing chain for task.",
                                  statusCode="400")
         else:
-            chain = db_model_Chain.query.filter_by(id=data["chain_id"]).first()
+            chain = db_model_Chain.get(id=data["chain_id"])
             if chain is None:
                 task_namespace.abort(400, "Wrong parameter.",
-                                     status="Unknow chain with id {}.".format(
-                                         data["chain_id"]),
+                                     status=f"Unknow chain with id {data['chain_id']}.",
                                      statusCode="400")
 
         for processor in data["parameters"].keys():
@@ -88,8 +128,8 @@ class TasksBase(Resource):
             if not report.is_valid:
                 task_namespace.abort(
                     400, "Wrong parameter.",
-                    status="Unknown parameter \"{0}\" for processor \"{1}\".".format(
-                        data["parameters"][processor], processor),
+                    status=f"Unknown parameter \"{data['parameters'][processor]}\" "
+                           f"for processor \"{processor}\".",
                     statusCode="400")
 
         data["parameters"] = json.dumps(data["parameters"])
@@ -99,18 +139,16 @@ class TasksBase(Resource):
 
 
 @task_namespace.route("")
-class Task(TasksBase):
+class TaskRoot(TasksBase):
+    """Restful methods for tasks."""
 
     @api.doc(responses={201: "Created", 400: "Missing parameter"})
     @api.expect(task_model)
     def post(self):
-        data = self.task_data(request.json)
-
-        task = db_model_Task(**data)
-        db.session.add(task)
-        db.session.commit()
-
-        headers = dict(Location="/tasks/{0}".format(task.id))
+        """Create a new Task."""
+        task = db_model_Task.add(
+            **self.task_data(request.json)
+        )
 
         return make_response({
             "message": "Task created.",
@@ -127,17 +165,17 @@ class TaskActions(TasksBase):
     def post(self, task_id, action):
         """ Execute the given action for the task. """
         # TODO: Return the actions as OPTIONS.
-        task = db_model_Task.query.filter_by(id=task_id).first()
+        task = db_model_Task.get(id=task_id)
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
-                status="Unknown task for id \"{0}\".".format(task_id),
+                status=f"Unknown task for id \"{task_id}\".",
                 statusCode="404")
 
         if action not in self.post_actions:
             task_namespace.abort(
                 400, "Unknown action.",
-                status="Unknown action \"{0}\".".format(action),
+                status=f"Unknown action \"{action}\".",
                 statusCode="400")
 
         action = getattr(self, action)
@@ -146,7 +184,7 @@ class TaskActions(TasksBase):
         except Exception as exc:
             task_namespace.abort(
                 500, "Error.",
-                status="Unexpected error \"{0}\".".format(exc.__str__()),
+                status=f"Unexpected error \"{exc.__str__()}\".",
                 statusCode="400")
 
     @api.doc(responses={200: "OK", 400: "Unknown action",
@@ -154,17 +192,18 @@ class TaskActions(TasksBase):
     def get(self, task_id, action):
         """ Get some information for the task. """
         # TODO: Return the actions as OPTIONS.
-        task = db_model_Task.query.filter_by(id=task_id).first()
+        task = db_model_Task.get(id=task_id)
+
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
-                status="Unknown task for id \"{0}\".".format(task_id),
+                status=f"Unknown task for id \"{task_id}\".",
                 statusCode="404")
 
         if action not in self.get_actions:
             task_namespace.abort(
                 400, "Unknown action.",
-                status="Unknown action \"{0}\".".format(action),
+                status=f"Unknown action \"{action}\".",
                 statusCode="400")
 
         action = getattr(self, action)
@@ -173,7 +212,7 @@ class TaskActions(TasksBase):
         except Exception as exc:
             task_namespace.abort(
                 500, "Error.",
-                status="Unexpected error \"{0}\".".format(exc.__str__()),
+                status=f"Unexpected error \"{exc.__str__()}\".",
                 statusCode="400")
 
     def run(self, task):
@@ -181,6 +220,7 @@ class TaskActions(TasksBase):
         # worker_task = run_task.apply_async(args=[task.to_json()],
         #                                    countdown=20)
         # worker_task = run_task(task.to_json())
+        log.info("run task: %s", task)
         worker_task = run_task.delay(task.to_json())
         task.worker_task_id = worker_task.id
         db.session.commit()
@@ -197,10 +237,10 @@ class TaskActions(TasksBase):
 
         return jsonify(result)
 
-    def re_run(self, task):
+    def rerun(self, task):
         """ Run this task once again. """
         # Basically delete all and run again.
-        pass
+        raise NotImplementedError
 
     def status(self, task):
         """ Run this task. """
@@ -214,43 +254,182 @@ class TaskActions(TasksBase):
 
     def download_page(self, task):
         """ Download the results of the task as PAGE XML. """
-        pass
+        task_info = task_information(task.worker_task_id)
+
+        # Get the output group of the last step in the chain of the task.
+        task_data = db_model_Task.get(worker_task_id=task.worker_task_id)
+        chain_data = db_model_Chain.get(id=task_data.chain_id)
+        last_step = chain_data.processors[-1]
+        last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+
+        page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
+        base_path = pathlib.Path(page_xml_dir)
+
+        data = io.BytesIO()
+        with zipfile.ZipFile(data, mode='w') as zip_file:
+            for f_name in base_path.iterdir():
+                arcname = f"{last_output}/{os.path.basename(f_name)}"
+                zip_file.write(f_name, arcname=arcname)
+        data.seek(0)
+
+        return send_file(
+            data,
+            mimetype="application/zip",
+            as_attachment=True,
+            attachment_filename=f"ocr_page_xml_{task_info['result']['task_id']}.zip"
+        )
+
+    def download_pageviewer(self, task):
+        """ Download the results of the task for pageviewer, including PAGE XML,
+            METS file and DEFAULT images.
+        """
+        task_info = task_information(task.worker_task_id)
+
+        # Get the output group of the last step in the chain of the task.
+        task_data = db_model_Task.query.filter_by(worker_task_id=task.worker_task_id).first()
+        chain_data = db_model_Chain.query.filter_by(id=task_data.chain_id).first()
+        last_step = chain_data.processors[-1]
+        last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+
+        page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
+        page_xml_path = pathlib.Path(page_xml_dir)
+        img_dir = os.path.join(f"{task_info['result']['result_dir']}/DEFAULT")
+        img_path = pathlib.Path(img_dir)
+
+        data = io.BytesIO()
+        with zipfile.ZipFile(data, mode='w') as zip_file:
+            zip_file.write(f"{task_info['result']['result_dir']}/mets.xml", arcname="mets.xml")
+            for f_name in img_path.iterdir():
+                arcname = f"DEFAULT/{os.path.basename(f_name)}"
+                zip_file.write(f_name, arcname=arcname)
+            for f_name in page_xml_path.iterdir():
+                arcname = f"{last_output}/{os.path.basename(f_name)}"
+                zip_file.write(f_name, arcname=arcname)
+        data.seek(0)
+
+        return send_file(
+            data,
+            mimetype="application/zip",
+            as_attachment=True,
+            attachment_filename=f"ocr_page_xml_{task_info['result']['task_id']}.zip"
+        )
 
     def download_alto(self, task):
         """ Download the results of the task as ALTO XML. """
-        pass
+        task_info = task_information(task.worker_task_id)
+
+        # Get the output group of the last step in the chain of the task.
+        task_data = db_model_Task.query.filter_by(worker_task_id=task.worker_task_id).first()
+        chain_data = db_model_Chain.query.filter_by(id=task_data.chain_id).first()
+        last_step = chain_data.processors[-1]
+        last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+
+        # BUG?: java.lang.IllegalArgumentException:
+        # Variable value 'TextTypeSimpleType.CAPTION' is not in the list of valid values.
+        # possible reason: https://github.com/OCR-D/core/issues/451 ??
+        alto_xml_dir = os.path.join(task_info["result"]["result_dir"], "OCR-D-OCR-ALTO")
+        alto_path = pathlib.Path(alto_xml_dir)
+
+        if not os.path.exists(alto_path):
+            mets_url = f"{task_info['result']['result_dir']}/mets.xml"
+            run_cli(
+                "ocrd-fileformat-transform",
+                mets_url=mets_url,
+                resolver=Resolver(),
+                log_level="DEBUG",
+                input_file_grp=last_output,
+                output_file_grp="OCR-D-OCR-ALTO",
+                parameter='{"from-to": "page alto"}'
+            )
+
+        data = io.BytesIO()
+        with zipfile.ZipFile(data, mode='w') as zip_file:
+            for f_name in alto_path.iterdir():
+                arcname = f"{last_output}/{os.path.basename(f_name)}"
+                zip_file.write(f_name, arcname=arcname)
+        data.seek(0)
+
+        return send_file(
+            data,
+            mimetype="application/zip",
+            as_attachment=True,
+            attachment_filename="ocr_alto_xml_%s.zip" % task_info["result"]["task_id"]
+        )
 
     def download_txt(self, task):
         """ Download the results of the task as text. """
-        pass
+        task_info = task_information(task.worker_task_id)
+
+        # Get the output group of the last step in the chain of the task.
+        task_data = db_model_Task.query.filter_by(worker_task_id=task.worker_task_id).first()
+        chain_data = db_model_Chain.query.filter_by(id=task_data.chain_id).first()
+        last_step = chain_data.processors[-1]
+        last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+
+        page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
+        fulltext = ""
+
+        namespace = {
+            "page_2009-03-16": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2009-03-16",
+            "page_2010-01-12": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2010-01-12",
+            "page_2010-03-19": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2010-03-19",
+            "page_2013-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15",
+            "page_2016-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2016-07-15",
+            "page_2017-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2017-07-15",
+            "page_2018-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2018-07-15",
+            "page_2019-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15"
+        }
+
+        files = glob.glob(f"{page_xml_dir}/*.xml")
+        files.sort()
+
+        for file in files:
+            tree = ET.parse(file)
+            xmlns = tree.getroot().tag.split("}")[0].strip("{")
+            if xmlns in namespace.values():
+                for regions in tree.iterfind(".//{%s}TextRegion" % xmlns):
+                    fulltext += "\n"
+                    for content in regions.findall(
+                            ".//{%s}TextLine//{%s}TextEquiv//{%s}Unicode" % (xmlns, xmlns, xmlns)):
+                        if content.text is not None:
+                            fulltext += content.text
+
+        response = make_response(fulltext, 200)
+        response.mimetype = "text/txt"
+        response.headers.extend({
+            "Content-Disposition":
+            "attachment;filename=fulltext_%s.txt" % task_info["result"]["task_id"]
+        })
+        return response
 
 
 @task_namespace.route("/<string:task_id>")
 class Task(TasksBase):
+    """Methods for a specific task."""
 
     @api.doc(responses={200: "OK", 400: "Unknown task id"})
     def get(self, task_id):
-        """ Get the task by given id. """
+        """Get the task by given id."""
         task = db_model_Task.query.filter_by(id=task_id).first()
 
         if task is None:
             task_namespace.abort(
                 404, "Wrong parameter",
-                status="Can't find a task with the id \"{0}\".".format(
-                    task_id),
+                status=f"Can't find a task with the id \"{task_id}\".",
                 statusCode="404")
 
         return jsonify(task.to_json())
 
     @api.doc(responses={200: "OK", 404: "Unknown task id"})
     def put(self, task_id):
+        """Update the task of given id."""
         res = db_model_Task.query.filter_by(id=task_id)
         task = res.first()
 
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
-                status="Can't find a task with the id \"{0}\".".format(task_id),
+                status=f"Can't find a task with the id \"{task_id}\".",
                 statusCode="404")
 
         fields = task.to_json().keys()
@@ -261,7 +440,7 @@ class Task(TasksBase):
         db.session.commit()
 
         return jsonify({
-            "message": "Task \"{0}\" updated.".format(task_id)
+            "message": f"Task \"{task_id}\" updated."
         })
 
     @api.doc(responses={200: "OK", 404: "Unknown task id"})
@@ -273,10 +452,10 @@ class Task(TasksBase):
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
-                status="Can't find a task with the id \"{0}\".".format(task_id),
+                status=f"Can't find a task with the id \"{task_id}\".",
                 statusCode="404")
 
-        message = "Task \"{0}\" deleted.".format(task.id)
+        message = f"Task \"{task.id}\" deleted."
         res.delete()
         db.session.commit()
 

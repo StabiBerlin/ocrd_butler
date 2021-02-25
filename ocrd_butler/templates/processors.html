@@ -22,12 +22,13 @@
                     onclick="javascript:;jQuery('.table-{{ processor.name }}').toggle('fast');window.location.hash='table-{{ processor.name }}';">
                     +
                     </a>
-                    {% if "package" in processor %}
+                    <span>
                         <br />
-                        <a class="" style="font-size: 1rem" href="{{ processor["package"]["git_url"] }}" target="_blank">
-                            Package: {{ processor["package"]["name"] }} ({{ processor["package"]["version"] }})
+                        {{ processor.description }}
+                        <a href="https://github.com/OCR-D/{{ processor.name[:processor.name.find('-', 5)].replace('-', '_') }}" target="_blank">
+                            ~
                         </a>
-                    {% endif %}
+                    </span>
                 </h2>
                 <table style="display:none;" class="table-{{ processor.name }} table">
                     {% for key, value in processor.items() %}

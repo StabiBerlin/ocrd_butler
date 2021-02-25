@@ -1,0 +1,54 @@
+{
+  "executable": "ocrd-fileformat-transform",
+  "description": "Convert between OCR file formats",
+  "categories": [
+    "Image preprocessing"
+  ],
+  "steps": [
+    "preprocessing/optimization"
+  ],
+  "input_file_grp": [
+    "OCR-D-OCR-PAGE",
+    "OCR-D-OCR-ALTO",
+    "OCR-D-OCR-HOCR"
+  ],
+  "output_file_grp": [
+    "OCR-D-OCR-PAGE",
+    "OCR-D-OCR-ALTO",
+    "OCR-D-OCR-HOCR"
+  ],
+  "parameters": {
+    "from-to": {
+      "description": "Transformation scenario, see ocr-fileformat -L",
+      "type": "string",
+      "default": "page alto",
+      "enum": [
+        "alto2.0 alto3.0",
+        "alto2.0 alto3.1",
+        "alto2.0 hocr",
+        "alto2.1 alto3.0",
+        "alto2.1 alto3.1",
+        "alto2.1 hocr",
+        "alto page",
+        "alto text",
+        "gcv hocr",
+        "hocr alto2.0",
+        "hocr alto2.1",
+        "hocr text",
+        "page alto",
+        "page hocr",
+        "page text"
+      ]
+    },
+    "ext": {
+      "description": "Output extension. Set to empty string to derive extension from the media type.",
+      "type": "string",
+      "default": ""
+    },
+    "script-args": {
+      "description": "Arguments to Saxon (for XSLT transformations) or to transformation script",
+      "type": "string",
+      "default": ""
+    }
+  }
+}

@@ -43,19 +43,24 @@ class CompareForm(FlaskForm):
         validators=[DataRequired(message="Please choose a task to compare to.")])
     submit = SubmitField('Compare tasks')
 
+
 @compare_blueprint.route("/compare", methods=["GET"])
 def compare():
     """
     Page for create a comparisation between two OCR text versions.
     """
     compare_form = CompareForm()
-    cur_tasks = db_model_Task.query.all()
-    compare_form.task_from.choices = [(task.id, task.work_id) for task in cur_tasks]
-    compare_form.task_to.choices = [(task.id, task.work_id) for task in cur_tasks]
+    task_choices = [
+        (task.id, task.worker_task_id)
+        for task in db_model_Task.get_all()
+    ]
+    compare_form.task_from.choices = task_choices
+    compare_form.task_to.choices = task_choices[::]
 
     return render_template(
         "compare.html",
         form=compare_form)
+
 
 @compare_blueprint.route('/compare', methods=['POST'])
 def compare_results():
@@ -78,11 +83,11 @@ def compare_results():
         # not making sense to compare to itself, but why not?
         pass
 
-    task_from = db_model_Task.query.filter_by(id=task_from_id).first()
-    task_to = db_model_Task.query.filter_by(id=task_to_id).first()
+    task_from = db_model_Task.get(id=task_from_id)
+    task_to = db_model_Task.get(id=task_to_id)
 
-    result_from = task_information(task_from.worker_id)
-    result_to = task_information(task_to.worker_id)
+    result_from = task_information(task_from.worker_task_id)
+    result_to = task_information(task_to.worker_task_id)
 
     dst_dir = "{0}-{1}".format(
         result_from["result"]["result_dir"],
@@ -92,10 +97,10 @@ def compare_results():
         os.mkdir(dst_dir)
 
     # Get the output group of the last step in the chain of the task.
-    chain_from = db_model_Chain.query.filter_by(id=task_from.chain_id).first()
+    chain_from = db_model_Chain.get(id=task_from.chain_id)
     last_proc_from = json.loads(chain_from.processors)[-1]
     last_output_from = PROCESSORS_ACTION[last_proc_from]["output_file_grp"]
-    chain_to = db_model_Chain.query.filter_by(id=task_to.chain_id).first()
+    chain_to = db_model_Chain.get(id=task_to.chain_id)
     last_proc_to = json.loads(chain_to.processors)[-1]
     last_output_to = PROCESSORS_ACTION[last_proc_to]["output_file_grp"]
 

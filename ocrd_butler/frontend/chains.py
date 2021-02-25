@@ -76,19 +76,20 @@ def delete_chain(chain_id):
     url = "{0}api/chains/{1}".format(host_url(request), chain_id)
     response = requests.delete(url)
 
-    if response.status_code is 200:
+    if response.status_code == 200:
         flash(response.json()["message"])
     else:
         flash("Can't delete chain {0}. Status {1}, Error {2}".format(
             chain_id, response.status_code, response.json()["message"]))
     return redirect("/chains", code=302)
 
+
 @chains_blueprint.route("/chains")
 def chains():
     """
     The page presenting the existing chains.
     """
-    results = db_model_Chain.query.all()
+    results = db_model_Chain.get_all()
     new_chain_form = NewChainForm(csrf_enabled=False)
     p_choices = [(name, name) for name in PROCESSOR_NAMES]
     new_chain_form.processors.choices = p_choices

@@ -1,0 +1,41 @@
+{
+  "executable": "ocrd-tesserocr-segment-table",
+  "categories": [
+    "Layout analysis"
+  ],
+  "description": "Segment table regions into cell text regions with Tesseract",
+  "input_file_grp": [
+    "OCR-D-SEG-BLOCK",
+    "OCR-D-GT-SEG-BLOCK"
+  ],
+  "output_file_grp": [
+    "OCR-D-SEG-BLOCK"
+  ],
+  "steps": [
+    "layout/segmentation/region"
+  ],
+  "parameters": {
+    "dpi": {
+      "type": "number",
+      "format": "float",
+      "description": "pixel density in dots per inch (overrides any meta-data in the images); disabled when negative",
+      "default": 0
+    },
+    "overwrite_cells": {
+      "type": "boolean",
+      "default": true,
+      "description": "Remove existing layout and text annotation below the TableRegion level (otherwise skip table; no incremental annotation yet)."
+    },
+    "padding": {
+      "type": "number",
+      "format": "integer",
+      "description": "extend detected cell rectangles by this many (true) pixels",
+      "default": 0
+    },
+    "shrink_polygons": {
+      "type": "boolean",
+      "default": false,
+      "description": "annotate polygon coordinates instead of bounding box rectangles by projecting the convex hull of all symbols"
+    }
+  }
+}

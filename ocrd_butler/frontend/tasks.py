@@ -6,13 +6,7 @@ from datetime import (
     datetime,
     timedelta
 )
-import io
-import glob
 import json
-import os
-import pathlib
-import xml.etree.ElementTree as ET
-import zipfile
 
 import requests
 
@@ -23,8 +17,7 @@ from flask import (
     redirect,
     render_template,
     request,
-    Response,
-    send_file
+    Response
 )
 
 from flask_wtf import FlaskForm
@@ -40,10 +33,6 @@ from wtforms.validators import (
     URL
 )
 
-from ocrd.processor.base import run_cli
-from ocrd.resolver import Resolver
-
-from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import host_url
@@ -55,6 +44,7 @@ tasks_blueprint = Blueprint("tasks_blueprint", __name__)
 @tasks_blueprint.app_template_filter('format_date')
 def _jinja2_filter_format_date(date, fmt="%d.%m.%Y, %H:%M"):
     return date.strftime(fmt)
+
 
 @tasks_blueprint.app_template_filter('format_delta')
 def _jinja2_filter_format_delta(delta):
@@ -68,15 +58,14 @@ def task_information(uid):
     if uid is None:
         return None
 
-    response = requests.get("http://localhost:5555/api/task/info/{0}".format(uid))
+    response = requests.get(f"http://localhost:5555/api/task/info/{uid}")
     if response.status_code == 404:
         current_app.logger.warning("Can't find task '{0}'".format(uid))
         return None
     try:
         task_info = json.loads(response.content)
     except json.decoder.JSONDecodeError as exc:
-        current_app.logger.error("Can't read response for task '{0}'. ({1})".format(
-            uid, exc.__str__()))
+        current_app.logger.error(f"Can't read response for task '{uid}'. ({exc.__str__()})")
         return None
 
     task_info["ready"] = task_info["state"] == "SUCCESS"
@@ -90,12 +79,12 @@ def current_tasks():
     """
     Collect and prepare the current tasks.
     """
-    results = db_model_Task.query.all()
+    results = db_model_Task.get_all()
 
     cur_tasks = []
 
     for result in results:
-        chain = db_model_Chain.query.filter_by(id=result.chain_id).first()
+        chain = db_model_Chain.get(id=result.chain_id)
         task = {
             "repr": result.__str__(),
             "description": result.description,
@@ -123,9 +112,9 @@ def current_tasks():
 
         if task_info is not None and task_info["ready"]:
             task["result"].update({
-                "page": "/download/page/{}".format(result.worker_task_id),
-                "alto": "/download/alto/{}".format(result.worker_task_id),
-                "txt": "/download/txt/{}".format(result.worker_task_id),
+                "page": f"/download/page/{result.worker_task_id}",
+                "alto": f"/download/alto/{result.worker_task_id}",
+                "txt": f"/download/txt/{result.worker_task_id}",
             })
 
             if task_info["received"] is not None:
@@ -144,11 +133,10 @@ def current_tasks():
                     "runtime": timedelta(seconds=task_info["runtime"])
                 })
 
-        task["flower_url"] = "{0}{1}task/{2}".format(
-            request.host_url.replace("5000", "5555"), # A bit hacky, but for devs on localhost.
-            "flower/" if not "localhost:5000" in request.host_url else "",
-            task["worker_task_id"]
-        )
+        # A bit hacky, but for devs on localhost.
+        flower_host_url = request.host_url.replace("5000", "5555")
+        flower_path = "flower/" if "localhost:5000" not in request.host_url else ""
+        task["flower_url"] = f"{flower_host_url}{flower_path}task/{task['worker_task_id']}"
 
         cur_tasks.append(task)
 
@@ -188,7 +176,7 @@ def new_task():
     data = json.dumps({
         "description": request.form.get("task_description"),
         "src": request.form.get("src"),
-        "file_grp": request.form.get("input_file_grp") or "DEFAULT",
+        "default_file_grp": request.form.get("input_file_grp") or "DEFAULT",
         "chain_id": request.form.get("chain_id"),
         "parameters": parameters
     })
@@ -204,8 +192,8 @@ def new_task():
             flash("Can't create new task. Status {0}, Error '{1}': '{2}'.".format(
                 result["statusCode"], result["message"], result["status"]))
         except Exception as exc:
-            flash("Exception while displaying error message in new_task. Exc: {0}."
-                  " Is the proxy active?".format(exc.__str__()))
+            flash(f"Exception while displaying error message in new_task. Exc: {exc.__str__()}."
+                  " Is the proxy active?")
 
     return redirect("/tasks", code=302)
 
@@ -215,7 +203,7 @@ def tasks():
     """Define the page presenting the created tasks."""
     # new_task_form = NewTaskForm(csrf_enabled=False)
     new_task_form = NewTaskForm()
-    chains = db_model_Chain.query.all()
+    chains = db_model_Chain.get_all()
     new_task_form.chain_id.choices = [(chain.id, chain.name) for chain in chains]
 
     return render_template(
@@ -227,15 +215,14 @@ def tasks():
 @tasks_blueprint.route("/task/delete/<int:task_id>")
 def task_delete(task_id):
     """Delete the task with the given id."""
-    response = requests.delete("{0}api/tasks/{1}".format(
-        host_url(request),
-        task_id))
+    response = requests.delete(f"{host_url(request)}api/tasks/{task_id}")
 
     if response.status_code in (200, 201):
-        flash("Task {0} deleted.".format(task_id))
+        flash(f"Task {task_id} deleted.")
     else:
         result = json.loads(response.content)
-        flash("An error occured: {0}".format(result.status))
+        flash(f"An error occured: {result['status']}")
+
     return redirect("/tasks", code=302)
 
 
@@ -243,137 +230,106 @@ def task_delete(task_id):
 def task_run(task_id):
     """Run the task with the given id."""
     # pylint: disable=broad-except
-    response = requests.post("{0}api/tasks/{1}/run".format(
-        host_url(request),
-        task_id))
+    response = requests.post(f"{host_url(request)}api/tasks/{task_id}/run")
+
     if response.status_code in (200, 201):
-        flash("Task {0} started.".format(task_id))
+        flash(f"Task {task_id} started.")
     else:
         try:
             result = json.loads(response.content)
-            flash("An error occured: {0}".format(result["status"]))
+            flash(f"An error occured: {result['status']}")
         except Exception as exc:
             result = response.content
-            flash("An error occured: {0}. (Exception: {1})".format(
-                result, exc.__str__()))
+            flash(f"An error occured: {result}. (Exception: {exc.__str__()})")
+
     return redirect("/tasks", code=302)
 
-@tasks_blueprint.route("/download/txt/<string:worker_task_id>")
-def download_txt(worker_task_id):
+
+def validate_and_wrap_response(
+    response: Response,
+    payload_field: str,
+    **kwargs
+) -> Response:
+    """ Create a new response based on the given reponse's status.
+
+    If it's ok, then a new response is being created from all passed keyword parameters,
+    and the value of the given response's member with the name specified
+    by the ``payload_field`` parameter als payload.
+
+    If it is not (status anything but 200), then a redirect to path ``/tasks`` is being
+    returned.
+    """
+    if response.status_code != 200:
+        flash(
+            "An error occured: {0}".format(
+                json.loads(
+                    response.content
+                ).get('status')
+            )
+        )
+        return redirect("/tasks", code=302)
+    else:
+        return Response(
+            getattr(response, payload_field),
+            **kwargs
+        )
+
+
+@tasks_blueprint.route("/download/txt/<string:task_id>")
+def download_txt(task_id):
     """Define route to download the results as text."""
-    task_info = task_information(worker_task_id)
+    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_txt")
 
-    # Get the output group of the last step in the chain of the task.
-    task = db_model_Task.query.filter_by(worker_task_id=worker_task_id).first()
-    chain = db_model_Chain.query.filter_by(id=task.chain_id).first()
-    last_step = chain.processors[-1]
-    last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
-
-    page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
-    fulltext = ""
-
-    namespace = {
-        "page_2009-03-16": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2009-03-16",
-        "page_2010-01-12": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2010-01-12",
-        "page_2010-03-19": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2010-03-19",
-        "page_2013-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15",
-        "page_2016-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2016-07-15",
-        "page_2017-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2017-07-15",
-        "page_2018-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2018-07-15",
-        "page_2019-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15"
-    }
-
-    files = glob.glob("{}/*.xml".format(page_xml_dir))
-    files.sort()
-
-    for file in files:
-        tree = ET.parse(file)
-        xmlns = tree.getroot().tag.split("}")[0].strip("{")
-        if xmlns in namespace.values():
-            for regions in tree.iterfind(".//{%s}TextRegion" % xmlns):
-                fulltext += "\n"
-                for content in regions.findall(
-                        ".//{%s}TextLine//{%s}TextEquiv//{%s}Unicode" % (xmlns, xmlns, xmlns)):
-                    if content.text is not None:
-                        fulltext += content.text
-
-    return Response(
-        fulltext,
+    return validate_and_wrap_response(
+        response, 'text',
         mimetype="text/txt",
         headers={
             "Content-Disposition":
-            "attachment;filename=fulltext_%s.txt" % task_info["result"]["task_id"]
+            f"attachment;filename=fulltext_{task_id}.txt"
         }
     )
 
 
-@tasks_blueprint.route("/download/page/<string:worker_task_id>")
-def download_page_zip(worker_task_id):
+@tasks_blueprint.route("/download/page/<string:task_id>")
+def download_page_zip(task_id):
     """Define route to download the page xml results as zip file."""
-    task_info = task_information(worker_task_id)
+    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_page")
 
-    # Get the output group of the last step in the chain of the task.
-    task = db_model_Task.query.filter_by(worker_task_id=worker_task_id).first()
-    chain = db_model_Chain.query.filter_by(id=task.chain_id).first()
-    last_step = chain.processors[-1]
-    last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
-
-    page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
-    base_path = pathlib.Path(page_xml_dir)
-
-    data = io.BytesIO()
-    with zipfile.ZipFile(data, mode='w') as zip_file:
-        for f_name in base_path.iterdir():
-            arcname = "{0}/{1}".format(last_output, os.path.basename(f_name))
-            zip_file.write(f_name, arcname=arcname)
-    data.seek(0)
-
-    return send_file(
-        data,
+    return validate_and_wrap_response(
+        response, 'data',
         mimetype="application/zip",
-        as_attachment=True,
-        attachment_filename="ocr_page_xml_%s.zip" % task_info["result"]["task_id"]
+        headers={
+            "Content-Disposition":
+            f"attachment;filename=ocr_page_xml_{task_id}.zip"
+        }
     )
 
-@tasks_blueprint.route("/download/alto/<string:worker_task_id>")
-def download_alto_zip(worker_task_id):
-    """Define route to download the alto xml results as zip file."""
-    task_info = task_information(worker_task_id)
 
-    # Get the output group of the last step in the chain of the task.
-    task = db_model_Task.query.filter_by(worker_task_id=worker_task_id).first()
-    chain = db_model_Chain.query.filter_by(id=task.chain_id).first()
-    last_step = chain.processors[-1]
-    last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+@tasks_blueprint.route("/download/pageviewer/<string:task_id>")
+def download_pageviewer_zip(task_id):
+    """Define route to download the page xml results as zip file."""
+    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_pageviewer")
 
-    # BUG?: java.lang.IllegalArgumentException:
-    # Variable value 'TextTypeSimpleType.CAPTION' is not in the list of valid values.
-    # possible reason: https://github.com/OCR-D/core/issues/451 ??
-    alto_xml_dir = os.path.join(task_info["result"]["result_dir"], "OCR-D-OCR-ALTO")
-    alto_path = pathlib.Path(alto_xml_dir)
-
-    if not os.path.exists(alto_path):
-        mets_url = "{}/mets.xml".format(task_info["result"]["result_dir"])
-        run_cli(
-            "ocrd-fileformat-transform",
-            mets_url=mets_url,
-            resolver=Resolver(),
-            log_level="DEBUG",
-            input_file_grp=last_output,
-            output_file_grp="OCR-D-OCR-ALTO",
-            parameter='{"from-to": "page alto"}'
-        )
-
-    data = io.BytesIO()
-    with zipfile.ZipFile(data, mode='w') as zip_file:
-        for f_name in alto_path.iterdir():
-            arcname = "{0}/{1}".format(last_output, os.path.basename(f_name))
-            zip_file.write(f_name, arcname=arcname)
-    data.seek(0)
-
-    return send_file(
-        data,
+    return validate_and_wrap_response(
+        response, 'data',
         mimetype="application/zip",
-        as_attachment=True,
-        attachment_filename="ocr_alto_xml_%s.zip" % task_info["result"]["task_id"]
+        headers={
+            "Content-Disposition":
+            f"attachment;filename=ocr_pageviewer_{task_id}.zip"
+        }
+    )
+
+
+@tasks_blueprint.route("/download/alto/<string:task_id>")
+def download_alto_zip(task_id):
+    """Define route to download the alto xml results as zip file."""
+    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_pageviewer")
+
+    return validate_and_wrap_response(
+        response, 'data',
+        mimetype="application/zip",
+        headers={
+            "Content-Disposition":
+            f"attachment;filename=ocr_alto_{task_id}.zip"
+        }
     )

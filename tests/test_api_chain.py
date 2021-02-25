@@ -2,15 +2,15 @@
 
 """Testing the api for `ocrd_butler` package."""
 
-import pytest
-
 from flask_restx import fields
 from flask_testing import TestCase
 
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import create_app, db
-from ocrd_butler.api.models import chain_model
-from ocrd_butler.api.models import ChainParametersField
+from ocrd_butler.api.models import (
+    chain_model,
+    ChainParametersField,
+)
 
 
 class ApiTests(TestCase):
@@ -65,7 +65,8 @@ class ApiTests(TestCase):
         response = self.client.get("/api/chains/1")
         assert "ocrd-tesserocr-segment-region" in response.json["parameters"].keys()
         assert response.json["parameters"]["ocrd-tesserocr-recognize"]["textequiv_level"] == "word"
-        assert response.json["parameters"]["ocrd-tesserocr-recognize"]["overwrite_words"] is False
+        assert response.json["parameters"]["ocrd-tesserocr-recognize"]["overwrite_segments"] is False
+        assert response.json["parameters"]["ocrd-tesserocr-segment-word"]["overwrite_words"] is True
 
     def test_create_chain_with_own_parameters(self):
         """Check if a new chain is created."""
@@ -135,7 +136,6 @@ class ApiTests(TestCase):
         assert response.status_code == 404
         assert response.json["status"] == "Can't find a chain with the id \"13\"."
 
-
     def test_get_unknown_chain(self):
         """Check if a non existing chain ...."""
         response = self.client.get("/api/chains/23")
@@ -144,16 +144,16 @@ class ApiTests(TestCase):
 
     def test_get_chains(self):
         """Check if a new chain can be retrieved."""
-        response = self.client.post("/api/chains", json=dict(
+        assert self.client.post("/api/chains", json=dict(
             name="First Chain",
             description="Some foobar chain.",
             processors=["ocrd-olena-binarize"],
-        ))
-        response = self.client.post("/api/chains", json=dict(
+        )).status_code == 201
+        assert self.client.post("/api/chains", json=dict(
             name="Second Chain",
             description="Some barfoo chain.",
             processors=["ocrd-sbb-textline-detector"],
-        ))
+        )).status_code == 201
         response = self.client.get("/api/chains")
 
         assert response.status_code == 200
@@ -206,5 +206,3 @@ class ApiTests(TestCase):
                 assert type(chain_model[field]) == ChainParametersField
             else:
                 assert type(chain_model[field]) == fields.String
-
-

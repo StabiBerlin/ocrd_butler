@@ -34,13 +34,26 @@ Be aware that on more up-to-date systems with Python >= 3.8.x there is currently
 
 Installation for development:
 
+Install Redis Server (needed as backend for Celery and Flower)
+
+.. code-block:: bash
+
+  user@server:/ > sudo apt install redis
+  user@server:/ > sudo service redis start
+
 Follow the installation for `ocrd_all`_
 
 .. code-block:: bash
 
-  /home/ocrd > git clone https://github.com/OCR-D/ocrd_all.git & cd ocrd_all
+  /home/ocrd > git clone --recurse-submodules https://github.com/OCR-D/ocrd_all.git && cd ocrd_all
   /home/ocrd/ocrd_all > make all
-  ... -> download appropriate models...
+  ... -> download appropriate modules...
+
+Install german language files for Tesseract OCR:
+
+.. code-block:: bash
+
+  user@server:/ > sudo apt install tesseract-ocr-deu
 
 Install ocrd-butler in the virtual environment created by ocrd_all:
 
@@ -52,54 +65,35 @@ Install ocrd-butler in the virtual environment created by ocrd_all:
   (venv) /home/ocrd/ocrd-butler > pip install -r requirements-dev.txt
   (venv) /home/ocrd/ocrd-butler > python setup.py develop
 
-Maybe there are more steps nessesary, e.g.
+
+For some modules in `ocrd_all`_ there are further files nessesary, e.g. trained models for the OCR itself. The folders on the server can be overwritten it every single task.
+
+* ``sbb_textline_detector`` (i.e. ``make textline-detector-model``):
 
 .. code-block:: bash
 
-  /home/ocrd > cd ocrd_all/ocrd_calamari
-  /home/ocrd/ocrd_all/ocrd_calamari > python setup.py develop
-
-This step maybe needed for ocrd_calamari, ocrd_segment, ocrd_keraslm and ocrd_anybaseocr.
-
-For some modules in `ocrd_all`_ there are further files nessesary,
-e.g. trained models for the OCR itself. The folders on the server
-can be overwritten it every single task.
-
-* sbb_textline_detector
-
-.. code-block:: bash
-
-  > mkdir /data/sbb_textline_detector && cd /data/sbb_textline_detector
+  > mkdir -p /data/sbb_textline_detector && cd /data/sbb_textline_detector
   > wget https://qurator-data.de/sbb_textline_detector/models.tar.gz
   > tar xfz models.tar.gz
 
 
-* ocrd_calamari
+* ``ocrd_calamari`` (i.e. ``make calamari-model``):
 
 .. code-block:: bash
 
-  > mkdir /data/calamari_models && cd /data/calamari_models
+  > mkdir -p /data/calamari_models && cd /data/calamari_models
   > wget https://qurator-data.de/calamari-models/GT4HistOCR/model.tar.xz
   > tar xf model.tar.xz
 
-* ocrd_tesserocr
+* ``ocrd_tesserocr`` (i.e. ``make tesseract-model``):
 
 .. code-block:: bash
 
-  > mkdir /data/tesseract_models && cd /data/tesseract_models
+  > mkdir -p /data/tesseract_models && cd /data/tesseract_models
   > wget https://qurator-data.de/tesseract-models/GT4HistOCR/models.tar
   > tar xf models.tar
   > cp GT4HistOCR_2000000.traineddata /usr/share/tesseract-ocr/4.00/tessdata/
 
-
-* Clone ocrd_butler (GitLab) and install it in the very same venv.
-
-.. code-block:: bash
-
-  > cd /srv
-  > git clone https://github.com/StaatsbibliothekBerlin/ocrd_butler.git && cd ocrd-butler
-  > source /srv/ocrd_all/.venv/bin/master
-  > pip install -r requirements.txt # or pipenv install if you are using pipenv
 
 
 Start celery worker:
@@ -121,26 +115,18 @@ Run the app:
 
 .. code-block:: bash
 
-    ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata FLASK_APP=ocrd_butler/app.py flask run
-    or
     ╰─$ FLASK_APP=ocrd_butler/app.py flask run
 
 
-If download of METS files fail - disable the proxy on local machines.
-
-Swagger docs: http://localhost:5000/api
+Flask frontend: http://localhost:5000
+Swagger interface: http://localhost:5000/api
 
 
 Run the tests:
 
 .. code-block:: bash
 
-    ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata py.test
-
-
-Resources
----------
-`Flask + Celery = how to. <https://medium.com/@frassetto.stefano/flask-celery-howto-d106958a15fe>`
+    ╰─$ make test
 
 
 Known problems
@@ -179,3 +165,4 @@ This package was created with Cookiecutter_ and the `elgertam/cookiecutter-pipen
 .. _`OCR-D project`: https://github.com/OCR-D
 .. _`Qurator Data`: https://qurator-data.de/
 .. _`OCR-D ecosystem`: https://github.com/topics/ocr-d
+.. _tesseract-ocr-deu debian: https://packages.debian.org/de/sid/tesseract-ocr-deu

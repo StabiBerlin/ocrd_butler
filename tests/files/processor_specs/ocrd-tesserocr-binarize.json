@@ -1,0 +1,30 @@
+{
+  "executable": "ocrd-tesserocr-binarize",
+  "categories": [
+    "Image preprocessing"
+  ],
+  "description": "Binarize regions or lines with Tesseract's global Otsu",
+  "input_file_grp": [
+    "OCR-D-IMG",
+    "OCR-D-SEG-BLOCK",
+    "OCR-D-SEG-LINE"
+  ],
+  "output_file_grp": [
+    "OCR-D-BIN-BLOCK",
+    "OCR-D-BIN-LINE"
+  ],
+  "steps": [
+    "preprocessing/optimization/binarization"
+  ],
+  "parameters": {
+    "operation_level": {
+      "type": "string",
+      "enum": [
+        "region",
+        "line"
+      ],
+      "default": "region",
+      "description": "PAGE XML hierarchy level to operate on"
+    }
+  }
+}

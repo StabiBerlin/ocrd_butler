@@ -3,7 +3,10 @@
 """Console script for ocrd_butler."""
 import sys
 import click
-from ocrd_butler.app import flask_app, log
+from ocrd_butler.app import flask_app
+from ocrd_butler.util import logger
+
+log = logger(__name__)
 
 
 @click.command('start')
@@ -17,6 +20,7 @@ def main(debug=False, args=None):
     # flask_app.run(debug=config_json["FLASK_DEBUG"])
     flask_app.run(debug=debug)
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())  # pragma: no cover

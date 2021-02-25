@@ -49,12 +49,20 @@ clean-test: ## remove test and coverage artifacts
 	rm -f .coverage
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
+	rm tests/calamari_models/*
 
 lint: ## check style with flake8
 	flake8 ocrd_butler tests
 
-test: ## run tests quickly with the default Python
-	py.test
+test-init: ## download current checkpoint data files from Calamari OCR github repo
+        ifeq ("$(wildcard tests/calamari_models/*.ckpt.h5)", "")
+	for i in 0 1 2 3 4; do for f in json h5; \
+		do wget "https://raw.githubusercontent.com/Calamari-OCR/calamari_models/master/gt4histocr/$${i}.ckpt.$${f}" -O "tests/calamari_models/$${i}.ckpt.$${f}" ; \
+	done; done
+        endif
+
+test: test-init ## run tests quickly with the default Python
+	PROFILE=test TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata py.test
 
 test-all: ## run tests on every Python version with tox
 	tox
@@ -88,3 +96,18 @@ dist: clean ## builds source and wheel package
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
+
+tesseract-model: ## install trained model for tesseract
+	mkdir -p /data/tesseract_models && cd /data/tesseract_models; \
+	wget https://qurator-data.de/tesseract-models/GT4HistOCR/models.tar; \
+	tar -xf models.tar -C /usr/share/tesseract-ocr/4.00/tessdata/ GT4HistOCR_2000000.traineddata
+
+calamari-model: ## install trained model for calamari
+	mkdir -p /data/calamari_models && cd /data/calamari_models; \
+	wget https://qurator-data.de/calamari-models/GT4HistOCR/model.tar.xz; \
+	tar -xf model.tar.xz
+
+textline-detector-model: ## install trained model for sbb textline detector
+	mkdir -p /data/sbb_textline_detector && cd /data/sbb_textline_detector; \
+	wget https://qurator-data.de/sbb_textline_detector/models.tar.gz; \
+	tar -xzf models.tar.gz

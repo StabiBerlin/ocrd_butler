@@ -1,0 +1,57 @@
+{
+  "executable": "ocrd-olena-binarize",
+  "description": "popular binarization algorithms implemented by Olena/SCRIBO, wrapped for OCR-D (on page level only)",
+  "categories": [
+    "Image preprocessing"
+  ],
+  "steps": [
+    "preprocessing/optimization/binarization"
+  ],
+  "input_file_grp": [
+    "OCR-D-SEG-BLOCK",
+    "OCR-D-SEG-LINE",
+    "OCR-D-SEG-WORD",
+    "OCR-D-IMG"
+  ],
+  "output_file_grp": [
+    "OCR-D-SEG-BLOCK",
+    "OCR-D-SEG-LINE",
+    "OCR-D-SEG-WORD"
+  ],
+  "parameters": {
+    "impl": {
+      "description": "The name of the actual binarization algorithm",
+      "type": "string",
+      "default": "sauvola-ms-split",
+      "enum": [
+        "sauvola",
+        "sauvola-ms",
+        "sauvola-ms-fg",
+        "sauvola-ms-split",
+        "kim",
+        "wolf",
+        "niblack",
+        "singh",
+        "otsu"
+      ]
+    },
+    "k": {
+      "description": "Sauvola's formulae parameter (foreground weight decreases with k); for Multiscale, multiplied to yield default 0.2/0.3/0.5; for Singh, multiplied to yield default 0.06; for Niblack, multiplied to yield default -0.2; for Wolf/Kim, used directly; for Otsu, does not apply",
+      "format": "float",
+      "type": "number",
+      "default": 0.34
+    },
+    "win-size": {
+      "description": "The (odd) window size in pixels; when zero (default), set to DPI (or 301); for Otsu, does not apply",
+      "type": "number",
+      "format": "integer",
+      "default": 0
+    },
+    "dpi": {
+      "type": "number",
+      "format": "float",
+      "description": "pixel density in dots per inch (overrides any meta-data in the images); disabled when zero",
+      "default": 0
+    }
+  }
+}
