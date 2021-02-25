@@ -1,0 +1,74 @@
+{
+    "chains": [
+        {
+            "name": "SBB - binarize - textline - calamari",
+            "description": "Chain with olena binarization and calamari recognize.",
+            "processors": [
+                "ocrd-sbb-binarize",
+                "ocrd-sbb-textline-detector",
+                "ocrd-calamari-recognize"
+            ],
+            "parameters": {
+                "ocrd-sbb-binarize": {
+                    "model": "/data/sbb_binarization/models",
+                    "operation_level": "page"
+                },
+                "ocrd-sbb-textline-detector": {
+                    "model": "/data/sbb_textline_detector"
+                },
+                "ocrd-calamari-recognize": {
+                    "checkpoint": "/data/calamari_models/*ckpt.json",
+                    "voter": "confidence_voter_default_ctc",
+                    "textequiv_level": "line",
+                    "glyph_conf_cutoff": 0.001
+                }
+            }
+        }
+        ,
+        {
+            "name": "Tesseract",
+            "description": "Chain with only tesseract processors",
+            "processors": [
+                "ocrd-tesserocr-segment-region",
+                "ocrd-tesserocr-segment-line",
+                "ocrd-tesserocr-segment-word",
+                "ocrd-tesserocr-recognize"
+            ]
+        }
+        ,
+        {
+            "name": "Tesseract - Calamari",
+            "description": "Chain with tesserocr preps and calamari recognize",
+            "processors": [
+                "ocrd-tesserocr-segment-region",
+                "ocrd-tesserocr-segment-line",
+                "ocrd-tesserocr-segment-word",
+                "ocrd-calamari-recognize"
+            ],
+            "parameters": {
+                "ocrd-calamari-recognize": {
+                    "checkpoint": "/data/calamari_models/*ckpt.json"
+                }
+            }
+        }
+        ,
+        {
+            "name": "Olena - Calamari",
+            "description": "Chain with olena binarization and calamari recognize",
+            "processors": [
+                "ocrd-olena-binarize",
+                "ocrd-tesserocr-segment-region",
+                "ocrd-tesserocr-segment-line",
+                "ocrd-calamari-recognize"
+            ],
+            "parameters": {
+                "ocrd-olena-binarize": {
+                    "impl": "sauvola-ms-split"
+                },
+                "ocrd-calamari-recognize": {
+                    "checkpoint": "/data/calamari_models/*ckpt.json"
+                }
+            }
+        }
+    ]
+}
