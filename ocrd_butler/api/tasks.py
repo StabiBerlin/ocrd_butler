@@ -293,7 +293,7 @@ class TaskActions(TasksBase):
 
         page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
         page_xml_path = pathlib.Path(page_xml_dir)
-        img_dir = os.path.join(f"{task_info['result']['result_dir']}/DEFAULT")
+        img_dir = os.path.join(f"{task_info['result']['result_dir']}/{task.default_file_grp}")
         img_path = pathlib.Path(img_dir)
 
         data = io.BytesIO()

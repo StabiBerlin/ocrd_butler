@@ -112,9 +112,10 @@ def current_tasks():
 
         if task_info is not None and task_info["ready"]:
             task["result"].update({
-                "page": f"/download/page/{result.worker_task_id}",
-                "alto": f"/download/alto/{result.worker_task_id}",
-                "txt": f"/download/txt/{result.worker_task_id}",
+                "page": f"/download/page/{result.id}",
+                "alto": f"/download/alto/{result.id}",
+                "txt": f"/download/txt/{result.id}",
+                "pageviewer": f"/download/pageviewer/{result.id}",
             })
 
             if task_info["received"] is not None:
@@ -323,7 +324,7 @@ def download_pageviewer_zip(task_id):
 @tasks_blueprint.route("/download/alto/<string:task_id>")
 def download_alto_zip(task_id):
     """Define route to download the alto xml results as zip file."""
-    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_pageviewer")
+    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_alto")
 
     return validate_and_wrap_response(
         response, 'data',

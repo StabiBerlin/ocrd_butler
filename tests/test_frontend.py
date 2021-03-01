@@ -15,7 +15,7 @@ from ocrd_butler.factory import (
     create_app,
     db
 )
-from ocrd_butler.database.models import Task as db_model_Task
+from ocrd_butler.database import models
 
 
 class FrontendTests(TestCase):
@@ -25,7 +25,7 @@ class FrontendTests(TestCase):
         db.create_all()
 
         def create_api_task_callback(request):
-            db_task = db_model_Task(
+            db_task = models.Task(
                 uid="id",
                 src="mets_url",
                 default_file_grp="file_grp",
@@ -39,7 +39,7 @@ class FrontendTests(TestCase):
             return (201, headers, json.dumps({"task_id": 1, "created": True}))
 
         def delete_api_task_callback(request):
-            db_model_Task.query.filter_by(id=1).delete()
+            models.Task.query.filter_by(id=1).delete()
             db.session.commit()
             return (200, {}, json.dumps({"task_id": 1, "deleted": True}))
 
@@ -82,14 +82,51 @@ class FrontendTests(TestCase):
     def create_app(self):
         return create_app(config=TestingConfig)
 
-    def test_task_page(self):
+    def _create_task(self, uid):
+        """ Create a new instance of the :class:`~ocrd_butler.database.models.Task`
+        model without saving it to session.
+        """
+        return models.add(
+            models.Task,
+            uid='foobar',
+            chain_id="1",
+            src="src",
+        )
+
+    @mock.patch("ocrd_butler.database.models.Task.get_all")
+    @mock.patch("ocrd_butler.frontend.tasks.task_information")
+    def test_task_page(self, mock_task_information, mock_get_all):
         """Check if tasks page is visible."""
+        mock_get_all.return_value = [
+            self._create_task(uid.__str__()) for uid in [1, 2, 3]
+        ]
+        mock_task_information.return_value = {
+            "ready": True,
+            "result": {
+                "ready": True,
+                "status": "SUCCESS",
+                "succeeded": 1,
+                "runtime": 42
+            },
+            "received": 23,
+            "started": 42,
+            "succeeded": 666,
+            "runtime": 451
+        }
+
         response = self.client.get("/tasks")
         self.assert200(response)
         self.assert_template_used("tasks.html")
         html = HTML(html=response.data)
-        assert len(html.find('table > tr > th')) == 10
-        assert len(html.find('table > tr > td')) == 0
+
+        assert len(html.find("table > tr > th")) == 10
+        assert len(html.find("table > tr > td")) == 30
+
+        download_links = html.find("table > tr:nth-child(2) > td:nth-child(9) > a")
+        assert download_links[0].links == {'/download/page/1'}
+        assert download_links[1].links == {'/download/pageviewer/1'}
+        assert download_links[2].links == {'/download/alto/1'}
+        assert download_links[3].links == {'/download/txt/1'}
 
     def get_chain_id(self):
         """Create a chain for the tests."""
@@ -241,7 +278,7 @@ class FrontendTests(TestCase):
     @mock.patch("ocrd_butler.database.models.Task.get_all")
     def test_frontend_compare_select(self, db_model_task_mock_get_all):
         db_model_task_mock_get_all.return_value = [
-            db_model_Task.create(**{
+            models.Task.create(**{
                 "uid": "1",
                 "chain_id": "1",
                 "src": "src",
@@ -252,7 +289,7 @@ class FrontendTests(TestCase):
 
     @mock.patch("ocrd_butler.database.models.Task.get")
     def test_frontend_compare(self, db_model_task_mock_get):
-        db_model_task_mock_get.return_value = db_model_Task.create(
+        db_model_task_mock_get.return_value = models.Task.create(
             **{
                 'uid': '1', 'chain_id': '1', 'src': 'src',
             }

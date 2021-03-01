@@ -49,6 +49,7 @@ class ApiTaskActions(TestCase):
             .return_value = type('', (object,), {
                 "chain_id": 1,
                 "worker_task_id": 42,
+                "default_file_grp": "DEFAULT",
                 "processors": ["ocrd-calamari-recognize"]
             })()
 
@@ -133,7 +134,7 @@ class ApiTaskActions(TestCase):
     @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
     @mock.patch("ocrd_butler.api.tasks.task_information")
     def test_api_task_pageviewer_zip(self, mock_task_information, mock_fs):
-        """Check if download txt is working."""
+        """Check if download pageviewer zip is working."""
         self.setup_mocks(mock_task_information, mock_fs)
 
         response = self.client.get("/api/tasks/foobar/download_pageviewer")
