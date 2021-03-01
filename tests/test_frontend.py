@@ -86,9 +86,8 @@ class FrontendTests(TestCase):
         """ Create a new instance of the :class:`~ocrd_butler.database.models.Task`
         model without saving it to session.
         """
-        return models.add(
-            models.Task,
-            uid='foobar',
+        return models.Task.create(
+            uid=uid,
             chain_id="1",
             src="src",
         )
