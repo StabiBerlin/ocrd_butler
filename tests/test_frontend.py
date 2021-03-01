@@ -86,11 +86,13 @@ class FrontendTests(TestCase):
         """ Create a new instance of the :class:`~ocrd_butler.database.models.Task`
         model without saving it to session.
         """
-        return models.Task.create(
+        task = models.Task.create(
             uid=uid,
             chain_id="1",
             src="src",
         )
+        task.id = uid
+        return task
 
     @mock.patch("ocrd_butler.database.models.Task.get_all")
     @mock.patch("ocrd_butler.frontend.tasks.task_information")
