@@ -98,7 +98,7 @@ class FrontendTests(TestCase):
     def test_task_page(self, mock_task_information, mock_get_all):
         """Check if tasks page is visible."""
         mock_get_all.return_value = [
-            self._create_task(uid.__str__()) for uid in [1, 2, 3]
+            self._create_task(uid) for uid in "123"
         ]
         mock_task_information.return_value = {
             "ready": True,
