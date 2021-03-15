@@ -247,9 +247,9 @@ def task_run(task_id):
 
 
 def validate_and_wrap_response(
-    response: Response,
-    payload_field: str,
-    **kwargs
+        response: Response,
+        payload_field: str,
+        **kwargs
 ) -> Response:
     """ Create a new response based on the given reponse's status.
 
@@ -297,7 +297,7 @@ def download_page_zip(task_id):
     response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_page")
 
     return validate_and_wrap_response(
-        response, 'data',
+        response, 'content',
         mimetype="application/zip",
         headers={
             "Content-Disposition":
@@ -312,7 +312,7 @@ def download_pageviewer_zip(task_id):
     response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_pageviewer")
 
     return validate_and_wrap_response(
-        response, 'data',
+        response, 'content',
         mimetype="application/zip",
         headers={
             "Content-Disposition":
