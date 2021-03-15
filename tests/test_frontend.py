@@ -213,7 +213,7 @@ class FrontendTests(TestCase):
         """Check if download page files is working."""
 
         mock_requests_get.return_value = type('', (object,), {
-            "data": b"foobar",
+            "content": b"foobar",
             "status_code": 200
         })()
 
@@ -253,7 +253,7 @@ class FrontendTests(TestCase):
         """Check if download files for pageviewer is working."""
 
         mock_requests_get.return_value = type('', (object,), {
-            "data": b"foobar",
+            "content": b"foobar",
             "status_code": 200
         })()
 
