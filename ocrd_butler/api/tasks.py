@@ -43,6 +43,18 @@ log = logger(__name__)
 
 task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 
+page_xml_namespaces = {
+    "page_2009-03-16": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2009-03-16",
+    "page_2010-01-12": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2010-01-12",
+    "page_2010-03-19": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2010-03-19",
+    "page_2013-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15",
+    "page_2016-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2016-07-15",
+    "page_2017-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2017-07-15",
+    "page_2018-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2018-07-15",
+    "page_2019-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15"
+}
+
+
 # get the status of a task
 # get the results of a task - this collect links to the resources like mets files, images, etc.
 # stop a running task
@@ -85,6 +97,12 @@ def task_information(uid):
     task_info["ready"] = task_info["state"] == "SUCCESS"
     if task_info["result"] is not None:
         task_info["result"] = json.loads(task_info["result"].replace("'", '"'))
+
+        # task_db_data = db_model_Task.get(worker_task_id=uid)
+        # chain_db_data = db_model_Chain.get(id=task_db_data.chain_id)
+        # last_step = chain_db_data.processors[-1]
+        # last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+        # task_info["last_output_file_grp"] = last_output
 
     return task_info
 
@@ -252,23 +270,33 @@ class TaskActions(TasksBase):
         """ Run this task. """
         return jsonify(task.results)
 
+    def page_result_dir(self, task_info: dict, path_part: str = "OCR-D-OCR") -> pathlib.Path:
+        """ Get base path to the page xml results of the task. """
+        result_xml_files = glob.glob(f"{task_info['result']['result_dir']}/*/*.xml")
+        for file in result_xml_files:
+            if not path_part in file:  # This is a bit fixed.
+                continue
+            tree = ET.parse(file)
+            xmlns = tree.getroot().tag.split("}")[0].strip("{")
+            if xmlns in page_xml_namespaces.values():
+                return os.path.dirname(file)
+
     def download_page(self, task):
         """ Download the results of the task as PAGE XML. """
         task_info = task_information(task.worker_task_id)
+        page_result_dir = self.page_result_dir(task_info)
 
-        # Get the output group of the last step in the chain of the task.
-        task_data = db_model_Task.get(worker_task_id=task.worker_task_id)
-        chain_data = db_model_Chain.get(id=task_data.chain_id)
-        last_step = chain_data.processors[-1]
-        last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+        if page_result_dir is None:
+            return jsonify({
+                "status": "ERROR",
+                "msg": f"Can't find page results for task {task_info['result']['task_id']}"
+            })
 
-        page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
-        base_path = pathlib.Path(page_xml_dir)
-
+        page_result_path = pathlib.Path(page_result_dir)
         data = io.BytesIO()
         with zipfile.ZipFile(data, mode='w') as zip_file:
-            for f_name in base_path.iterdir():
-                arcname = f"{last_output}/{os.path.basename(f_name)}"
+            for f_name in page_result_path.iterdir():
+                arcname = f"{os.path.basename(f_name)}"
                 zip_file.write(f_name, arcname=arcname)
         data.seek(0)
 
@@ -284,15 +312,15 @@ class TaskActions(TasksBase):
             METS file and DEFAULT images.
         """
         task_info = task_information(task.worker_task_id)
+        page_result_dir = self.page_result_dir(task_info)
+        page_result_path = pathlib.Path(page_result_dir)
 
-        # Get the output group of the last step in the chain of the task.
-        task_data = db_model_Task.query.filter_by(worker_task_id=task.worker_task_id).first()
-        chain_data = db_model_Chain.query.filter_by(id=task_data.chain_id).first()
-        last_step = chain_data.processors[-1]
-        last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+        if page_result_dir is None:
+            return jsonify({
+                "status": "ERROR",
+                "msg": f"Can't find page results for task {task_info['result']['task_id']}"
+            })
 
-        page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
-        page_xml_path = pathlib.Path(page_xml_dir)
         img_dir = os.path.join(f"{task_info['result']['result_dir']}/{task.default_file_grp}")
         img_path = pathlib.Path(img_dir)
 
@@ -300,10 +328,10 @@ class TaskActions(TasksBase):
         with zipfile.ZipFile(data, mode='w') as zip_file:
             zip_file.write(f"{task_info['result']['result_dir']}/mets.xml", arcname="mets.xml")
             for f_name in img_path.iterdir():
-                arcname = f"DEFAULT/{os.path.basename(f_name)}"
+                arcname = f"{task.default_file_grp}/{os.path.basename(f_name)}"
                 zip_file.write(f_name, arcname=arcname)
-            for f_name in page_xml_path.iterdir():
-                arcname = f"{last_output}/{os.path.basename(f_name)}"
+            for f_name in page_result_path.iterdir():
+                arcname = f"{os.path.basename(os.path.dirname(f_name))}/{os.path.basename(f_name)}"
                 zip_file.write(f_name, arcname=arcname)
         data.seek(0)
 
@@ -317,31 +345,14 @@ class TaskActions(TasksBase):
     def download_alto(self, task):
         """ Download the results of the task as ALTO XML. """
         task_info = task_information(task.worker_task_id)
-
-        # Get the output group of the last step in the chain of the task.
-        task_data = db_model_Task.query.filter_by(worker_task_id=task.worker_task_id).first()
-        chain_data = db_model_Chain.query.filter_by(id=task_data.chain_id).first()
-        last_step = chain_data.processors[-1]
-        last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
-
-        # BUG?: java.lang.IllegalArgumentException:
-        # Variable value 'TextTypeSimpleType.CAPTION' is not in the list of valid values.
-        # possible reason: https://github.com/OCR-D/core/issues/451 ??
         alto_xml_dir = os.path.join(task_info["result"]["result_dir"], "OCR-D-OCR-ALTO")
+        if not os.path.exists(alto_xml_dir):
+            return jsonify({
+                "status": "ERROR",
+                "msg": f"Can't find page results for task {task_info['result']['task_id']}"
+            })
+
         alto_path = pathlib.Path(alto_xml_dir)
-
-        if not os.path.exists(alto_path):
-            mets_url = f"{task_info['result']['result_dir']}/mets.xml"
-            run_cli(
-                "ocrd-fileformat-transform",
-                mets_url=mets_url,
-                resolver=Resolver(),
-                log_level="DEBUG",
-                input_file_grp=last_output,
-                output_file_grp="OCR-D-OCR-ALTO",
-                parameter='{"from-to": "page alto"}'
-            )
-
         data = io.BytesIO()
         with zipfile.ZipFile(data, mode='w') as zip_file:
             for f_name in alto_path.iterdir():
