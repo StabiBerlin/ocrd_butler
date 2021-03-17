@@ -349,7 +349,7 @@ class TaskActions(TasksBase):
         if not os.path.exists(alto_xml_dir):
             return jsonify({
                 "status": "ERROR",
-                "msg": f"Can't find page results for task {task_info['result']['task_id']}"
+                "msg": f"Can't find alto results for task {task_info['result']['task_id']}"
             })
 
         alto_path = pathlib.Path(alto_xml_dir)

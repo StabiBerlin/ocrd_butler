@@ -327,7 +327,7 @@ def download_alto_zip(task_id):
     response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_alto")
 
     return validate_and_wrap_response(
-        response, 'data',
+        response, 'content',
         mimetype="application/zip",
         headers={
             "Content-Disposition":

@@ -128,15 +128,16 @@ def run_task(self, task):
                              task["uid"])
     resolver = Resolver()
     workspace = prepare_workspace(task, resolver, dst_dir)
+    task_processors = task["chain"]["processors"]
 
     # TODO: Steps could be saved along the other task information to get a
     # more informational task.
-    for index, processor_name in enumerate(task["chain"]["processors"]):
+    for index, processor_name in enumerate(task_processors):
         if index == 0:
             input_file_grp = task["default_file_grp"]
         else:
             previous_processor = PROCESSORS_ACTION[
-                task["chain"]["processors"][index - 1]
+                task_processors[index - 1]
             ]
             input_file_grp = previous_processor["output_file_grp"]
 

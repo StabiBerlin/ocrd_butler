@@ -32,13 +32,15 @@ PROCESSOR_NAMES = PROCESSORS_CONFIG.keys()
 
 # We prepare usable action configurations from the config itself.
 PROCESSORS_ACTION = copy.deepcopy(PROCESSORS_CONFIG)
-for processor in ['ocrd-olena-binarize', 'ocrd-sbb-binarize']:
-    PROCESSORS_ACTION.get(
-        processor, {}
-    )['output_file_grp'] = ['OCR-D-IMG-BINPAGE']
+
+# We override some base settings of the processors.
+for processor, settings in ocrd_config.PROCESSOR_SETTINGS.items():
+    for key, value in settings.items():
+        PROCESSORS_ACTION.get(
+            processor, {}
+        )[key] = value
 
 for name, config in PROCESSORS_ACTION.items():
-
     if "package" in config:
         del config["package"]
 

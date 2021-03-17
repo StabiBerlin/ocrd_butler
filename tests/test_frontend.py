@@ -267,7 +267,7 @@ class FrontendTests(TestCase):
         """Check if download alto files is working."""
 
         mock_requests_get.return_value = type('', (object,), {
-            "data": b"foobar",
+            "content": b"foobar",
             "status_code": 200
         })()
 
