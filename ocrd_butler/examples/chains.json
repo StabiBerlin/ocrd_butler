@@ -20,7 +20,7 @@
                 "ocrd-calamari-recognize": {
                     "checkpoint": "/data/calamari_models/*ckpt.json",
                     "voter": "confidence_voter_default_ctc",
-                    "textequiv_level": "line",
+                    "textequiv_level": "word",
                     "glyph_conf_cutoff": 0.001
                 },
                 "ocrd-fileformat-transform": {
