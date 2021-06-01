@@ -117,7 +117,6 @@ class TasksBase(Resource):
             "results",
             "download_txt",
             "download_page",
-            "download_pageviewer",
             "download_alto")
         self.post_actions = ("run", "rerun", "stop")
 
@@ -282,33 +281,7 @@ class TaskActions(TasksBase):
                 return os.path.dirname(file)
 
     def download_page(self, task):
-        """ Download the results of the task as PAGE XML. """
-        task_info = task_information(task.worker_task_id)
-        page_result_dir = self.page_result_dir(task_info)
-
-        if page_result_dir is None:
-            return jsonify({
-                "status": "ERROR",
-                "msg": f"Can't find page results for task {task_info['result']['task_id']}"
-            })
-
-        page_result_path = pathlib.Path(page_result_dir)
-        data = io.BytesIO()
-        with zipfile.ZipFile(data, mode='w') as zip_file:
-            for f_name in page_result_path.iterdir():
-                arcname = f"{os.path.basename(f_name)}"
-                zip_file.write(f_name, arcname=arcname)
-        data.seek(0)
-
-        return send_file(
-            data,
-            mimetype="application/zip",
-            as_attachment=True,
-            attachment_filename=f"ocr_page_xml_{task_info['result']['task_id']}.zip"
-        )
-
-    def download_pageviewer(self, task):
-        """ Download the results of the task for pageviewer, including PAGE XML,
+        """ Download the results of the task for e.g. pageviewer, including PAGE XML,
             METS file and DEFAULT images.
         """
         task_info = task_information(task.worker_task_id)
@@ -352,9 +325,15 @@ class TaskActions(TasksBase):
                 "msg": f"Can't find alto results for task {task_info['result']['task_id']}"
             })
 
+        img_dir = os.path.join(f"{task_info['result']['result_dir']}/{task.default_file_grp}")
+        img_path = pathlib.Path(img_dir)
         alto_path = pathlib.Path(alto_xml_dir)
         data = io.BytesIO()
         with zipfile.ZipFile(data, mode='w') as zip_file:
+            zip_file.write(f"{task_info['result']['result_dir']}/mets.xml", arcname="mets.xml")
+            for f_name in img_path.iterdir():
+                arcname = f"{task.default_file_grp}/{os.path.basename(f_name)}"
+                zip_file.write(f_name, arcname=arcname)
             for f_name in alto_path.iterdir():
                 arcname = f"{os.path.basename(os.path.dirname(f_name))}/{os.path.basename(f_name)}"
                 zip_file.write(f_name, arcname=arcname)
@@ -369,6 +348,7 @@ class TaskActions(TasksBase):
 
     def download_txt(self, task):
         """ Download the results of the task as text. """
+        # https://github.com/qurator-spk/dinglehopper/blob/master/qurator/dinglehopper/extracted_text.py#L95
         task_info = task_information(task.worker_task_id)
 
         # Get the output group of the last step in the chain of the task.
@@ -380,24 +360,13 @@ class TaskActions(TasksBase):
         page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
         fulltext = ""
 
-        namespace = {
-            "page_2009-03-16": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2009-03-16",
-            "page_2010-01-12": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2010-01-12",
-            "page_2010-03-19": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2010-03-19",
-            "page_2013-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15",
-            "page_2016-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2016-07-15",
-            "page_2017-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2017-07-15",
-            "page_2018-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2018-07-15",
-            "page_2019-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15"
-        }
-
         files = glob.glob(f"{page_xml_dir}/*.xml")
         files.sort()
 
         for file in files:
             tree = ET.parse(file)
             xmlns = tree.getroot().tag.split("}")[0].strip("{")
-            if xmlns in namespace.values():
+            if xmlns in page_xml_namespaces.values():
                 for regions in tree.iterfind(".//{%s}TextRegion" % xmlns):
                     fulltext += "\n"
                     for content in regions.findall(

@@ -125,9 +125,8 @@ class FrontendTests(TestCase):
 
         download_links = html.find("table > tr:nth-child(2) > td:nth-child(9) > a")
         assert download_links[0].links == {'/download/page/1'}
-        assert download_links[1].links == {'/download/pageviewer/1'}
-        assert download_links[2].links == {'/download/alto/1'}
-        assert download_links[3].links == {'/download/txt/1'}
+        assert download_links[1].links == {'/download/alto/1'}
+        assert download_links[2].links == {'/download/txt/1'}
 
     def get_chain_id(self):
         """Create a chain for the tests."""
@@ -247,20 +246,6 @@ class FrontendTests(TestCase):
         response = self.client.get('/download/page/23')
         assert response.status_code == 302
         assert response.headers.get('Location').endswith('/tasks')
-
-    @mock.patch("requests.get")
-    def test_frontend_pageviewer_zip(self, mock_requests_get):
-        """Check if download files for pageviewer is working."""
-
-        mock_requests_get.return_value = type('', (object,), {
-            "content": b"foobar",
-            "status_code": 200
-        })()
-
-        response = self.client.get("/download/pageviewer/42")
-
-        assert response.status_code == 200
-        assert response.data[:10] == b"foobar"
 
     @mock.patch("requests.get")
     def test_frontend_alto_zip(self, mock_requests_get):

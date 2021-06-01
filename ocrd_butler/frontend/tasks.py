@@ -115,7 +115,6 @@ def current_tasks():
                 "page": f"/download/page/{result.id}",
                 "alto": f"/download/alto/{result.id}",
                 "txt": f"/download/txt/{result.id}",
-                "pageviewer": f"/download/pageviewer/{result.id}",
             })
 
             if task_info["received"] is not None:
@@ -302,21 +301,6 @@ def download_page_zip(task_id):
         headers={
             "Content-Disposition":
             f"attachment;filename=ocr_page_xml_{task_id}.zip"
-        }
-    )
-
-
-@tasks_blueprint.route("/download/pageviewer/<string:task_id>")
-def download_pageviewer_zip(task_id):
-    """Define route to download the page xml results as zip file."""
-    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_pageviewer")
-
-    return validate_and_wrap_response(
-        response, 'content',
-        mimetype="application/zip",
-        headers={
-            "Content-Disposition":
-            f"attachment;filename=ocr_pageviewer_{task_id}.zip"
         }
     )
 

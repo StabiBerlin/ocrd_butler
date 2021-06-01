@@ -133,18 +133,6 @@ class ApiTaskActions(TestCase):
 
     @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
     @mock.patch("ocrd_butler.api.tasks.task_information")
-    def test_api_task_pageviewer_zip(self, mock_task_information, mock_fs):
-        """Check if download pageviewer zip is working."""
-        self.setup_mocks(mock_task_information, mock_fs)
-
-        response = self.client.get("/api/tasks/foobar/download_pageviewer")
-
-        assert response.status_code == 200
-        assert response.content_type == "application/zip"
-        assert response.data[:10] == b'PK\x03\x04\x14\x00\x00\x00\x00\x00'
-
-    @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
-    @mock.patch("ocrd_butler.api.tasks.task_information")
     def test_api_task_alto_zip(self, mock_task_information, mock_fs):
         """Check if download txt is working."""
         self.setup_mocks(mock_task_information, mock_fs)

@@ -31,7 +31,6 @@ class ProcessorsTests(TestCase):
         assert "ocrd-calamari-recognize" in PROCESSOR_NAMES
         assert "ocrd-segment-repair" in PROCESSOR_NAMES
         assert "ocrd-keraslm-rate" in PROCESSOR_NAMES
-        assert "ocrd-anybaseocr-binarize" in PROCESSOR_NAMES
 
     def test_tesserocr_integration(self):
         """Check if ocr_tesserocr is importable."""
