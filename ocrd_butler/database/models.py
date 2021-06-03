@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""OCRD Butler database models."""
+"""OCR-D Butler database models."""
 
 from ocrd_butler.database import db
 from ocrd_butler.util import to_json
