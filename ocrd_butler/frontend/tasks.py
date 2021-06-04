@@ -35,7 +35,7 @@ from wtforms.validators import (
 
 from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
-from ocrd_butler.util import host_url
+from ocrd_butler.util import host_url, flower_url
 
 
 tasks_blueprint = Blueprint("tasks_blueprint", __name__)
@@ -51,21 +51,23 @@ def _jinja2_filter_format_delta(delta):
     return delta.__str__()
 
 
-def task_information(uid):
+def task_information(worker_task_id):
     """
-    Get information for the task based on its uid.
+    Get information for the task based on its worker task id from flower service.
     """
-    if uid is None:
+    if worker_task_id is None:
         return None
 
-    response = requests.get(f"http://localhost:5555/api/task/info/{uid}")
+    flower_base = flower_url(request)
+    response = requests.get(f"{flower_base}/api/task/info/{worker_task_id}")
+    #response = requests.get(f"http://localhost:5555/api/task/info/{uid}")
     if response.status_code == 404:
-        current_app.logger.warning("Can't find task '{0}'".format(uid))
+        current_app.logger.warning("Can't find task '{0}'".format(worker_task_id))
         return None
     try:
         task_info = json.loads(response.content)
     except json.decoder.JSONDecodeError as exc:
-        current_app.logger.error(f"Can't read response for task '{uid}'. ({exc.__str__()})")
+        current_app.logger.error(f"Can't read response for task '{worker_task_id}'. ({exc.__str__()})")
         return None
 
     task_info["ready"] = task_info["state"] == "SUCCESS"
@@ -112,9 +114,9 @@ def current_tasks():
 
         if task_info is not None and task_info["ready"]:
             task["result"].update({
-                "page": f"/download/page/{result.id}",
-                "alto": f"/download/alto/{result.id}",
-                "txt": f"/download/txt/{result.id}",
+                "page": f"/download/page/{result.uid}",
+                "alto": f"/download/alto/{result.uid}",
+                "txt": f"/download/txt/{result.uid}",
             })
 
             if task_info["received"] is not None:

@@ -37,7 +37,7 @@ from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 
 from ocrd_butler.execution.tasks import run_task
-from ocrd_butler.util import logger, to_json
+from ocrd_butler.util import logger, to_json, flower_url
 
 log = logger(__name__)
 
@@ -77,21 +77,22 @@ page_xml_namespaces = {
 # - downloadable and (even better) live log showing
 
 
-def task_information(uid):
+def task_information(worker_task_id):
     """
-    Get information for the task based on its uid.
+    Get information for the task based on its worker id.
     """
-    if uid is None:
+    if worker_task_id is None:
         return None
-
-    response = requests.get(f"http://localhost:5555/api/task/info/{uid}")
+    
+    flower_base = flower_url(request)
+    response = requests.get(f"{flower_base}/api/task/info/{worker_task_id}")
     if response.status_code == 404:
-        current_app.logger.warning(f"Can't find task '{uid}'")
+        current_app.logger.warning(f"Can't find task '{worker_task_id}'")
         return None
     try:
         task_info = json.loads(response.content)
     except json.decoder.JSONDecodeError as exc:
-        current_app.logger.error(f"Can't read response for task '{uid}'. ({exc.__str__()})")
+        current_app.logger.error(f"Can't read response for task '{worker_task_id}'. ({exc.__str__()})")
         return None
 
     task_info["ready"] = task_info["state"] == "SUCCESS"
@@ -209,12 +210,12 @@ class TaskActions(TasksBase):
     def get(self, task_id, action):
         """ Get some information for the task. """
         # TODO: Return the actions as OPTIONS.
-        task = db_model_Task.get(id=task_id)
-
+        log.info(f"Get task {task_id} with action {action}.")
+        task = db_model_Task.get(uid=task_id)
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
-                status=f"Unknown task for id \"{task_id}\".",
+                status=f"Unknown task with uid \"{task_id}\".",
                 statusCode="404")
 
         if action not in self.get_actions:

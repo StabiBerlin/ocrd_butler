@@ -8,7 +8,7 @@ import re
 import logging.config
 
 logging_conf_path = os.path.normpath(os.path.join(
-    os.path.dirname(__file__), '../logging.conf'))
+    os.path.dirname(__file__), '/data/ocrd-butler/logging.conf'))
 logging.config.fileConfig(logging_conf_path)
 log = logging.getLogger(__name__)
 
@@ -33,8 +33,12 @@ def camel_case_split(identifier):
 
 def host_url(request):
     return request.host_url
-    # return "http://localhost:5000/"
+    #return "http://localhost:5000/"
 
+def flower_url(request):
+    if request.host_url.startswith("http://localhost"):
+        return "http://locahost:5555"
+    return f"{request.host_url}/flower"
 
 def to_json(data):
     if isinstance(data, str):
