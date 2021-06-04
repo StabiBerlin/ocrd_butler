@@ -52,15 +52,6 @@ Install ocrd-butler in the virtual environment created by ocrd_all:
   (venv) /home/ocrd/ocrd-butler > pip install -r requirements-dev.txt
   (venv) /home/ocrd/ocrd-butler > python setup.py develop
 
-Maybe there are more steps necessary, e.g.
-
-.. code-block:: bash
-
-  /home/ocrd > cd ocrd_all/ocrd_calamari
-  /home/ocrd/ocrd_all/ocrd_calamari > python setup.py develop
-
-This step maybe needed for ocrd_calamari, ocrd_segment, ocrd_keraslm and ocrd_anybaseocr.
-
 For some modules in `ocrd_all`_ there are further files necessary,
 e.g. trained models for the OCR itself. The folders on the server
 can be overwritten it every single task.
