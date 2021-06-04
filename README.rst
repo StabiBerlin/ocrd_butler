@@ -92,16 +92,6 @@ can be overwritten it every single task.
   > cp GT4HistOCR_2000000.traineddata /usr/share/tesseract-ocr/4.00/tessdata/
 
 
-* Clone ocrd_butler (GitLab) and install it in the very same venv.
-
-.. code-block:: bash
-
-  > cd /srv
-  > git clone https://github.com/StaatsbibliothekBerlin/ocrd_butler.git && cd ocrd-butler
-  > source /srv/ocrd_all/.venv/bin/master
-  > pip install -r requirements.txt # or pipenv install if you are using pipenv
-
-
 Start celery worker:
 
 .. code-block:: bash
