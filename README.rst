@@ -79,7 +79,7 @@ can be overwritten it every single task.
 .. code-block:: bash
 
   > mkdir /data/calamari_models && cd /data/calamari_models
-  > wget https://qurator-data.de/calamari-models/GT4HistOCR/model.tar.xz
+  > wget https://qurator-data.de/calamari-models/GT4HistOCR/2019-12-11T11_10+0100/model.tar.xz
   > tar xf model.tar.xz
 
 * ocrd_tesserocr
