@@ -351,19 +351,19 @@ class TaskActions(TasksBase):
         """ Download the results of the task as text. """
         # https://github.com/qurator-spk/dinglehopper/blob/master/qurator/dinglehopper/extracted_text.py#L95
         task_info = task_information(task.worker_task_id)
+        page_result_dir = self.page_result_dir(task_info)
+        page_result_path = pathlib.Path(page_result_dir)
 
-        # Get the output group of the last step in the chain of the task.
-        task_data = db_model_Task.query.filter_by(worker_task_id=task.worker_task_id).first()
-        chain_data = db_model_Chain.query.filter_by(id=task_data.chain_id).first()
-        last_step = chain_data.processors[-1]
-        last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
+        if page_result_dir is None:
+            return jsonify({
+                "status": "ERROR",
+                "msg": f"Can't find page results for task {task_info['result']['task_id']}"
+            })
 
-        page_xml_dir = os.path.join(task_info["result"]["result_dir"], last_output)
         fulltext = ""
 
-        files = glob.glob(f"{page_xml_dir}/*.xml")
+        files = glob.glob(f"{page_result_path}/*.xml")
         files.sort()
-
         for file in files:
             tree = ET.parse(file)
             xmlns = tree.getroot().tag.split("}")[0].strip("{")
