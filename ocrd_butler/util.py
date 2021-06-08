@@ -7,11 +7,15 @@ import json
 import re
 import logging.config
 
-logging_conf_path = os.path.normpath(os.path.join(
-    os.path.dirname(__file__), '/data/ocrd-butler/logging.conf'))
-logging.config.fileConfig(logging_conf_path)
-log = logging.getLogger(__name__)
+system_conf = '/data/ocrd-butler/logging.conf'
+local_conf = f'{os.getcwd()}/logging.conf'
 
+for conf in (system_conf, local_conf):
+    if(os.path.exists(conf)):
+        conf_path = os.path.normpath(os.path.join(os.path.dirname(__file__), conf))
+        logging.config.fileConfig(conf_path)
+        break
+log = logging.getLogger(__name__)
 
 def logger(name: str) -> logging.Logger:
     """ returns logger instance for given identifier.
