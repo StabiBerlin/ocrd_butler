@@ -43,3 +43,4 @@ flask-wtf = "*"
 flask-restx = "*"
 pipenv-to-requirements = "*"
 readline = "*"
+ocrd-page-to-alto = {file = "https://github.com/kba/page-to-alto/archive/refs/heads/master.zip"}
