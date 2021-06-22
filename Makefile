@@ -97,6 +97,15 @@ dist: clean ## builds source and wheel package
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
+run-celery:
+	. ../ocrd_all/venv/bin/activate; TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
+
+run-flask:
+	. ../ocrd_all/venv/bin/activate; FLASK_APP=ocrd_butler/app.py flask run
+
+run-flower:
+	. ../ocrd_all/venv/bin/activate; flower --broker redis://localhost:6379 --persistent=True --db=flower [--log=debug
+
 tesseract-model: ## install trained model for tesseract
 	mkdir -p /data/tesseract_models && cd /data/tesseract_models; \
 	wget https://qurator-data.de/tesseract-models/GT4HistOCR/models.tar; \
