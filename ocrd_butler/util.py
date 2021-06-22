@@ -26,6 +26,10 @@ def logger(name: str) -> logging.Logger:
     """
     return logging.getLogger(name)
 
+logging_conf_path = os.path.normpath(os.path.join(
+    os.path.dirname(__file__), '../logging.conf'))
+logging.config.fileConfig(logging_conf_path)
+log = logging.getLogger(__name__)
 
 def camel_case_split(identifier):
     """CamelCase split"""

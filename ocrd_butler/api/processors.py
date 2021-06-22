@@ -5,6 +5,7 @@ Extract predefined processors information.
 """
 
 import copy
+import subprocess
 
 from flask import jsonify
 from flask_restx import Resource
