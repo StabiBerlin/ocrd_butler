@@ -103,9 +103,11 @@ class ApiTaskActions(TestCase):
         """
         task = self._create_task("1")
         task_model_mock_get.return_value = task
-        assert self.client.get(
+        response = self.client.get(
             "/api/tasks/1/status"
-        ).status_code == 200
+        )
+        assert response.status_code == 200
+        assert response.data == b'{\n  "status": "CREATED"\n}\n'
 
     @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
     @mock.patch("ocrd_butler.api.tasks.task_information")
