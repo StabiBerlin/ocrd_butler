@@ -45,7 +45,7 @@ def host_url(request):
 
 def flower_url(request):
     if request.host_url.startswith("http://localhost"):
-        return "http://locahost:5555"
+        return "http://localhost:5555"
     return f"{request.host_url}/flower"
 
 def to_json(data):
