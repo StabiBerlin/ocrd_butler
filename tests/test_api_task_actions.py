@@ -32,15 +32,16 @@ class ApiTaskActions(TestCase):
         headers = {"Content-Type": "application/json"}
         self.client.post("/api/tasks", data=data, headers=headers)
 
-    def setup_mocks(self, mock_task_information, mock_fs):
+    def setup_mocks(self, mock_task_information, mock_fs, result_num='01'):
         """Setup the mocks for patching task_information and flask_sqlalchemy
            query getter.
         """
         mock_task_information.return_value = {
             "ready": True,
             "result": {
-                "result_dir": f"{CURRENT_DIR}/files/ocr_result_01",
-                "task_id": 23
+                "result_dir": f"{CURRENT_DIR}/files/ocr_result_{result_num}",
+                "task_id": 23,
+                "uid": 42
             }
         }
         mock_fs\
@@ -48,6 +49,7 @@ class ApiTaskActions(TestCase):
             .return_value.first\
             .return_value = type('', (object,), {
                 "chain_id": 1,
+                "uid": 42,
                 "worker_task_id": 42,
                 "default_file_grp": "DEFAULT",
                 "processors": ["ocrd-calamari-recognize"]
@@ -144,3 +146,18 @@ class ApiTaskActions(TestCase):
         assert response.status_code == 200
         assert response.content_type == "application/zip"
         assert response.data[:10] == b'PK\x03\x04\x14\x00\x00\x00\x00\x00'
+
+    @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
+    @mock.patch("ocrd_butler.api.tasks.task_information")
+    def test_api_task_page_to_alto(self, mock_task_information, mock_fs):
+        """Check if page to alto conversion is working."""
+        self.setup_mocks(mock_task_information, mock_fs, result_num="02")
+
+        response = self.client.post("/api/tasks/foobar/page_to_alto")
+
+        assert response.status_code == 200
+        assert response.content_type == "application/json"
+        assert response.json == {
+            'msg': 'You can get the results via http://localhost/api/tasks/42/download_alto',
+            'status': 'SUCCESS'
+        }

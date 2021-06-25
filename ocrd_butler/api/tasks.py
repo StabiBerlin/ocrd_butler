@@ -27,6 +27,8 @@ from ocrd.processor.base import run_cli
 from ocrd.resolver import Resolver
 from ocrd_validators import ParameterValidator
 
+from ocrd_page_to_alto.convert import OcrdPageAltoConverter, NAMESPACES
+
 from ocrd_butler.api.restx import api
 from ocrd_butler.api.models import task_model
 from ocrd_butler.api.processors import PROCESSORS_ACTION
@@ -37,7 +39,7 @@ from ocrd_butler.database.models import Chain as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 
 from ocrd_butler.execution.tasks import run_task
-from ocrd_butler.util import logger, to_json, flower_url
+from ocrd_butler.util import logger, to_json, host_url, flower_url
 
 log = logger(__name__)
 
@@ -83,7 +85,7 @@ def task_information(worker_task_id):
     """
     if worker_task_id is None:
         return None
-    
+
     flower_base = flower_url(request)
     response = requests.get(f"{flower_base}/api/task/info/{worker_task_id}")
     if response.status_code == 404:
@@ -118,8 +120,14 @@ class TasksBase(Resource):
             "results",
             "download_txt",
             "download_page",
-            "download_alto")
-        self.post_actions = ("run", "rerun", "stop")
+            "download_alto",
+        )
+        self.post_actions = (
+            "run",
+            "rerun",
+            "stop",
+            "page_to_alto",
+        )
 
     def task_data(self, json_data):
         """ Validate and prepare task input. """
@@ -208,7 +216,8 @@ class TaskActions(TasksBase):
     @api.doc(responses={200: "OK", 400: "Unknown action",
                         404: "Unknown task", 500: "Error"})
     def get(self, task_id, action):
-        """ Get some information for the task. """
+        """ Get information or results of the task.
+        """
         # TODO: Return the actions as OPTIONS.
         log.info(f"Get task {task_id} with action {action}.")
         task = db_model_Task.get(uid=task_id)
@@ -270,6 +279,32 @@ class TaskActions(TasksBase):
         """ Run this task. """
         return jsonify(task.results)
 
+    def page_to_alto(self, task):
+        """ Convert page files to alto. """
+        task_info = task_information(task.worker_task_id)
+        page_result_dir = self.page_result_dir(task_info)
+        page_result_path = pathlib.Path(page_result_dir)
+        alto_result_path = self.alto_result_path(task_info)
+
+        if page_result_dir is None:
+            return jsonify({
+                "status": "ERROR",
+                "msg": f"Can't find page results for task {task_info['result']['task_id']}"
+            })
+
+        for file_path in page_result_path.iterdir():
+            converter = OcrdPageAltoConverter(page_filename=file_path)
+            alto_xml = converter.convert()
+            alto_file_name = file_path.name.replace("CALAMARI", "ALTO")
+            alto_result_file = alto_result_path.joinpath(alto_file_name)
+            with open(alto_result_file, "w") as alto_file:
+                alto_file.write(str(alto_xml))
+
+        return jsonify({
+            "status": "SUCCESS",
+            "msg": f"You can get the results via {host_url(request)}api/tasks/{task.uid}/download_alto"
+        })
+
     def page_result_dir(self, task_info: dict, path_part: str = "OCR-D-OCR") -> pathlib.Path:
         """ Get base path to the page xml results of the task. """
         result_xml_files = glob.glob(f"{task_info['result']['result_dir']}/*/*.xml")
@@ -280,6 +315,13 @@ class TaskActions(TasksBase):
             xmlns = tree.getroot().tag.split("}")[0].strip("{")
             if xmlns in page_xml_namespaces.values():
                 return os.path.dirname(file)
+
+    def alto_result_path(self, task_info: dict) -> pathlib.Path:
+        """ Get path to dir for alto xml files. If it not exists, it will be created. """
+        alto_path = f"{task_info['result']['result_dir']}/OCR-D-OCR-ALTO"
+        if not os.path.exists(alto_path):
+            os.mkdir(alto_path)
+        return pathlib.Path(alto_path)
 
     def download_page(self, task):
         """ Download the results of the task for e.g. pageviewer, including PAGE XML,
