@@ -90,7 +90,7 @@ def chains():
     The page presenting the existing chains.
     """
     results = db_model_Chain.get_all()
-    new_chain_form = NewChainForm(csrf_enabled=False)
+    new_chain_form = NewChainForm(meta={'csrf': False})
     p_choices = [(name, name) for name in PROCESSOR_NAMES]
     new_chain_form.processors.choices = p_choices
 
