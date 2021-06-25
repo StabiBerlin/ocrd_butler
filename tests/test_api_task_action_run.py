@@ -222,7 +222,7 @@ class ApiTaskActionRunTests(TestCase):
         ))
 
         response = self.client.post("/api/tasks/{0}/run".format(
-            task_response.json["id"]))
+            task_response.json["uid"]))
         assert response.status_code == 200
         assert response.json["status"] == "SUCCESS"
 
@@ -288,7 +288,9 @@ class ApiTaskActionRunTests(TestCase):
         ))
 
         assert task_response.status_code == 201
-        assert task_response.json == {'id': 1, 'message': 'Task created.'}
+        assert task_response.json["id"] == 1
+        assert len(task_response.json["uid"]) == 36
+        assert task_response.json["message"] == "Task created."
 
         response = self.client.post(
             "/api/tasks/{0}/run".format(task_response.json["id"])
@@ -297,7 +299,7 @@ class ApiTaskActionRunTests(TestCase):
         assert response.json["status"] == "SUCCESS"
 
         response = self.client.get("/api/tasks/{0}/results".format(
-            task_response.json["id"]))
+            task_response.json["uid"]))
 
         ocr_results = os.path.join(response.json["result_dir"],
                                    "OCR-D-OCR-CALAMARI")

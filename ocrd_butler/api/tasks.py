@@ -179,19 +179,34 @@ class TaskRoot(TasksBase):
         return make_response({
             "message": "Task created.",
             "id": task.id,
+            "uid": task.uid,
         }, 201)
 
 
 @task_namespace.route("/<string:task_id>/<string:action>")
 class TaskActions(TasksBase):
-    """Run actions on the task, e.g. run, rerun, stop."""
+    """Run actions on the task."""
 
     @api.doc(responses={200: "OK", 400: "Unknown action",
                         404: "Unknown task", 500: "Error"})
     def post(self, task_id, action):
-        """ Execute the given action for the task. """
-        # TODO: Return the actions as OPTIONS.
+        """
+        Execute the given action for the task.
+
+        Available post actions:
+        * run
+        * rerun
+        * stop
+        * page_to_alto
+
+        TODO: Return the actions as OPTIONS.
+        """
+        log.info(f"Task {task_id} post action {action} called.")
+
         task = db_model_Task.get(id=task_id)
+        if task is None:
+            task = db_model_Task.get(uid=task_id)
+
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
@@ -216,15 +231,28 @@ class TaskActions(TasksBase):
     @api.doc(responses={200: "OK", 400: "Unknown action",
                         404: "Unknown task", 500: "Error"})
     def get(self, task_id, action):
-        """ Get information or results of the task.
         """
-        # TODO: Return the actions as OPTIONS.
-        log.info(f"Get task {task_id} with action {action}.")
-        task = db_model_Task.get(uid=task_id)
+        Get information or results of the task.
+
+        Available GET actions:
+        * status
+        * results
+        * download_txt
+        * download_page
+        * download_alto
+
+        TODO: Return the actions as OPTIONS.
+        """
+        log.info(f"Task {task_id} get action {action} called.")
+
+        task = db_model_Task.get(id=task_id)
+        if task is None:
+            task = db_model_Task.get(uid=task_id)
+
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
-                status=f"Unknown task with uid \"{task_id}\".",
+                status=f"Unknown task with id or uid \"{task_id}\".",
                 statusCode="404")
 
         if action not in self.get_actions:
@@ -270,13 +298,13 @@ class TaskActions(TasksBase):
         raise NotImplementedError
 
     def status(self, task):
-        """ Run this task. """
+        """ Get the status of this task. """
         return jsonify({
             "status": task.status
         })
 
     def results(self, task):
-        """ Run this task. """
+        """ Get the results of this task. """
         return jsonify(task.results)
 
     def page_to_alto(self, task):
