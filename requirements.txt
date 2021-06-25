@@ -34,7 +34,6 @@ cssselect==1.1.0
 cycler==0.10.0
 decorator==4.4.2
 Deprecated==1.2.0
-dinglehopper @ file:///home/j23d/projects/ocrd/ocrd_all/dinglehopper
 distlib==0.3.0
 docutils==0.16
 dominate==2.5.1
@@ -95,24 +94,6 @@ multimethod==1.3
 networkx==2.4
 numpy==1.19.5
 oauthlib==3.1.0
-ocrd==2.24.0
--e git+https://github.com/OCR-D/ocrd_anybaseocr.git@e930c931d71e574045f6fe2d397f517e7ff1584c#egg=ocrd_anybaseocr&subdirectory=../../ocrd_anybaseocr
--e git+git@code.dev.sbb.berlin:zidsuz/ocrd-butler.git@137c488b2868b4f005469e9eedc87a407325fc91#egg=ocrd_butler
-ocrd-calamari @ file:///home/j23d/projects/ocrd/ocrd_all/ocrd_calamari
-ocrd-cis @ file:///home/j23d/projects/ocrd/ocrd_all/ocrd_cis
-ocrd-fork-ocropy==1.4.0a3
-ocrd-fork-pylsd==0.0.3
--e git+https://github.com/OCR-D/ocrd_keraslm.git@b11b51d307799bff5ad55ccc197093530d71389e#egg=ocrd_keraslm&subdirectory=../../ocrd_keraslm
-ocrd-modelfactory==2.24.0
-ocrd-models==2.24.0
-ocrd-olahd-client @ file:///home/j23d/projects/ocrd/ocrd_all/ocrd_olahd_client
-ocrd-page-to-alto @ https://github.com/kba/page-to-alto/archive/refs/heads/master.zip
-ocrd-repair-inconsistencies @ file:///home/j23d/projects/ocrd/ocrd_all/ocrd_repair_inconsistencies
--e git+https://github.com/OCR-D/ocrd_segment.git@5fd7254879aac409a2af9582a97b20180da94e88#egg=ocrd_segment&subdirectory=../../ocrd_segment
-ocrd-tesserocr @ file:///home/j23d/projects/ocrd/ocrd_all/ocrd_tesserocr
-ocrd-utils==2.24.0
-ocrd-validators==2.24.0
-ocrd-wrap @ file:///home/j23d/projects/ocrd/ocrd_all/ocrd_wrap
 opencv-python-headless==4.4.0.42
 opt-einsum==3.3.0
 packaging==20.4
@@ -194,7 +175,6 @@ tensorflow==2.4.1
 tensorflow-estimator==2.4.0
 tensorflow-gpu==1.15.3
 termcolor==1.1.0
-tesserocr @ file:///home/j23d/projects/ocrd/ocrd_all/tesserocr
 tifffile==2020.8.13
 toml==0.10.1
 torch==1.6.0
