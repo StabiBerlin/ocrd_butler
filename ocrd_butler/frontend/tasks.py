@@ -60,7 +60,6 @@ def task_information(worker_task_id):
 
     flower_base = flower_url(request)
     response = requests.get(f"{flower_base}/api/task/info/{worker_task_id}")
-    #response = requests.get(f"http://localhost:5555/api/task/info/{uid}")
     if response.status_code == 404:
         current_app.logger.warning("Can't find task '{0}'".format(worker_task_id))
         return None
@@ -203,7 +202,7 @@ def new_task():
 @tasks_blueprint.route('/tasks', methods=['GET'])
 def tasks():
     """Define the page presenting the created tasks."""
-    # new_task_form = NewTaskForm(csrf_enabled=False)
+    # new_task_form = NewTaskForm(meta={'csrf': False})
     new_task_form = NewTaskForm()
     chains = db_model_Chain.get_all()
     new_task_form.chain_id.choices = [(chain.id, chain.name) for chain in chains]
