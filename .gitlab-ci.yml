@@ -6,6 +6,7 @@ before_script:
   - export HTTP_PROXY=http://proxy.sbb.spk-berlin.de:3128
   - export HTTPS_PROXY=http://proxy.sbb.spk-berlin.de:3128
   - python --version
+  - pip install --upgrade pip
   - pip install -r requirements.txt
   - pip install -r requirements-dev.txt
 

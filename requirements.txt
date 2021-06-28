@@ -1,9 +1,11 @@
+-e .
 click==7.1.2
 Flask==1.1.1
 celery==4.3.0
 redis==3.3.11
 flower==0.9.4
 kombu==4.6.3
+wheel==0.36.2
 Flask-SQLAlchemy==2.4.3
 Flask-Bootstrap==3.3.7.1
 flask-nav==0.6
