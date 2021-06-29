@@ -112,9 +112,8 @@ tesseract-model: ## install trained model for tesseract
 	tar -xf models.tar -C /usr/share/tesseract-ocr/4.00/tessdata/ GT4HistOCR_2000000.traineddata
 
 calamari-model: ## install trained model for calamari
-	mkdir -p /data/calamari_models && cd /data/calamari_models; \
-	wget https://qurator-data.de/calamari-models/GT4HistOCR/model.tar.xz; \
-	tar -xf model.tar.xz
+	mkdir -p /data && cd /data; \
+	ocrd resmgr download ocrd-calamari-recognize qurator-gt4histocr-1.0 -l cwd
 
 textline-detector-model: ## install trained model for sbb textline detector
 	mkdir -p /data/sbb_textline_detector && cd /data/sbb_textline_detector; \
