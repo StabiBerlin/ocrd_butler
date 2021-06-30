@@ -35,7 +35,7 @@ from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.api.processors import PROCESSORS_CONFIG
 
 from ocrd_butler.database import db
-from ocrd_butler.database.models import Chain as db_model_Chain
+from ocrd_butler.database.models import Workflow as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 
 from ocrd_butler.execution.tasks import run_task
@@ -270,7 +270,7 @@ class TaskActions(TasksBase):
                 status=f"Unexpected error \"{exc.__str__()}\".",
                 statusCode="400")
 
-    def run(self, task):
+    def run(self, task: db_model_Task):
         """ Run this task. """
         # worker_task = run_task.apply_async(args=[task.to_json()],
         #                                    countdown=20)

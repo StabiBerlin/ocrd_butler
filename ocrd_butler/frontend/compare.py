@@ -25,7 +25,7 @@ from wtforms.widgets import Select
 
 from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.frontend.tasks import task_information
-from ocrd_butler.database.models import Chain as db_model_Chain
+from ocrd_butler.database.models import Workflow as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 
 

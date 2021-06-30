@@ -25,7 +25,10 @@ from ocrd.workspace import Workspace
 
 from ocrd_butler import celery
 from ocrd_butler.api.processors import PROCESSORS_ACTION
-from ocrd_butler.database import db
+from ocrd_butler.database import (
+    db,
+    models,
+)
 from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import logger
 
@@ -120,7 +123,7 @@ def prepare_workspace(task: dict, resolver: Resolver, dst_dir: str) -> Workspace
 
 
 @celery.task(bind=True)
-def run_task(self, task):
+def run_task(self, task: models.Task) -> dict:
     """ Create a task an run the given chain. """
 
     # Create workspace
@@ -128,7 +131,7 @@ def run_task(self, task):
                              task["uid"])
     resolver = Resolver()
     workspace = prepare_workspace(task, resolver, dst_dir)
-    task_processors = task["chain"]["processors"]
+    task_processors = task["workflow"]["processors"]
 
     # TODO: Steps could be saved along the other task information to get a
     # more informational task.
@@ -144,12 +147,12 @@ def run_task(self, task):
         processor = PROCESSORS_ACTION[processor_name]
 
         # Its possible to override the default parameters of the processor
-        # via chain or task.
+        # via workflow or task.
         kwargs = {"parameter": {}}
         if "parameters" in processor:
             kwargs["parameter"] = processor["parameters"]
-        if processor_name in task["chain"]["parameters"]:
-            kwargs["parameter"].update(task["chain"]["parameters"][processor_name])
+        if processor_name in task["workflow"]["parameters"]:
+            kwargs["parameter"].update(task["workflow"]["parameters"][processor_name])
         if processor_name in task["parameters"]:
             kwargs["parameter"].update(task["parameters"][processor_name])
         parameter = json.dumps(kwargs["parameter"])

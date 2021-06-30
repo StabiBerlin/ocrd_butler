@@ -20,7 +20,7 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     uid = db.Column(db.String(64))
     src = db.Column(db.String(255))
-    chain_id = db.Column(db.Integer, db.ForeignKey('chains.id'))
+    workflow_id = db.Column(db.Integer, db.ForeignKey('workflows.id'))
     description = db.Column(db.String(1024))
     parameters = db.Column(db.JSON)
     default_file_grp = db.Column(db.String(64))
@@ -29,15 +29,19 @@ class Task(db.Model):
     # Change this "results" to postres specific JSON, if we switch.
     results = db.Column(db.JSON)
 
-    chain = db.relationship("Chain",
-                            backref=db.backref("chains", lazy="dynamic"))
+    workflow = db.relationship(
+        "Workflow",
+        backref=db.backref("workflows", lazy="dynamic")
+    )
 
-    def __init__(self, uid, src, chain_id, parameters={}, description="",
-                 default_file_grp="DEFAULT", worker_task_id=None,
-                 status="CREATED", results={}):
+    def __init__(
+        self, uid, src, workflow_id, parameters={}, description="",
+        default_file_grp="DEFAULT", worker_task_id=None,
+        status="CREATED", results={}
+    ):
         self.uid = uid
         self.src = src
-        self.chain_id = chain_id
+        self.workflow_id = workflow_id
         self.parameters = parameters
         self.description = description
         self.default_file_grp = default_file_grp
@@ -50,7 +54,7 @@ class Task(db.Model):
             "id": self.id,
             "uid": self.uid,
             "src": self.src,
-            "chain": self.chain.to_json(),
+            "workflow": self.workflow.to_json(),
             "parameters": to_json(self.parameters),
             "description": self.description,
             "default_file_grp": self.default_file_grp,
@@ -62,15 +66,16 @@ class Task(db.Model):
     def __repr__(self):
         desc = self.description and ", description: {}".format(
             self.description) or ""
-        return "Task {0} - source {1}, chain {2}{3}".format(
-            self.uid, self.src, self.chain, desc)
-            # TODO: test_frontend/test_task_delete fail with
-            # self.uid, self.src, self.chain.name, desc)
+        return "Task {0} - source {1}, workflow {2}{3}".format(
+            self.uid, self.src, self.workflow, desc
+        )
+        # TODO: test_frontend/test_task_delete fail with
+        # self.uid, self.src, self.workflow.name, desc)
 
 
-class Chain(db.Model):
-    """ Database model for our chains. """
-    __tablename__ = "chains"
+class Workflow(db.Model):
+    """ Database model for our workflow. """
+    __tablename__ = "workflows"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
     description = db.Column(db.String(1024))
@@ -93,7 +98,7 @@ class Chain(db.Model):
         }
 
     def __repr__(self):
-        return "Chain {0} ({1})".format(self.name, self.description)
+        return "Workflow {0} ({1})".format(self.name, self.description)
 
 
 def delete(model: type, id: str) -> bool:
@@ -133,6 +138,9 @@ def get_all(model: type) -> List[db.Model]:
 def create(model: type, **data) -> db.Model:
     """ create a new instance of the specified db model, without saving it.
     """
+    # TODO: this can be removed once the API model field `chain_id` has been renamed accordingly
+    if model == Task and 'chain_id' in data:
+        data['workflow_id'] = data.pop('chain_id')
     return model(**data)
 
 
@@ -153,7 +161,7 @@ def _add_model_operations():
     """ equip both db model classes with convenience functions for creation,
     deletion, item count, and so on.
     """
-    for model in [Task, Chain]:
+    for model in [Task, Workflow]:
         model.save = save
         for func in [
             get, create, add, count, delete, get_all

@@ -25,7 +25,7 @@ class FrontendTests(TestCase):
         db.create_all()
 
         def create_api_task_callback(request):
-            db_task = models.Task(
+            db_task = models.Task.create(
                 uid="id",
                 src="mets_url",
                 default_file_grp="file_grp",

@@ -22,7 +22,7 @@ from ocrd_butler.api.processors import (
     PROCESSORS_CONFIG
 )
 from ocrd_butler.database import db
-from ocrd_butler.database.models import Chain as db_model_Chain
+from ocrd_butler.database.models import Workflow as db_model_Chain
 
 chain_namespace = api.namespace("chains", description="Manage OCR-D processor chains")
 

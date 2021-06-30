@@ -25,7 +25,7 @@ from wtforms.validators import (
 )
 
 from ocrd_butler.api.processors import PROCESSOR_NAMES
-from ocrd_butler.database.models import Chain as db_model_Chain
+from ocrd_butler.database.models import Workflow as db_model_Chain
 from ocrd_butler.util import host_url
 
 

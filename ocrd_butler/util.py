@@ -17,6 +17,7 @@ for conf in (system_conf, local_conf):
         break
 log = logging.getLogger(__name__)
 
+
 def logger(name: str) -> logging.Logger:
     """ returns logger instance for given identifier.
 
@@ -26,10 +27,12 @@ def logger(name: str) -> logging.Logger:
     """
     return logging.getLogger(name)
 
+
 logging_conf_path = os.path.normpath(os.path.join(
     os.path.dirname(__file__), '../logging.conf'))
 logging.config.fileConfig(logging_conf_path)
 log = logging.getLogger(__name__)
+
 
 def camel_case_split(identifier):
     """CamelCase split"""
@@ -41,12 +44,14 @@ def camel_case_split(identifier):
 
 def host_url(request):
     return request.host_url
-    #return "http://localhost:5000/"
+    # return "http://localhost:5000/"
+
 
 def flower_url(request):
     if request.host_url.startswith("http://localhost"):
         return "http://localhost:5555"
     return f"{request.host_url}/flower"
+
 
 def to_json(data):
     if isinstance(data, str):

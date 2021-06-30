@@ -134,7 +134,6 @@ class Config(object):
         },
     }
 
-
     @classmethod
     def processor_specs(cls, processor: str) -> dict:
         """ retrieve OCRD processor specification from its ``--dump-json``

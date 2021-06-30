@@ -33,7 +33,7 @@ from wtforms.validators import (
     URL
 )
 
-from ocrd_butler.database.models import Chain as db_model_Chain
+from ocrd_butler.database.models import Workflow as db_model_Chain
 from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import host_url, flower_url
 
@@ -85,7 +85,7 @@ def current_tasks():
     cur_tasks = []
 
     for result in results:
-        chain = db_model_Chain.get(id=result.chain_id)
+        chain = db_model_Chain.get(id=result.workflow_id)
         task = {
             "repr": result.__str__(),
             "description": result.description,
