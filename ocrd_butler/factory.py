@@ -8,7 +8,7 @@ from flask import Blueprint
 
 from flask_bootstrap import Bootstrap
 
-from ocrd_butler.api.chains import workflow_namespace
+from ocrd_butler.api.workflows import workflow_namespace
 from ocrd_butler.api.tasks import task_namespace
 from ocrd_butler.api.restx import api
 from ocrd_butler.celery_utils import init_celery
