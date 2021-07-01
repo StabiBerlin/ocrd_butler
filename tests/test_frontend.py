@@ -30,7 +30,7 @@ class FrontendTests(TestCase):
                 src="mets_url",
                 default_file_grp="file_grp",
                 worker_task_id="worker_task.id",
-                chain_id="chain.id",
+                workflow_id="chain.id",
                 parameters="")
             db.session.add(db_task)
             db.session.commit()
@@ -88,7 +88,7 @@ class FrontendTests(TestCase):
         """
         task = models.Task.create(
             uid=uid,
-            chain_id="1",
+            workflow_id="1",
             src="src",
         )
         task.id = uid
@@ -128,11 +128,11 @@ class FrontendTests(TestCase):
         assert download_links[1].links == {'/download/alto/1'}
         assert download_links[2].links == {'/download/txt/1'}
 
-    def get_chain_id(self):
+    def get_workflow_id(self):
         """Create a chain for the tests."""
         chain_response = self.client.post("/api/workflows", json=dict(
-            name="TC Chain",
-            description="Chain with tesseract and calamari recog.",
+            name="TC Workflow",
+            description="Workflow with tesseract and calamari recog.",
             processors=[
                 "ocrd-tesserocr-segment-region",
                 "ocrd-tesserocr-segment-line",
@@ -149,7 +149,7 @@ class FrontendTests(TestCase):
             task_id="foobar",
             description="barfoo",
             src="http://foo.bar/mets.xml",
-            chain_id=self.get_chain_id(),
+            workflow_id=self.get_workflow_id(),
             default_file_grp="file_grp"
         ))
 
@@ -168,7 +168,7 @@ class FrontendTests(TestCase):
             task_id="foobar-del",
             description="barfoo",
             src="http://foo.bar/mets.xml",
-            chain_id=self.get_chain_id()
+            workflow_id=self.get_workflow_id()
         ))
 
         response = self.client.get("/tasks")
@@ -266,7 +266,7 @@ class FrontendTests(TestCase):
         db_model_task_mock_get_all.return_value = [
             models.Task.create(**{
                 "uid": "1",
-                "chain_id": "1",
+                "workflow_id": "1",
                 "src": "src",
             })
         ]
@@ -277,7 +277,7 @@ class FrontendTests(TestCase):
     def test_frontend_compare(self, db_model_task_mock_get):
         db_model_task_mock_get.return_value = models.Task.create(
             **{
-                'uid': '1', 'chain_id': '1', 'src': 'src',
+                'uid': '1', 'workflow_id': '1', 'src': 'src',
             }
         )
         # response = self.client.post(

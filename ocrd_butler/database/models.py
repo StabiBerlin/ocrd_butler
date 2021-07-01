@@ -138,9 +138,6 @@ def get_all(model: type) -> List[db.Model]:
 def create(model: type, **data) -> db.Model:
     """ create a new instance of the specified db model, without saving it.
     """
-    # TODO: this can be removed once the API model field `chain_id` has been renamed accordingly
-    if model == Task and 'chain_id' in data:
-        data['workflow_id'] = data.pop('chain_id')
     return model(**data)
 
 
