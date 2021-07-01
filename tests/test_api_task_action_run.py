@@ -112,7 +112,7 @@ class ApiTaskActionRunTests(TestCase):
 
     def t_chain(self):
         """Creates a chain with tesseract processors."""
-        response = self.client.post("/api/chains", json=dict(
+        response = self.client.post("/api/workflows", json=dict(
             name="T Chain",
             description="Some foobar chain.",
             processors=[
@@ -131,7 +131,7 @@ class ApiTaskActionRunTests(TestCase):
 
     def empty_chain(self):
         """Creates a chain without processors."""
-        response = self.client.post("/api/chains", json=dict(
+        response = self.client.post("/api/workflows", json=dict(
             name="Empty Chain",
             description="Empty but not useless chain.",
             processors=[],
@@ -198,7 +198,7 @@ class ApiTaskActionRunTests(TestCase):
     )
     def test_task_tess_cal(self, mock_run_task):
         """Check if a new task is created."""
-        chain_response = self.client.post("/api/chains", json=dict(
+        chain_response = self.client.post("/api/workflows", json=dict(
             name="TC Chain",
             description="Chain with tesseract and calamari recog.",
             processors=[
@@ -253,7 +253,7 @@ class ApiTaskActionRunTests(TestCase):
             "{0}/calamari_models/0.ckpt.json".format(CURRENT_DIR)
         )
 
-        chain_response = self.client.post("/api/chains", json=dict(
+        chain_response = self.client.post("/api/workflows", json=dict(
             name="TC Chain",
             description="Chain with olena binarization, tesseract segmentation"
                         " and calamari recog.",

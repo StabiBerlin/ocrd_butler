@@ -24,7 +24,7 @@ from ocrd_butler.api.processors import (
 from ocrd_butler.database import db
 from ocrd_butler.database.models import Workflow as db_model_Workflow
 
-workflow_namespace = api.namespace("chains", description="Manage OCR-D processor workflows")
+workflow_namespace = api.namespace("workflows", description="Manage OCR-D processor workflows")
 
 
 class WorkflowBase(Resource):

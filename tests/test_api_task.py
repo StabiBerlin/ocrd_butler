@@ -24,7 +24,7 @@ class ApiTests(TestCase):
         return create_app(config=TestingConfig)
 
     def chain(self):
-        response = self.client.post("/api/chains", json=dict(
+        response = self.client.post("/api/workflows", json=dict(
             name="New Chain",
             description="Some foobar chain.",
             processors=["ocrd-tesserocr-recognize"]

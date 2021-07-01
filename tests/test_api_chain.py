@@ -28,7 +28,7 @@ class ApiTests(TestCase):
 
     def test_create_new_chain(self):
         """Check if a new chain is created."""
-        response = self.client.post("/api/chains", json=dict(
+        response = self.client.post("/api/workflows", json=dict(
             name="New Chain",
             description="Some foobar chain.",
             processors=["ocrd-tesserocr-recognize"],
@@ -39,7 +39,7 @@ class ApiTests(TestCase):
 
     def test_create_chain_with_unknown_processor(self):
         """Check if a new chain is created."""
-        response = self.client.post("/api/chains", json=dict(
+        response = self.client.post("/api/workflows", json=dict(
             name="chain", processors=["foobar"]))
         assert response.status_code == 400
         assert response.json["message"] == "Wrong parameter."
@@ -47,14 +47,14 @@ class ApiTests(TestCase):
 
     def test_create_chain_without_processor(self):
         """Check if a new chain is created."""
-        response = self.client.post("/api/chains", json=dict(name="chain"))
+        response = self.client.post("/api/workflows", json=dict(name="chain"))
         assert response.status_code == 400
         assert response.json["message"] == "Wrong parameter."
         assert response.json["status"] == "Missing processors for workflow."
 
     def test_create_chain_with_default_parameters(self):
         """Check if a new chain is created."""
-        self.client.post("/api/chains", json=dict(
+        self.client.post("/api/workflows", json=dict(
             name="New Chain",
             description="Some foobar chain.",
             processors=["ocrd-tesserocr-segment-region",
@@ -62,7 +62,7 @@ class ApiTests(TestCase):
                         "ocrd-tesserocr-segment-word",
                         "ocrd-tesserocr-recognize"]
         ))
-        response = self.client.get("/api/chains/1")
+        response = self.client.get("/api/workflows/1")
         assert "ocrd-tesserocr-segment-region" in response.json["parameters"].keys()
         assert response.json["parameters"]["ocrd-tesserocr-recognize"]["textequiv_level"] == "word"
         assert response.json["parameters"]["ocrd-tesserocr-recognize"]["overwrite_segments"] is False
@@ -70,7 +70,7 @@ class ApiTests(TestCase):
 
     def test_create_chain_with_own_parameters(self):
         """Check if a new chain is created."""
-        response = self.client.post("/api/chains", json=dict(
+        response = self.client.post("/api/workflows", json=dict(
             name="New Chain",
             description="Some foobar chain.",
             processors=["ocrd-olena-binarize"],
@@ -81,13 +81,13 @@ class ApiTests(TestCase):
             }
         ))
 
-        response = self.client.get("/api/chains/1")
+        response = self.client.get("/api/workflows/1")
         assert "ocrd-olena-binarize" in response.json["parameters"].keys()
         assert response.json["parameters"]["ocrd-olena-binarize"]["impl"] == "sauvola-ms-split"
 
     def test_create_chain_with_wrong_parameters(self):
         """Check if a new chain is created."""
-        response = self.client.post("/api/chains", json=dict(
+        response = self.client.post("/api/workflows", json=dict(
             name="New Chain",
             description="Some foobar chain.",
             processors=["ocrd-olena-binarize"],
@@ -105,12 +105,12 @@ class ApiTests(TestCase):
 
     def test_get_chain(self):
         """Check if an existing chain is returned."""
-        response = self.client.post("/api/chains", json=dict(
+        response = self.client.post("/api/workflows", json=dict(
             name="New Chain",
             description="Some foobar chain.",
             processors=["ocrd-olena-binarize"],
         ))
-        response = self.client.get("/api/chains/1")
+        response = self.client.get("/api/workflows/1")
         assert response.status_code == 200
         assert response.json["id"] == 1
         assert response.json["name"] == "New Chain"
@@ -119,42 +119,42 @@ class ApiTests(TestCase):
 
     def test_delete_chain(self):
         """Check if a new chain is created."""
-        response = self.client.post("/api/chains", json=dict(
+        response = self.client.post("/api/workflows", json=dict(
             name="New Chain",
             description="Some foobar chain.",
             processors=["ocrd-tesserocr-recognize"],
         ))
-        response = self.client.delete("/api/chains/1")
+        response = self.client.delete("/api/workflows/1")
         assert response.status_code == 200
         assert response.json["message"] == "Delete workflow \"New Chain(1)\": success"
-        response = self.client.get("/api/chains/1")
+        response = self.client.get("/api/workflows/1")
         assert response.status_code == 404
 
     def test_delete_unknown_chain(self):
         """Check if a new chain is created."""
-        response = self.client.delete("/api/chains/13")
+        response = self.client.delete("/api/workflows/13")
         assert response.status_code == 404
         assert response.json["status"] == "Can't find a workflow with the id \"13\"."
 
     def test_get_unknown_chain(self):
         """Check if a non existing chain ...."""
-        response = self.client.get("/api/chains/23")
+        response = self.client.get("/api/workflows/23")
         assert response.status_code == 404
         assert response.json["status"] == "Can't find a workflow with the id \"23\"."
 
     def test_get_chains(self):
         """Check if a new chain can be retrieved."""
-        assert self.client.post("/api/chains", json=dict(
+        assert self.client.post("/api/workflows", json=dict(
             name="First Chain",
             description="Some foobar chain.",
             processors=["ocrd-olena-binarize"],
         )).status_code == 201
-        assert self.client.post("/api/chains", json=dict(
+        assert self.client.post("/api/workflows", json=dict(
             name="Second Chain",
             description="Some barfoo chain.",
             processors=["ocrd-sbb-textline-detector"],
         )).status_code == 201
-        response = self.client.get("/api/chains")
+        response = self.client.get("/api/workflows")
 
         assert response.status_code == 200
         assert len(response.json) == 2
@@ -169,24 +169,24 @@ class ApiTests(TestCase):
 
     def test_update_chain(self):
         """Check if a new chain is created."""
-        self.client.post("/api/chains", json=dict(
+        self.client.post("/api/workflows", json=dict(
             name="New Chain",
             description="Some foobar chain.",
             processors=["ocrd-tesserocr-recognize"],
         ))
-        response = self.client.get("/api/chains/1")
+        response = self.client.get("/api/workflows/1")
         assert response.status_code == 200
         assert response.json["id"] == 1
         assert response.json["name"] == "New Chain"
         assert response.json["description"] == "Some foobar chain."
         assert "ocrd-tesserocr-recognize" in response.json["processors"]
 
-        response = self.client.put("/api/chains/1", json=dict(
+        response = self.client.put("/api/workflows/1", json=dict(
             name="Updated Chain",
             description="Some barfoo chain.",
             processors=["ocrd-tesserocr-segment-word"],
         ))
-        response = self.client.get("/api/chains/1")
+        response = self.client.get("/api/workflows/1")
         assert response.status_code == 200
         assert response.json["id"] == 1
         assert response.json["name"] == "Updated Chain"

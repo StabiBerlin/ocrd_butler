@@ -130,7 +130,7 @@ class FrontendTests(TestCase):
 
     def get_chain_id(self):
         """Create a chain for the tests."""
-        chain_response = self.client.post("/api/chains", json=dict(
+        chain_response = self.client.post("/api/workflows", json=dict(
             name="TC Chain",
             description="Chain with tesseract and calamari recog.",
             processors=[
