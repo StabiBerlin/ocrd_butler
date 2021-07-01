@@ -8,7 +8,7 @@ from ocrd_butler.database import models
 task_data = dict(
     uid="001",
     src="src",
-    chain_id="1",
+    workflow_id="1",
     description="desc",
 )
 

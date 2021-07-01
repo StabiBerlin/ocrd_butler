@@ -26,7 +26,7 @@ class ApiTaskActions(TestCase):
             "description": "task_description",
             "src": "src",
             "file_grp": "DEFAULT",
-            "chain_id": "chain_id",
+            "workflow_id": "workflow_id",
             "parameters": "{}"
         })
         headers = {"Content-Type": "application/json"}
@@ -48,7 +48,7 @@ class ApiTaskActions(TestCase):
             .return_value.filter_by\
             .return_value.first\
             .return_value = type('', (object,), {
-                "chain_id": 1,
+                "workflow_id": 1,
                 "uid": 42,
                 "worker_task_id": 42,
                 "default_file_grp": "DEFAULT",
@@ -69,7 +69,7 @@ class ApiTaskActions(TestCase):
         return db_model.create(
             db_model.Task,
             uid=task_id,
-            chain_id="1",
+            workflow_id="1",
             src="src",
         )
 

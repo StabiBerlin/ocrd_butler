@@ -110,11 +110,11 @@ class ApiTaskActionRunTests(TestCase):
     def create_app(self):
         return create_app(config=TestingConfig)
 
-    def t_chain(self):
-        """Creates a chain with tesseract processors."""
-        response = self.client.post("/api/chains", json=dict(
-            name="T Chain",
-            description="Some foobar chain.",
+    def t_workflow(self):
+        """Creates a workflow with tesseract processors."""
+        response = self.client.post("/api/workflows", json=dict(
+            name="T Workflow",
+            description="Some foobar workflow.",
             processors=[
                 "ocrd-tesserocr-segment-region",
                 "ocrd-tesserocr-segment-line",
@@ -129,11 +129,11 @@ class ApiTaskActionRunTests(TestCase):
         ))
         return response.json["id"]
 
-    def empty_chain(self):
-        """Creates a chain without processors."""
-        response = self.client.post("/api/chains", json=dict(
-            name="Empty Chain",
-            description="Empty but not useless chain.",
+    def empty_workflow(self):
+        """Creates a workflow without processors."""
+        response = self.client.post("/api/workflows", json=dict(
+            name="Empty Workflow",
+            description="Empty but not useless workflow.",
             processors=[],
             parameters={}
         ))
@@ -143,7 +143,7 @@ class ApiTaskActionRunTests(TestCase):
     def test_task_max_file_download(self):
         """Check if the workspace is created."""
         self.client.post("/api/tasks", json=dict(
-            chain_id=self.empty_chain(),
+            workflow_id=self.empty_workflow(),
             src="http://foo.bar/mets.xml",
             description="Check workspace task.",
             default_file_grp="MAX"
@@ -167,7 +167,7 @@ class ApiTaskActionRunTests(TestCase):
     def test_task_tesserocr(self, mock_run_task):
         """Check if a new task is created."""
         response = self.client.post("/api/tasks", json=dict(
-            chain_id=self.t_chain(),
+            workflow_id=self.t_workflow(),
             src="http://foo.bar/mets.xml",
             description="Tesserocr task."
         ))
@@ -198,9 +198,9 @@ class ApiTaskActionRunTests(TestCase):
     )
     def test_task_tess_cal(self, mock_run_task):
         """Check if a new task is created."""
-        chain_response = self.client.post("/api/chains", json=dict(
-            name="TC Chain",
-            description="Chain with tesseract and calamari recog.",
+        workflow_response = self.client.post("/api/workflows", json=dict(
+            name="TC Workflow",
+            description="Workflow with tesseract and calamari recog.",
             processors=[
                 "ocrd-tesserocr-segment-region",
                 "ocrd-tesserocr-segment-line",
@@ -210,7 +210,7 @@ class ApiTaskActionRunTests(TestCase):
         ))
 
         task_response = self.client.post("/api/tasks", json=dict(
-            chain_id=chain_response.json["id"],
+            workflow_id=workflow_response.json["id"],
             src="http://foo.bar/mets.xml",
             description="Tesserocr calamari task.",
             parameters={
@@ -253,9 +253,9 @@ class ApiTaskActionRunTests(TestCase):
             "{0}/calamari_models/0.ckpt.json".format(CURRENT_DIR)
         )
 
-        chain_response = self.client.post("/api/chains", json=dict(
-            name="TC Chain",
-            description="Chain with olena binarization, tesseract segmentation"
+        workflow_response = self.client.post("/api/workflows", json=dict(
+            name="TC Workflow",
+            description="Workflow with olena binarization, tesseract segmentation"
                         " and calamari recog.",
             processors=[
                 "ocrd-olena-binarize",
@@ -270,10 +270,10 @@ class ApiTaskActionRunTests(TestCase):
             }
         ))
 
-        assert chain_response.json == {'id': 1, 'message': 'Chain created.'}
+        assert workflow_response.json == {'id': 1, 'message': 'Workflow created.'}
 
         task_response = self.client.post("/api/tasks", json=dict(
-            chain_id=chain_response.json["id"],
+            workflow_id=workflow_response.json["id"],
             src="http://foo.bar/mets.xml",
             description="Olena calamari task.",
             parameters={

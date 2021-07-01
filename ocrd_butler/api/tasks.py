@@ -23,19 +23,16 @@ from flask_restx import (
 )
 import requests
 
-from ocrd.processor.base import run_cli
-from ocrd.resolver import Resolver
 from ocrd_validators import ParameterValidator
 
-from ocrd_page_to_alto.convert import OcrdPageAltoConverter, NAMESPACES
+from ocrd_page_to_alto.convert import OcrdPageAltoConverter
 
 from ocrd_butler.api.restx import api
 from ocrd_butler.api.models import task_model
-from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.api.processors import PROCESSORS_CONFIG
 
 from ocrd_butler.database import db
-from ocrd_butler.database.models import Chain as db_model_Chain
+from ocrd_butler.database.models import Workflow as db_model_Workflow
 from ocrd_butler.database.models import Task as db_model_Task
 
 from ocrd_butler.execution.tasks import run_task
@@ -66,9 +63,9 @@ page_xml_namespaces = {
 # list tasks, all or filtered
 # delete tasks, all or filtered (safety?)
 
-# get predefined chains
+# get predefined workflows
 # get all usable processors
-# get default chain
+# get default workflow
 
 # have a look to the wording in the context of a butler
 # do a butler "serve"?
@@ -102,8 +99,8 @@ def task_information(worker_task_id):
         task_info["result"] = json.loads(task_info["result"].replace("'", '"'))
 
         # task_db_data = db_model_Task.get(worker_task_id=uid)
-        # chain_db_data = db_model_Chain.get(id=task_db_data.chain_id)
-        # last_step = chain_db_data.processors[-1]
+        # workflow_db_data = db_model_Chain.get(id=task_db_data.workflow_id)
+        # last_step = workflow_db_data.processors[-1]
         # last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
         # task_info["last_output_file_grp"] = last_output
 
@@ -137,16 +134,18 @@ class TasksBase(Resource):
             data["parameters"] = {}
         data["parameters"] = to_json(data["parameters"])
 
-        if data["chain_id"] is None:
+        if data["workflow_id"] is None:
             task_namespace.abort(400, "Wrong parameter.",
-                                 status="Missing chain for task.",
+                                 status="Missing workflow for task.",
                                  statusCode="400")
         else:
-            chain = db_model_Chain.get(id=data["chain_id"])
-            if chain is None:
-                task_namespace.abort(400, "Wrong parameter.",
-                                     status=f"Unknow chain with id {data['chain_id']}.",
-                                     statusCode="400")
+            workflow = db_model_Workflow.get(id=data["workflow_id"])
+            if workflow is None:
+                task_namespace.abort(
+                    400, "Wrong parameter.",
+                    status=f"Unknown workflow with id {data['workflow_id']}.",
+                    statusCode="400"
+                )
 
         for processor in data["parameters"].keys():
             validator = ParameterValidator(PROCESSORS_CONFIG[processor])
@@ -270,7 +269,7 @@ class TaskActions(TasksBase):
                 status=f"Unexpected error \"{exc.__str__()}\".",
                 statusCode="400")
 
-    def run(self, task):
+    def run(self, task: db_model_Task):
         """ Run this task. """
         # worker_task = run_task.apply_async(args=[task.to_json()],
         #                                    countdown=20)

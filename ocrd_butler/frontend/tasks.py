@@ -33,7 +33,7 @@ from wtforms.validators import (
     URL
 )
 
-from ocrd_butler.database.models import Chain as db_model_Chain
+from ocrd_butler.database.models import Workflow as db_model_Workflow
 from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import host_url, flower_url
 
@@ -85,7 +85,7 @@ def current_tasks():
     cur_tasks = []
 
     for result in results:
-        chain = db_model_Chain.get(id=result.chain_id)
+        workflow = db_model_Workflow.get(id=result.workflow_id)
         task = {
             "repr": result.__str__(),
             "description": result.description,
@@ -93,7 +93,7 @@ def current_tasks():
             "uid": result.uid,
             "src": result.src,
             "default_file_grp": result.default_file_grp,
-            "chain": chain,
+            "workflow": workflow,
             "parameters": result.parameters,
             "worker_task_id": result.worker_task_id,
             "result": {
@@ -153,8 +153,8 @@ class NewTaskForm(FlaskForm):
         DataRequired(message="Please enter an URL to a METS file."),
         URL(message="Please enter a valid URL to a METS file.")])
     input_file_grp = StringField("Input file group (defaults to 'DEFAULT')")
-    chain_id = SelectField('Chain', validators=[
-        DataRequired(message="Please choose a chain.")])
+    workflow_id = SelectField('Workflow', validators=[
+        DataRequired(message="Please choose a workflow.")])
     parameter = TextAreaField('Parameters')
     submit = SubmitField('Create new task')
 
@@ -178,7 +178,7 @@ def new_task():
         "description": request.form.get("task_description"),
         "src": request.form.get("src"),
         "default_file_grp": request.form.get("input_file_grp") or "DEFAULT",
-        "chain_id": request.form.get("chain_id"),
+        "workflow_id": request.form.get("workflow_id"),
         "parameters": parameters
     })
     headers = {"Content-Type": "application/json"}
@@ -204,8 +204,8 @@ def tasks():
     """Define the page presenting the created tasks."""
     # new_task_form = NewTaskForm(meta={'csrf': False})
     new_task_form = NewTaskForm()
-    chains = db_model_Chain.get_all()
-    new_task_form.chain_id.choices = [(chain.id, chain.name) for chain in chains]
+    workflows = db_model_Workflow.get_all()
+    new_task_form.workflow_id.choices = [(workflow.id, workflow.name) for workflow in workflows]
 
     return render_template(
         "tasks.html",

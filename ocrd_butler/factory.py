@@ -8,14 +8,14 @@ from flask import Blueprint
 
 from flask_bootstrap import Bootstrap
 
-from ocrd_butler.api.chains import chain_namespace
+from ocrd_butler.api.workflows import workflow_namespace
 from ocrd_butler.api.tasks import task_namespace
 from ocrd_butler.api.restx import api
 from ocrd_butler.celery_utils import init_celery
 from ocrd_butler.database import db
 from ocrd_butler.frontend import frontend_blueprint
 from ocrd_butler.frontend.processors import processors_blueprint
-from ocrd_butler.frontend.chains import chains_blueprint
+from ocrd_butler.frontend.workflows import workflows_blueprint
 from ocrd_butler.frontend.tasks import tasks_blueprint
 from ocrd_butler.frontend.compare import compare_blueprint
 from ocrd_butler.frontend.nav import nav
@@ -64,13 +64,13 @@ def initialize_app(app):
     app.register_blueprint(blueprint_api)
 
     api.add_namespace(task_namespace)
-    api.add_namespace(chain_namespace)
+    api.add_namespace(workflow_namespace)
 
     Bootstrap(app)
     nav.init_app(app)
     app.register_blueprint(frontend_blueprint)
     app.register_blueprint(processors_blueprint)
-    app.register_blueprint(chains_blueprint)
+    app.register_blueprint(workflows_blueprint)
     app.register_blueprint(tasks_blueprint)
     app.register_blueprint(compare_blueprint)
 

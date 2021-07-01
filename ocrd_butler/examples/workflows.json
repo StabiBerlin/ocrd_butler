@@ -1,8 +1,8 @@
 {
-    "chains": [
+    "workflows": [
         {
             "name": "SBB - b-t-c-p2a",
-            "description": "Chain with olena binarization and calamari recognize.",
+            "description": "Workflow with olena binarization and calamari recognize.",
             "processors": [
                 "ocrd-sbb-binarize",
                 "ocrd-sbb-textline-detector",
@@ -31,7 +31,7 @@
         ,
         {
             "name": "SBB - binarize - textline - calamari",
-            "description": "Chain with olena binarization and calamari recognize.",
+            "description": "Workflow with olena binarization and calamari recognize.",
             "processors": [
                 "ocrd-sbb-binarize",
                 "ocrd-sbb-textline-detector",
@@ -56,7 +56,7 @@
         ,
         {
             "name": "Tesseract",
-            "description": "Chain with only tesseract processors",
+            "description": "Workflow with only tesseract processors",
             "processors": [
                 "ocrd-tesserocr-segment-region",
                 "ocrd-tesserocr-segment-line",
@@ -67,7 +67,7 @@
         ,
         {
             "name": "Tesseract - Calamari",
-            "description": "Chain with tesserocr preps and calamari recognize",
+            "description": "Workflow with tesserocr preps and calamari recognize",
             "processors": [
                 "ocrd-tesserocr-segment-region",
                 "ocrd-tesserocr-segment-line",
@@ -83,7 +83,7 @@
         ,
         {
             "name": "Olena - Calamari",
-            "description": "Chain with olena binarization and calamari recognize",
+            "description": "Workflow with olena binarization and calamari recognize",
             "processors": [
                 "ocrd-olena-binarize",
                 "ocrd-tesserocr-segment-region",

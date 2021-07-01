@@ -14,29 +14,29 @@
 
 
 {% block app_content %}
-   <div class="container chains">
+   <div class="container workflows">
 
         <div class="jumbotron">
             <div class="container">
                 <div class="col-md-10">
-                    <h1>Chains</h1>
-                    <p>Madam/Sir, please find the currently available chains here.</p>
+                    <h1>Workflows</h1>
+                    <p>Madam/Sir, please find the currently available workflows here.</p>
                 </div>
                 <div class="col-md-2">
-                    <img width="100%%" src="{{url_for('static', filename='butler_chains.png')}}" />
+                    <img width="100%%" src="{{url_for('static', filename='butler_workflows.png')}}" />
                 </div>
             </div>
         </div>
 
         <div class="col-md-2">
-            <!-- <button id="new-chain" type="button" class="btn">Add a new chain</button> -->
-            To add a new chain, please use the <a href="/api" target="_blank">api</a>.
+            <!-- <button id="new-workflow" type="button" class="btn">Add a new workflow</button> -->
+            To add a new workflow, please use the <a href="/api" target="_blank">api</a>.
         </div>
 
         <div class="col-md-10">
 
-            <div class="new-chain-form">
-                <form action="/new-chain" method="post">
+            <div class="new-workflow-form">
+                <form action="/new-workflow" method="post">
                   <div class="form-group">
                     {{ form.name.label }}
                     <br />
@@ -59,19 +59,19 @@
             </div>
 
 
-            {% for chain in chains %}
-                <h3>{{ chain.name }} (<a title="Delete chain." href="/chain/delete/{{ chain.id }}">x</a>)</h3>
+            {% for workflow in workflows %}
+                <h3>{{ workflow.name }} (<a title="Delete workflow." href="/workflow/delete/{{ workflow.id }}">x</a>)</h3>
                 <p>
                     <h4>Description</h4>
-                    {{ chain.description }}
+                    {{ workflow.description }}
 
                     <h4>Processors</h4>
-                    {% for processor in chain.processors %}
+                    {% for processor in workflow.processors %}
                         {{ processor }}
                         <br />
                     {% endfor %}
                     <h4>Parameters</h4>
-                    {{ chain.parameters|safe }}
+                    {{ workflow.parameters|safe }}
                 </p>
             {% endfor %}
 

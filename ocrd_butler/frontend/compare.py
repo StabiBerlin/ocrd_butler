@@ -25,7 +25,7 @@ from wtforms.widgets import Select
 
 from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.frontend.tasks import task_information
-from ocrd_butler.database.models import Chain as db_model_Chain
+from ocrd_butler.database.models import Workflow as db_model_Workflow
 from ocrd_butler.database.models import Task as db_model_Task
 
 
@@ -96,12 +96,12 @@ def compare_results():
     if not os.path.exists(dst_dir):
         os.mkdir(dst_dir)
 
-    # Get the output group of the last step in the chain of the task.
-    chain_from = db_model_Chain.get(id=task_from.chain_id)
-    last_proc_from = json.loads(chain_from.processors)[-1]
+    # Get the output group of the last step in the workflow of the task.
+    workflow_from = db_model_Workflow.get(id=task_from.workflow_id)
+    last_proc_from = json.loads(workflow_from.processors)[-1]
     last_output_from = PROCESSORS_ACTION[last_proc_from]["output_file_grp"]
-    chain_to = db_model_Chain.get(id=task_to.chain_id)
-    last_proc_to = json.loads(chain_to.processors)[-1]
+    workflow_to = db_model_Workflow.get(id=task_to.workflow_id)
+    last_proc_to = json.loads(workflow_to.processors)[-1]
     last_output_to = PROCESSORS_ACTION[last_proc_to]["output_file_grp"]
 
     # TODO: collect informations to this task
