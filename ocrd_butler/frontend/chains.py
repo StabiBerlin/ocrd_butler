@@ -25,14 +25,14 @@ from wtforms.validators import (
 )
 
 from ocrd_butler.api.processors import PROCESSOR_NAMES
-from ocrd_butler.database.models import Workflow as db_model_Chain
+from ocrd_butler.database.models import Workflow as db_model_Workflow
 from ocrd_butler.util import host_url
 
 
-chains_blueprint = Blueprint("chains_blueprint", __name__)
+workflows_blueprint = Blueprint("workflows_blueprint", __name__)
 
 
-class NewChainForm(FlaskForm):
+class NewWorkflowForm(FlaskForm):
     """
     Describes the form to create a new chain via frontend.
     """
@@ -44,7 +44,7 @@ class NewChainForm(FlaskForm):
     submit = SubmitField('Create new chain')
 
 
-@chains_blueprint.route("/new-chain", methods=['POST'])
+@workflows_blueprint.route("/new-chain", methods=['POST'])
 def new_chain():
     """
     Create a new chain from the data given in the form.
@@ -68,7 +68,7 @@ def new_chain():
     return redirect("/chains", code=302)
 
 
-@chains_blueprint.route("/chain/delete/<int:chain_id>")
+@workflows_blueprint.route("/chain/delete/<int:chain_id>")
 def delete_chain(chain_id):
     """
     Delete the given chain.
@@ -84,13 +84,13 @@ def delete_chain(chain_id):
     return redirect("/chains", code=302)
 
 
-@chains_blueprint.route("/chains")
+@workflows_blueprint.route("/chains")
 def chains():
     """
     The page presenting the existing chains.
     """
-    results = db_model_Chain.get_all()
-    new_chain_form = NewChainForm(meta={'csrf': False})
+    results = db_model_Workflow.get_all()
+    new_chain_form = NewWorkflowForm(meta={'csrf': False})
     p_choices = [(name, name) for name in PROCESSOR_NAMES]
     new_chain_form.processors.choices = p_choices
 
