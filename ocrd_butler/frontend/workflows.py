@@ -109,6 +109,6 @@ def workflows():
         })
 
     return render_template(
-        "chains.html",
+        "workflows.html",
         workflows=current_workflows,
         form=new_workflow_form)
