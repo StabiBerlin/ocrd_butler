@@ -23,10 +23,10 @@ class ApiTests(TestCase):
     def create_app(self):
         return create_app(config=TestingConfig)
 
-    def chain(self):
+    def workflow(self):
         response = self.client.post("/api/workflows", json=dict(
-            name="New Chain",
-            description="Some foobar chain.",
+            name="New Workflow",
+            description="Some foobar workflow.",
             processors=["ocrd-tesserocr-recognize"]
         ))
         return response.json["id"]
@@ -34,7 +34,7 @@ class ApiTests(TestCase):
     def test_create_new_task_mets_src(self):
         """Check if a new task is created."""
         response = self.client.post("/api/tasks", json=dict(
-            workflow_id=self.chain(),
+            workflow_id=self.workflow(),
             src="https://foobar.tdl/themets.xml",
             description="Just a task.",
             default_file_grp="THUMBS"
@@ -55,7 +55,7 @@ class ApiTests(TestCase):
     def test_change_task(self):
         """Check if a new task is created."""
         response = self.client.post("/api/tasks", json=dict(
-            workflow_id=self.chain(),
+            workflow_id=self.workflow(),
             src="https://foobar.tdl/themets.xml",
             description="Just a task.",
             default_file_grp="THUMBS"
@@ -76,7 +76,7 @@ class ApiTests(TestCase):
     def test_delete_task(self):
         """Check if a task is deleted."""
         self.client.post("/api/tasks", json=dict(
-            workflow_id=self.chain(),
+            workflow_id=self.workflow(),
             src="https://foobar.tdl/themets.xml",
             description="Just a task."
         ))

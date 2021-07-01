@@ -12,7 +12,7 @@ Processing tasks in the ecosystem of the `OCR-D project`_ project.
 Features
 --------
 
-REST API to define chains of processors and run tasks with it in the OCR-D ecosystem.
+REST API to define workflows of processors and run tasks with it in the OCR-D ecosystem.
 
 
 Hints

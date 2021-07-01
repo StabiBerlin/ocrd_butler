@@ -124,7 +124,7 @@ def prepare_workspace(task: dict, resolver: Resolver, dst_dir: str) -> Workspace
 
 @celery.task(bind=True)
 def run_task(self, task: models.Task) -> dict:
-    """ Create a task an run the given chain. """
+    """ Create a task an run the given workflow. """
 
     # Create workspace
     dst_dir = "{}/{}".format(current_app.config["OCRD_BUTLER_RESULTS"],

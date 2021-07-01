@@ -63,9 +63,9 @@ page_xml_namespaces = {
 # list tasks, all or filtered
 # delete tasks, all or filtered (safety?)
 
-# get predefined chains
+# get predefined workflows
 # get all usable processors
-# get default chain
+# get default workflow
 
 # have a look to the wording in the context of a butler
 # do a butler "serve"?
@@ -99,8 +99,8 @@ def task_information(worker_task_id):
         task_info["result"] = json.loads(task_info["result"].replace("'", '"'))
 
         # task_db_data = db_model_Task.get(worker_task_id=uid)
-        # chain_db_data = db_model_Chain.get(id=task_db_data.chain_id)
-        # last_step = chain_db_data.processors[-1]
+        # workflow_db_data = db_model_Chain.get(id=task_db_data.workflow_id)
+        # last_step = workflow_db_data.processors[-1]
         # last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
         # task_info["last_output_file_grp"] = last_output
 
