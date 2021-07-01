@@ -14,28 +14,28 @@
 
 
 {% block app_content %}
-   <div class="container chains">
+   <div class="container workflows">
 
         <div class="jumbotron">
             <div class="container">
                 <div class="col-md-10">
-                    <h1>Chains</h1>
-                    <p>Madam/Sir, please find the currently available chains here.</p>
+                    <h1>Workflows</h1>
+                    <p>Madam/Sir, please find the currently available workflows here.</p>
                 </div>
                 <div class="col-md-2">
-                    <img width="100%%" src="{{url_for('static', filename='butler_chains.png')}}" />
+                    <img width="100%%" src="{{url_for('static', filename='butler_workflows.png')}}" />
                 </div>
             </div>
         </div>
 
         <div class="col-md-2">
-            <!-- <button id="new-chain" type="button" class="btn">Add a new chain</button> -->
-            To add a new chain, please use the <a href="/api" target="_blank">api</a>.
+            <!-- <button id="new-workflow" type="button" class="btn">Add a new workflow</button> -->
+            To add a new workflow, please use the <a href="/api" target="_blank">api</a>.
         </div>
 
         <div class="col-md-10">
 
-            <div class="new-chain-form">
+            <div class="new-workflow-form">
                 <form action="/new-workflow" method="post">
                   <div class="form-group">
                     {{ form.name.label }}

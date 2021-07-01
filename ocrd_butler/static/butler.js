@@ -7,11 +7,11 @@ $(document).ready(function() {
         $(".new-task-form").slideToggle({direction: 'right'});
     });
 
-    $("#new-chain").click(() => {
-        $(".new-chain-form").slideToggle({direction: 'right'});
+    $("#new-workflow").click(() => {
+        $(".new-workflow-form").slideToggle({direction: 'right'});
     });
 
-    let cp_select = $('.container.chains #processors');
+    let cp_select = $('.container.workflows #processors');
     if (cp_select.length > 0) {
         cp_select.multiSelect({
             "keepOrder": true
