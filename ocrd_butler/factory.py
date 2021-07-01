@@ -15,7 +15,7 @@ from ocrd_butler.celery_utils import init_celery
 from ocrd_butler.database import db
 from ocrd_butler.frontend import frontend_blueprint
 from ocrd_butler.frontend.processors import processors_blueprint
-from ocrd_butler.frontend.chains import workflows_blueprint
+from ocrd_butler.frontend.workflows import workflows_blueprint
 from ocrd_butler.frontend.tasks import tasks_blueprint
 from ocrd_butler.frontend.compare import compare_blueprint
 from ocrd_butler.frontend.nav import nav
