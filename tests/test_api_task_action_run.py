@@ -143,7 +143,7 @@ class ApiTaskActionRunTests(TestCase):
     def test_task_max_file_download(self):
         """Check if the workspace is created."""
         self.client.post("/api/tasks", json=dict(
-            chain_id=self.empty_chain(),
+            workflow_id=self.empty_chain(),
             src="http://foo.bar/mets.xml",
             description="Check workspace task.",
             default_file_grp="MAX"

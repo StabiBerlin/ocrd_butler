@@ -34,7 +34,7 @@ class ApiTests(TestCase):
     def test_create_new_task_mets_src(self):
         """Check if a new task is created."""
         response = self.client.post("/api/tasks", json=dict(
-            chain_id=self.chain(),
+            workflow_id=self.chain(),
             src="https://foobar.tdl/themets.xml",
             description="Just a task.",
             default_file_grp="THUMBS"
@@ -55,7 +55,7 @@ class ApiTests(TestCase):
     def test_change_task(self):
         """Check if a new task is created."""
         response = self.client.post("/api/tasks", json=dict(
-            chain_id=self.chain(),
+            workflow_id=self.chain(),
             src="https://foobar.tdl/themets.xml",
             description="Just a task.",
             default_file_grp="THUMBS"
@@ -76,7 +76,7 @@ class ApiTests(TestCase):
     def test_delete_task(self):
         """Check if a task is deleted."""
         self.client.post("/api/tasks", json=dict(
-            chain_id=self.chain(),
+            workflow_id=self.chain(),
             src="https://foobar.tdl/themets.xml",
             description="Just a task."
         ))
@@ -92,7 +92,7 @@ class ApiTests(TestCase):
     def test_task_model(self):
         assert "uid" in task_model
         assert "src" in task_model
-        assert "chain_id" in task_model
+        assert "workflow_id" in task_model
         assert "parameters" in task_model
         assert "description" in task_model
         assert "default_file_grp" in task_model

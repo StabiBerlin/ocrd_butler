@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=no-member
 
-""" Chain api implementation.
+""" Workflow api implementation.
 """
 
 from flask import (
@@ -16,36 +16,38 @@ from flask_restx import (
 from ocrd_validators import ParameterValidator
 
 from ocrd_butler.api.restx import api
-from ocrd_butler.api.models import chain_model
+from ocrd_butler.api.models import workflow_model
 from ocrd_butler.api.processors import (
     PROCESSOR_NAMES,
     PROCESSORS_CONFIG
 )
 from ocrd_butler.database import db
-from ocrd_butler.database.models import Workflow as db_model_Chain
+from ocrd_butler.database.models import Workflow as db_model_Workflow
 
-chain_namespace = api.namespace("chains", description="Manage OCR-D processor chains")
+workflow_namespace = api.namespace("chains", description="Manage OCR-D processor workflows")
 
 
-class ChainBase(Resource):
-    """Base methods for chains."""
+class WorkflowBase(Resource):
+    """Base methods for workflows."""
 
-    def chain_data(self, json_data):
-        """ Validate and prepare chain input. """
-        data = marshal(data=json_data, fields=chain_model, skip_none=False)
+    def workflow_data(self, json_data):
+        """ Validate and prepare workflow input. """
+        data = marshal(data=json_data, fields=workflow_model, skip_none=False)
 
         if data["parameters"] is None:
             data["parameters"] = {}
 
         # Should some checks be in the model itself?
         if data["processors"] is None:
-            chain_namespace.abort(400, "Wrong parameter.",
-                                  status="Missing processors for chain.",
-                                  statusCode="400")
+            workflow_namespace.abort(
+                400, "Wrong parameter.",
+                status="Missing processors for workflow.",
+                statusCode="400"
+            )
 
         for processor in data["processors"]:
             if processor not in PROCESSOR_NAMES:
-                chain_namespace.abort(
+                workflow_namespace.abort(
                     400, "Wrong parameter.",
                     status="Unknown processor \"{}\".".format(processor),
                     statusCode="400")
@@ -56,98 +58,103 @@ class ChainBase(Resource):
             validator = ParameterValidator(PROCESSORS_CONFIG[processor])
             report = validator.validate(data["parameters"][processor])
             if not report.is_valid:
-                chain_namespace.abort(
+                workflow_namespace.abort(
                     400, "Wrong parameter.",
-                    status="Error while validating parameters \"{0}\""
-                           "for processor \"{1}\" -> \"{2}\".".format(
-                                data["parameters"][processor],
-                                processor,
-                                str(report.errors)),
-                    statusCode="400")
+                    status=(
+                        "Error while validating parameters \"{0}\""
+                        "for processor \"{1}\" -> \"{2}\"."
+                    ).format(
+                        data["parameters"][processor],
+                        processor,
+                        str(report.errors)
+                    ),
+                    statusCode="400"
+                )
 
         return data
 
 
-@chain_namespace.route("")
-class Chains(ChainBase):
-    """ Add chains and list all of it. """
+@workflow_namespace.route("")
+class Workflows(WorkflowBase):
+    """ Add workflows and list all of it. """
 
     @api.doc(responses={201: "Created", 400: "Wrong parameter."})
-    @api.expect(chain_model)
+    @api.expect(workflow_model)
     def post(self):
-        """ Add a new chain. """
+        """ Add a new workflow. """
 
-        data = self.chain_data(request.json)
-        chain = db_model_Chain.add(**data)
+        data = self.workflow_data(request.json)
+        workflow = db_model_Workflow.add(**data)
 
         return make_response({
-            "message": "Chain created.",
-            "id": chain.id,
+            "message": "Workflow created.",
+            "id": workflow.id,
         }, 201)
 
     @api.doc(responses={200: "Found"})
     def get(self):
-        """ Get all chains. """
-        chains = db_model_Chain.get_all()
-        results = [chain.to_json() for chain in chains]
+        """ Get all workflows. """
+        workflows = db_model_Workflow.get_all()
+        results = [workflow.to_json() for workflow in workflows]
         return jsonify(results)
 
 
-@chain_namespace.route("/<string:chain_id>")
-class Chain(ChainBase):
-    """Getter, updater and remover for chains."""
+@workflow_namespace.route("/<string:workflow_id>")
+class Workflow(WorkflowBase):
+    """Getter, updater and remover for workflows."""
 
-    @api.doc(responses={200: "Found", 404: "Not known chain id."})
-    def get(self, chain_id):
-        """ Get the chain by given id. """
-        chain = db_model_Chain.get(id=chain_id)
+    @api.doc(responses={200: "Found", 404: "Not known workflow id."})
+    def get(self, workflow_id):
+        """ Get the workflow by given id. """
+        workflow = db_model_Workflow.get(id=workflow_id)
 
-        if chain is None:
-            chain_namespace.abort(
+        if workflow is None:
+            workflow_namespace.abort(
                 404, "Wrong parameter",
-                status="Can't find a chain with the id \"{0}\".".format(chain_id),
+                status="Can't find a workflow with the id \"{0}\".".format(workflow_id),
                 statusCode="404")
 
-        return jsonify(chain.to_json())
+        return jsonify(workflow.to_json())
 
-    @api.doc(responses={201: "Updated", 404: "Unknown chain."})
-    @api.expect(chain_model)
-    def put(self, chain_id):
-        """ Update the chain. """
-        chain = db_model_Chain.get(id=chain_id)
-        if chain is None:
-            chain_namespace.abort(
+    @api.doc(responses={201: "Updated", 404: "Unknown workflow."})
+    @api.expect(workflow_model)
+    def put(self, workflow_id):
+        """ Update a workflow. """
+        workflow = db_model_Workflow.get(id=workflow_id)
+        if workflow is None:
+            workflow_namespace.abort(
                 404, "Wrong parameter",
-                status="Can't find a chain with the id \"{0}\".".format(
-                    chain_id),
+                status="Can't find a workflow with the id \"{0}\".".format(
+                    workflow_id),
                 statusCode="404")
 
-        fields = chain.to_json().keys()
+        fields = workflow.to_json().keys()
         for field in fields:
             if field in request.json:
-                setattr(chain, field, request.json[field])
+                setattr(workflow, field, request.json[field])
         db.session.commit()
 
         return jsonify({
-            "message": "Chain updated.",
-            "id": chain.id,
+            "message": "Workflow updated.",
+            "id": workflow.id,
         })
 
-    @api.doc(responses={200: "Deleted", 404: "Unknown chain."})
-    def delete(self, chain_id):
-        """ Delete the chain by given id. """
-        res = db_model_Chain.query.filter_by(id=chain_id)
-        chain = res.first()
+    @api.doc(responses={200: "Deleted", 404: "Unknown workflow."})
+    def delete(self, workflow_id):
+        """ Delete the workflow by given id. """
+        workflow = db_model_Workflow.get(id=workflow_id)
 
-        if chain is None:
-            chain_namespace.abort(
-                404, "Unknown chain_id",
-                status="Can't find a chain with the id \"{0}\".".format(chain_id),
+        if workflow is None:
+            workflow_namespace.abort(
+                404, "Unknown workflow_id",
+                status="Can't find a workflow with the id \"{0}\".".format(workflow_id),
                 statusCode="404")
-
-        message = "Chain \"{0}({1})\" deleted.".format(chain.name, chain.id)
-        res.delete()
-        db.session.commit()
+        else:
+            message = "Delete workflow \"{0}({1})\"".format(workflow.name, workflow.id)
+            if db_model_Workflow.delete(id=workflow_id):
+                message = f'{message}: success'
+            else:
+                message = f'{message}: failed!'
 
         return jsonify({
             "message": message

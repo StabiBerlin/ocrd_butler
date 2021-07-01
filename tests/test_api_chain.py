@@ -8,8 +8,8 @@ from flask_testing import TestCase
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import create_app, db
 from ocrd_butler.api.models import (
-    chain_model,
-    ChainParametersField,
+    workflow_model,
+    WorkflowParametersField,
 )
 
 
@@ -34,7 +34,7 @@ class ApiTests(TestCase):
             processors=["ocrd-tesserocr-recognize"],
         ))
         assert response.status_code == 201
-        assert response.json["message"] == "Chain created."
+        assert response.json["message"] == "Workflow created."
         assert response.json["id"] is not None
 
     def test_create_chain_with_unknown_processor(self):
@@ -50,7 +50,7 @@ class ApiTests(TestCase):
         response = self.client.post("/api/chains", json=dict(name="chain"))
         assert response.status_code == 400
         assert response.json["message"] == "Wrong parameter."
-        assert response.json["status"] == "Missing processors for chain."
+        assert response.json["status"] == "Missing processors for workflow."
 
     def test_create_chain_with_default_parameters(self):
         """Check if a new chain is created."""
@@ -126,7 +126,7 @@ class ApiTests(TestCase):
         ))
         response = self.client.delete("/api/chains/1")
         assert response.status_code == 200
-        assert response.json["message"] == "Chain \"New Chain(1)\" deleted."
+        assert response.json["message"] == "Delete workflow \"New Chain(1)\": success"
         response = self.client.get("/api/chains/1")
         assert response.status_code == 404
 
@@ -134,13 +134,13 @@ class ApiTests(TestCase):
         """Check if a new chain is created."""
         response = self.client.delete("/api/chains/13")
         assert response.status_code == 404
-        assert response.json["status"] == "Can't find a chain with the id \"13\"."
+        assert response.json["status"] == "Can't find a workflow with the id \"13\"."
 
     def test_get_unknown_chain(self):
         """Check if a non existing chain ...."""
         response = self.client.get("/api/chains/23")
         assert response.status_code == 404
-        assert response.json["status"] == "Can't find a chain with the id \"23\"."
+        assert response.json["status"] == "Can't find a workflow with the id \"23\"."
 
     def test_get_chains(self):
         """Check if a new chain can be retrieved."""
@@ -194,15 +194,15 @@ class ApiTests(TestCase):
         assert "ocrd-tesserocr-recognize" not in response.json["processors"]
         assert "ocrd-tesserocr-segment-word" in response.json["processors"]
 
-    def test_chain_model(self):
-        assert "name" in chain_model
-        assert "description" in chain_model
-        assert "processors" in chain_model
+    def test_workflow_model(self):
+        assert "name" in workflow_model
+        assert "description" in workflow_model
+        assert "processors" in workflow_model
 
-        for field in chain_model:
+        for field in workflow_model:
             if field == "processors":
-                assert type(chain_model[field]) == fields.List
+                assert type(workflow_model[field]) == fields.List
             elif field == "parameters":
-                assert type(chain_model[field]) == ChainParametersField
+                assert type(workflow_model[field]) == WorkflowParametersField
             else:
-                assert type(chain_model[field]) == fields.String
+                assert type(workflow_model[field]) == fields.String

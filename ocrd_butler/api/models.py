@@ -16,10 +16,10 @@ task_model = api.model("Task Model", {
         required=True,
         description="URL to a METS file or filename of an image or an archive with images.",
         help="A source is required."),
-    "chain_id": fields.String(
-        title="Processor chain",
+    "workflow_id": fields.String(
+        title="Processor workflow",
         required=True,
-        description="The chain of processors that will be used."),
+        description="The workflow of processors that will be used."),
     "description": fields.String(
         title="Description",
         required=False,
@@ -32,7 +32,7 @@ task_model = api.model("Task Model", {
     "default_file_grp": fields.String(
         title="Default file group",
         required=False,
-        description="The default file group in the METS file to start the processor chain with.",
+        description="The default file group in the METS file to start the processor workflow with.",
         help="Defaults to 'DEFAULT'.",
         default="DEFAULT"),
     "worker_task_id": fields.String(
@@ -52,7 +52,7 @@ task_model = api.model("Task Model", {
 })
 
 
-class ChainProcessorsField(fields.Raw):
+class WorkflowProcessorsField(fields.Raw):
     __schema_type__ = 'list'
     __schema_format__ = 'JSON'
     __schema_example__ = '["processor-1", "processor-2", ...]'
@@ -62,7 +62,7 @@ class ChainProcessorsField(fields.Raw):
         return value
 
 
-class ChainParametersField(fields.Raw):
+class WorkflowParametersField(fields.Raw):
     __schema_type__ = 'dict'
     __schema_format__ = 'JSON'
     __schema_example__ = '{"processor-1": {"pamameter-1":"value-1", ...}, ...}'
@@ -72,16 +72,16 @@ class ChainParametersField(fields.Raw):
         return value
 
 
-chain_model = api.model("Chain Model", {
+workflow_model = api.model("Workflow Model", {
     "name": fields.String(
         title="Name",
         required=True,
-        description="A unique name for the chain",
+        description="A unique name for the workflow",
         help="Be creative."),
     "description": fields.String(
         title="Description",
         required=False,
-        description="Some more information what the chain should fulfil.",
+        description="Some more information what the workflow should fulfil.",
         help="Be as elaborative as needed."),
     "processors": fields.List(
         fields.String,
@@ -91,7 +91,7 @@ chain_model = api.model("Chain Model", {
         unique=True,
         description="The processor to be used.",
         help="The processors will be executed in the given order."),
-    "parameters": ChainParametersField(
+    "parameters": WorkflowParametersField(
         title="Parameters",
         required=False,
         unique=True,

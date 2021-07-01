@@ -8,7 +8,7 @@ from flask import Blueprint
 
 from flask_bootstrap import Bootstrap
 
-from ocrd_butler.api.chains import chain_namespace
+from ocrd_butler.api.chains import workflow_namespace
 from ocrd_butler.api.tasks import task_namespace
 from ocrd_butler.api.restx import api
 from ocrd_butler.celery_utils import init_celery
@@ -64,7 +64,7 @@ def initialize_app(app):
     app.register_blueprint(blueprint_api)
 
     api.add_namespace(task_namespace)
-    api.add_namespace(chain_namespace)
+    api.add_namespace(workflow_namespace)
 
     Bootstrap(app)
     nav.init_app(app)

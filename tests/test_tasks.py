@@ -43,7 +43,7 @@ class TasksTestExecution(TestCase):
 
         assert "uid" in task_model
         assert "src" in task_model
-        assert "chain_id" in task_model
+        assert "workflow_id" in task_model
         assert "parameters" in task_model
         assert "description" in task_model
         assert "default_file_grp" in task_model
