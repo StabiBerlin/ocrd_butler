@@ -116,3 +116,7 @@ calamari-model: ## install trained model for calamari
 textline-detector-model: ## install trained model for sbb textline detector
 	mkdir -p /data && cd /data; \
 	ocrd resmgr download ocrd-sbb-textline-detector default -al cwd
+
+sbb-binarize-model: ## install trained model for the sbb binarization processor
+	mkdir -p /data && cd /data; \
+	ocrd resmgr download ocrd-sbb-binarize default -al cwd

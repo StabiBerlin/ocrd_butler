@@ -124,25 +124,35 @@ class Config(object):
 
     PROCESSOR_SETTINGS = {
         "ocrd-calamari-recognize": {
-            "checkpoint_dir": "/data/ocrd-resources/ocrd-calamari-recognize/qurator-gt4histocr-1.0",
+            "parameters": {
+                "checkpoint_dir": (
+                    "/data/ocrd-resources/ocrd-calamari-recognize/qurator-gt4histocr-1.0"
+                ),
+            }
         },
         "ocrd-sbb-textline-detector": {
-            "model": "/data/ocrd-resources/ocrd-sbb-textline-detector/default",
+            "parameters": {
+                "model": "/data/ocrd-resources/ocrd-sbb-textline-detector/default",
+            }
         },
         "ocrd-tesserocr-recognize": {
-            "model": "Fraktur_GT4HistOCR",
+            "parameters": {
+                "model": "Fraktur_GT4HistOCR",
+            }
         },
         "ocrd-olena-binarize": {
             "output_file_grp": ["OCR-D-IMG-BINPAGE"]
         },
         "ocrd-sbb-binarize": {
-            "output_file_grp": ["OCR-D-IMG-BINPAGE"]
+            "output_file_grp": ["OCR-D-IMG-BINPAGE"],
+            "parameters": {
+                "model": "/data/ocrd-resources/ocrd-sbb-binarize/default",
+            }
         },
         "ocrd-fileformat-transform": {
             "output_file_grp": ["OCR-D-OCR-ALTO"]
         },
     }
-
 
     @classmethod
     def processor_specs(cls, processor: str) -> dict:
