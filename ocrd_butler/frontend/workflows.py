@@ -1,5 +1,5 @@
 """
-Routes for the chains.
+Routes for the workflows.
 """
 
 import json
@@ -34,20 +34,20 @@ workflows_blueprint = Blueprint("workflows_blueprint", __name__)
 
 class NewWorkflowForm(FlaskForm):
     """
-    Describes the form to create a new chain via frontend.
+    Describes the form to create a new workflow via frontend.
     """
     name = StringField('Name', [
         DataRequired(),
         Length(min=4, message=("Your name has to be at least 4 letters."))])
     description = StringField('Description', [DataRequired()])
-    processors = SelectMultipleField('Processors for chain')
-    submit = SubmitField('Create new chain')
+    processors = SelectMultipleField('Processors for workflow')
+    submit = SubmitField('Create new workflow')
 
 
-@workflows_blueprint.route("/new-chain", methods=['POST'])
-def new_chain():
+@workflows_blueprint.route("/new-workflow", methods=['POST'])
+def new_workflow():
     """
-    Create a new chain from the data given in the form.
+    Create a new workflow from the data given in the form.
 
     TODO: The order of the processors is not preserved in the multiselect!
     """
@@ -58,57 +58,57 @@ def new_chain():
         "parameters": request.form.get("parameters")
     })
     headers = {"Content-Type": "application/json"}
-    response = requests.post("{}api/chains".format(
+    response = requests.post("{}api/workflows".format(
         host_url(request)), data=data, headers=headers)
     if response.status_code in (200, 201):
-        flash("New chain created.")
+        flash("New workflow created.")
     else:
-        flash("Can't create new chain. Status {0}, Error {1}".format(
+        flash("Can't create new workflow. Status {0}, Error {1}".format(
             response.status_code, response.json()["message"]))
-    return redirect("/chains", code=302)
+    return redirect("/workflows", code=302)
 
 
-@workflows_blueprint.route("/chain/delete/<int:chain_id>")
-def delete_chain(chain_id):
+@workflows_blueprint.route("/workflow/delete/<int:workflow_id>")
+def delete_workflow(workflow_id):
     """
-    Delete the given chain.
+    Delete the given workflow.
     """
-    url = "{0}api/chains/{1}".format(host_url(request), chain_id)
+    url = "{0}api/workflows/{1}".format(host_url(request), workflow_id)
     response = requests.delete(url)
 
     if response.status_code == 200:
         flash(response.json()["message"])
     else:
-        flash("Can't delete chain {0}. Status {1}, Error {2}".format(
-            chain_id, response.status_code, response.json()["message"]))
-    return redirect("/chains", code=302)
+        flash("Can't delete workflow {0}. Status {1}, Error {2}".format(
+            workflow_id, response.status_code, response.json()["message"]))
+    return redirect("/workflows", code=302)
 
 
-@workflows_blueprint.route("/chains")
-def chains():
+@workflows_blueprint.route("/workflows")
+def workflows():
     """
-    The page presenting the existing chains.
+    The page presenting the existing workflows.
     """
     results = db_model_Workflow.get_all()
-    new_chain_form = NewWorkflowForm(meta={'csrf': False})
+    new_workflow_form = NewWorkflowForm(meta={'csrf': False})
     p_choices = [(name, name) for name in PROCESSOR_NAMES]
-    new_chain_form.processors.choices = p_choices
+    new_workflow_form.processors.choices = p_choices
 
-    current_chains = []
+    current_workflows = []
 
-    for chain in results:
-        parameters = json.dumps(chain.parameters, indent=4, separators=(',', ': '))
+    for workflow in results:
+        parameters = json.dumps(workflow.parameters, indent=4, separators=(',', ': '))
         parameters = parameters.replace(' ', '&nbsp;')
         parameters = parameters.replace('\n', '<br />')
-        current_chains.append({
-            "id": chain.id,
-            "name": chain.name,
-            "description": chain.description,
-            "processors": chain.processors,
+        current_workflows.append({
+            "id": workflow.id,
+            "name": workflow.name,
+            "description": workflow.description,
+            "processors": workflow.processors,
             "parameters": parameters
         })
 
     return render_template(
         "chains.html",
-        chains=current_chains,
-        form=new_chain_form)
+        workflows=current_workflows,
+        form=new_workflow_form)

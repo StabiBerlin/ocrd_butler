@@ -36,7 +36,7 @@
         <div class="col-md-10">
 
             <div class="new-chain-form">
-                <form action="/new-chain" method="post">
+                <form action="/new-workflow" method="post">
                   <div class="form-group">
                     {{ form.name.label }}
                     <br />
@@ -59,19 +59,19 @@
             </div>
 
 
-            {% for chain in chains %}
-                <h3>{{ chain.name }} (<a title="Delete chain." href="/chain/delete/{{ chain.id }}">x</a>)</h3>
+            {% for workflow in workflows %}
+                <h3>{{ workflow.name }} (<a title="Delete workflow." href="/workflow/delete/{{ workflow.id }}">x</a>)</h3>
                 <p>
                     <h4>Description</h4>
-                    {{ chain.description }}
+                    {{ workflow.description }}
 
                     <h4>Processors</h4>
-                    {% for processor in chain.processors %}
+                    {% for processor in workflow.processors %}
                         {{ processor }}
                         <br />
                     {% endfor %}
                     <h4>Parameters</h4>
-                    {{ chain.parameters|safe }}
+                    {{ workflow.parameters|safe }}
                 </p>
             {% endfor %}
 

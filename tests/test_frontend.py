@@ -30,7 +30,7 @@ class FrontendTests(TestCase):
                 src="mets_url",
                 default_file_grp="file_grp",
                 worker_task_id="worker_task.id",
-                workflow_id="chain.id",
+                workflow_id="workflow.id",
                 parameters="")
             db.session.add(db_task)
             db.session.commit()
@@ -129,8 +129,8 @@ class FrontendTests(TestCase):
         assert download_links[2].links == {'/download/txt/1'}
 
     def get_workflow_id(self):
-        """Create a chain for the tests."""
-        chain_response = self.client.post("/api/workflows", json=dict(
+        """Create a workflow for the tests."""
+        workflow_response = self.client.post("/api/workflows", json=dict(
             name="TC Workflow",
             description="Workflow with tesseract and calamari recog.",
             processors=[
@@ -140,7 +140,7 @@ class FrontendTests(TestCase):
                 "ocrd-calamari-recognize"
             ]
         ))
-        return chain_response.json["id"]
+        return workflow_response.json["id"]
 
     @responses.activate
     def test_create_task(self):
