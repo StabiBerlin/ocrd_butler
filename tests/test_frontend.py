@@ -17,6 +17,8 @@ from ocrd_butler.factory import (
 )
 from ocrd_butler.database import models
 
+from . import load_mock_workflows
+
 
 class FrontendTests(TestCase):
     """Test our frontend."""
@@ -289,3 +291,44 @@ class FrontendTests(TestCase):
         # )
         # assert response.status_code == 200
         # assert db_model_task_mock_get.call_count == 2
+
+    @mock.patch("requests.get")
+    def test_frontend_workflows(self, mock_requests_get):
+        workflows = list(
+            load_mock_workflows('ocrd_butler/examples/workflows.json')
+        )
+        assert len(workflows) == 5
+        assert type(workflows[0]) == models.Workflow
+        mock_requests_get.return_value = type('', (object,), {
+            "json": [workflow.to_json() for workflow in workflows],
+            "status_code": 200
+        })
+        response = self.client.get("/workflows")
+        assert response.status_code == 200
+        html = HTML(html=response.data)
+        assert html.find(
+            'body > div > div > div > h3:nth-child(2) > a'
+        )[0].attrs['href'] == '/workflow/delete/1'
+
+    @mock.patch("requests.delete")
+    @mock.patch("requests.get")
+    def test_frontend_delete_workflow(self, requests_get, requests_delete):
+        requests_get.response_value = type('', (object, ), {
+            'status_code': 200,
+            'json': list(
+                load_mock_workflows('ocrd_butler/examples/workflows.json')
+            )[0].to_json(),
+        })
+        requests_delete.response_value = type('', (object, ), {
+            'status_code': 200
+        })
+        workflow_id = self.get_workflow_id()
+        assert workflow_id == 1
+        response = self.client.get(f"/workflow/delete/{workflow_id}")
+        assert response.status_code == 302
+
+        requests_delete.response_value = type('', (object, ), {
+            'status_code': 404
+        })
+        response = self.client.get("/workflow/delete/XXX")
+        assert response.status_code == 404
