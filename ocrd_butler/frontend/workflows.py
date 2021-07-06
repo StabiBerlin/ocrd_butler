@@ -26,7 +26,6 @@ from wtforms.validators import (
 )
 
 from ocrd_butler.api.processors import PROCESSOR_NAMES
-from ocrd_butler.database.models import Workflow as db_model_Workflow
 from ocrd_butler.util import host_url
 
 
@@ -90,7 +89,9 @@ def workflows():
     """
     The page presenting the existing workflows.
     """
-    results = db_model_Workflow.get_all()
+    results = requests.get(
+        f"{host_url(request)}api/workflows"
+    ).json
     new_workflow_form = NewWorkflowForm(meta={'csrf': False})
     p_choices = [(name, name) for name in PROCESSOR_NAMES]
     new_workflow_form.processors.choices = p_choices

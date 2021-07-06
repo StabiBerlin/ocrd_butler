@@ -4,6 +4,7 @@
 
 from flask_restx import fields
 from flask_testing import TestCase
+from unittest import mock
 
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import create_app, db
@@ -11,6 +12,8 @@ from ocrd_butler.api.models import (
     workflow_model,
     WorkflowProcessors,
 )
+
+from . import load_mock_workflows
 
 
 class ApiTests(TestCase):
@@ -160,6 +163,16 @@ class ApiTests(TestCase):
         assert response.status_code == 404
         assert response.status == "404 NOT FOUND"
         assert response.json["message"].startswith("Can't find a workflow with the id \"23\".")
+
+    @mock.patch('ocrd_butler.database.models.Workflow.get_all')
+    def test_get_all_chains(self, model_mock):
+        model_mock.return_value = list(
+            load_mock_workflows('ocrd_butler/examples/workflows.json')
+        )
+        response = self.client.get('/api/workflows')
+        assert response.status_code == 200
+        assert len(response.json) == 5
+        assert response.json[0]['description'].startswith('Workflow ')
 
     def test_get_workflows(self):
         """Check if a new workflow can be retrieved."""

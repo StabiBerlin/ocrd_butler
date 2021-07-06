@@ -1,15 +1,28 @@
 import os
+import json
 import functools
 import subprocess
 from itertools import filterfalse
-from typing import Callable, List
+from typing import Callable, Iterable, List
 
 import pytest
 
 from ocrd_butler.util import logger
 from ocrd_butler.config import Config
+from ocrd_butler.database.models import Workflow
+
 
 log = logger(__name__)
+
+
+def load_mock_workflows(filename: str) -> Iterable:
+    """ load workflow data from JSON file and instantiate model instances
+    """
+    with open(filename, 'r') as f:
+        for i, workflow in enumerate(json.load(f)['workflows']):
+            model_instance = Workflow.create(**workflow)
+            model_instance.id = i + 1
+            yield model_instance
 
 
 def test_profile_active() -> bool:
