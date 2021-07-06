@@ -1,6 +1,31 @@
 {
     "workflows": [
         {
+            "name": "SBB - binarize - textline - calamari",
+            "description": "Workflow with olena binarization and calamari recognize.",
+            "processors": [{
+                    "ocrd-sbb-binarize": {
+                        "model": "/data/sbb_binarization/models",
+                        "operation_level": "page"
+                    }
+                },
+                {
+                    "ocrd-sbb-textline-detector": {
+                        "model": "/data/sbb_textline_detector"
+                    }
+                },
+                {
+                    "ocrd-calamari-recognize": {
+                        "checkpoint": "/data/calamari_models/*ckpt.json",
+                        "voter": "confidence_voter_default_ctc",
+                        "textequiv_level": "word",
+                        "glyph_conf_cutoff": 0.001
+                    }
+                }
+            ]
+        }
+        ,
+        {
             "name": "SBB - b-t-c-p2a",
             "description": "Workflow with olena binarization and calamari recognize.",
             "processors": [
@@ -25,31 +50,6 @@
                 },
                 "ocrd-fileformat-transform": {
                     "from-to": "page alto"
-                }
-            }
-        }
-        ,
-        {
-            "name": "SBB - binarize - textline - calamari",
-            "description": "Workflow with olena binarization and calamari recognize.",
-            "processors": [
-                "ocrd-sbb-binarize",
-                "ocrd-sbb-textline-detector",
-                "ocrd-calamari-recognize"
-            ],
-            "parameters": {
-                "ocrd-sbb-binarize": {
-                    "model": "/data/sbb_binarization/models",
-                    "operation_level": "page"
-                },
-                "ocrd-sbb-textline-detector": {
-                    "model": "/data/sbb_textline_detector"
-                },
-                "ocrd-calamari-recognize": {
-                    "checkpoint": "/data/calamari_models/*ckpt.json",
-                    "voter": "confidence_voter_default_ctc",
-                    "textequiv_level": "word",
-                    "glyph_conf_cutoff": 0.001
                 }
             }
         }

@@ -135,29 +135,24 @@ def run_task(self, task: models.Task) -> dict:
 
     # TODO: Steps could be saved along the other task information to get a
     # more informational task.
-    for index, processor_name in enumerate(task_processors):
-        if index == 0:
+    previous_processor = None
+
+    for processor_name, processor in task_processors.items():
+        if previous_processor is None:
             input_file_grp = task["default_file_grp"]
         else:
-            previous_processor = PROCESSORS_ACTION[
-                task_processors[index - 1]
-            ]
             input_file_grp = previous_processor["output_file_grp"]
+        previous_processor = processor
 
         processor = PROCESSORS_ACTION[processor_name]
 
-        # Its possible to override the default parameters of the processor
-        # via workflow or task.
+        # Its possible to override the parameters of the processor in the task.
         kwargs = {"parameter": {}}
-        if "parameters" in processor:
-            kwargs["parameter"] = processor["parameters"]
-        if processor_name in task["workflow"]["parameters"]:
-            kwargs["parameter"].update(task["workflow"]["parameters"][processor_name])
+        if processor_name in task["workflow"]["processors"]:
+            kwargs["parameter"].update(task["workflow"]["processors"][processor_name])
         if processor_name in task["parameters"]:
             kwargs["parameter"].update(task["parameters"][processor_name])
         parameter = json.dumps(kwargs["parameter"])
-
-        # TODO: Add validation of the parameters.
 
         mets_url = "{}/mets.xml".format(dst_dir)
         run_cli(

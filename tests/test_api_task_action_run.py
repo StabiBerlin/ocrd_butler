@@ -116,10 +116,10 @@ class ApiTaskActionRunTests(TestCase):
             name="T Workflow",
             description="Some foobar workflow.",
             processors=[
-                "ocrd-tesserocr-segment-region",
-                "ocrd-tesserocr-segment-line",
-                "ocrd-tesserocr-segment-word",
-                "ocrd-tesserocr-recognize",
+                {"ocrd-tesserocr-segment-region": {}},
+                {"ocrd-tesserocr-segment-line": {}},
+                {"ocrd-tesserocr-segment-word": {}},
+                {"ocrd-tesserocr-recognize": {}},
             ],
             parameters={
                 "ocrd-tesserocr-recognize": {
@@ -129,13 +129,12 @@ class ApiTaskActionRunTests(TestCase):
         ))
         return response.json["id"]
 
-    def empty_workflow(self):
+    def light_workflow(self):
         """Creates a workflow without processors."""
         response = self.client.post("/api/workflows", json=dict(
-            name="Empty Workflow",
+            name="Light Workflow",
             description="Empty but not useless workflow.",
-            processors=[],
-            parameters={}
+            processors=[{ "ocrd-tesserocr-segment-region": {} }],
         ))
         return response.json["id"]
 
@@ -143,13 +142,14 @@ class ApiTaskActionRunTests(TestCase):
     def test_task_max_file_download(self):
         """Check if the workspace is created."""
         self.client.post("/api/tasks", json=dict(
-            workflow_id=self.empty_workflow(),
+            workflow_id=self.light_workflow(),
             src="http://foo.bar/mets.xml",
             description="Check workspace task.",
             default_file_grp="MAX"
         ))
         self.client.post("/api/tasks/1/run")
         result_response = self.client.get("/api/tasks/1/results")
+        import ipdb; ipdb.set_trace()
         max_file_dir = os.path.join(result_response.json["result_dir"], "MAX")
         max_files = os.listdir(max_file_dir)
         with open(os.path.join(max_file_dir, max_files[2]), "rb") as img_file:
@@ -202,10 +202,10 @@ class ApiTaskActionRunTests(TestCase):
             name="TC Workflow",
             description="Workflow with tesseract and calamari recog.",
             processors=[
-                "ocrd-tesserocr-segment-region",
-                "ocrd-tesserocr-segment-line",
-                "ocrd-tesserocr-segment-word",
-                "ocrd-calamari-recognize"
+                {"ocrd-tesserocr-segment-region": {}},
+                {"ocrd-tesserocr-segment-line": {}},
+                {"ocrd-tesserocr-segment-word": {}},
+                {"ocrd-calamari-recognize": {}},
             ]
         ))
 
@@ -258,10 +258,10 @@ class ApiTaskActionRunTests(TestCase):
             description="Workflow with olena binarization, tesseract segmentation"
                         " and calamari recog.",
             processors=[
-                "ocrd-olena-binarize",
-                "ocrd-tesserocr-segment-region",
-                "ocrd-tesserocr-segment-line",
-                "ocrd-calamari-recognize"
+                {"ocrd-olena-binarize": {}},
+                {"ocrd-tesserocr-segment-region": {}},
+                {"ocrd-tesserocr-segment-line": {}},
+                {"ocrd-calamari-recognize": {}},
             ],
             parameters={
                 "ocrd-olena-binarize": {
@@ -270,7 +270,9 @@ class ApiTaskActionRunTests(TestCase):
             }
         ))
 
-        assert workflow_response.json == {'id': 1, 'message': 'Workflow created.'}
+        assert workflow_response.json["id"] == 1
+        assert workflow_response.json["uid"] is not None
+        assert workflow_response.json["message"] == "Workflow created."
 
         task_response = self.client.post("/api/tasks", json=dict(
             workflow_id=workflow_response.json["id"],

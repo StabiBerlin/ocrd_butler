@@ -66,6 +66,9 @@ for name, config in PROCESSORS_CONFIG.items():
         }
     )
 
+PROCESSORS_DEFAULTS = {}
+for name, config in PROCESSORS_CONFIG.items():
+    PROCESSORS_DEFAULTS[name] = "parameters" in config and config["parameters"] or {}
 
 @processors_namespace.route("")
 class Processors(Resource):

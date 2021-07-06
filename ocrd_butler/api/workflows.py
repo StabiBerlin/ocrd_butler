@@ -4,6 +4,11 @@
 """ Workflow api implementation.
 """
 
+from collections import (
+    OrderedDict,
+    Mapping,
+)
+from typing import MappingView
 from flask import (
     make_response,
     jsonify,
@@ -13,6 +18,7 @@ from flask_restx import (
     Resource,
     marshal
 )
+import uuid
 from ocrd_validators import ParameterValidator
 
 from ocrd_butler.api.restx import api
@@ -23,6 +29,7 @@ from ocrd_butler.api.processors import (
 )
 from ocrd_butler.database import db
 from ocrd_butler.database.models import Workflow as db_model_Workflow
+from responses import Response
 
 workflow_namespace = api.namespace("workflows", description="Manage OCR-D processor workflows")
 
@@ -30,64 +37,75 @@ workflow_namespace = api.namespace("workflows", description="Manage OCR-D proces
 class WorkflowBase(Resource):
     """Base methods for workflows."""
 
-    def workflow_data(self, json_data):
-        """ Validate and prepare workflow input. """
-        data = marshal(data=json_data, fields=workflow_model, skip_none=False)
+    def validate_processor(self, processor):
+        """ The OCR-D validator updates all parameters with default values. """
+        if not isinstance(processor, Mapping):
+            workflow_namespace.abort(400,
+                f'Wrong parameter. Unknown processor "{processor}".')
 
-        if data["parameters"] is None:
-            data["parameters"] = {}
-
-        # Should some checks be in the model itself?
-        if data["processors"] is None:
+        processor_name = list(processor)[0]
+        if processor_name not in PROCESSOR_NAMES:
             workflow_namespace.abort(
-                400, "Wrong parameter.",
-                status="Missing processors for workflow.",
-                statusCode="400"
+                400, f'Wrong parameter. Unknown processor "{processor_name}".')
+        validator = ParameterValidator(PROCESSORS_CONFIG[processor_name])
+        report = validator.validate(processor[processor_name])
+        if not report.is_valid:
+            workflow_namespace.abort(
+                400, f'Wrong parameter. '
+                        f'Error(s) while validating parameters "{processor[processor_name]}" '
+                        f'for processor "{processor_name}" -> "{str(report.errors)}".'
             )
 
+    def workflow_data(self, json_data):
+        """ Validate and prepare workflow database input. """
+        data = marshal(data=json_data, fields=workflow_model, skip_none=False)
+
+        workflow = {
+            "uid": uuid.uuid4().__str__(),
+            "name": data["name"],
+            "description": data["description"],
+            "processors": OrderedDict()
+        }
+
+        if not data["processors"]:
+            workflow_namespace.abort(400,
+                f'Wrong parameter. Processors "{data["processors"]}" seems empty.')
+
         for processor in data["processors"]:
-            if processor not in PROCESSOR_NAMES:
-                workflow_namespace.abort(
-                    400, "Wrong parameter.",
-                    status="Unknown processor \"{}\".".format(processor),
-                    statusCode="400")
+            self.validate_processor(processor)
+            workflow["processors"].update(processor)
 
-            # The OCR-D validator updates all parameters with default values.
-            if processor not in data["parameters"].keys():
-                data["parameters"][processor] = {}
-            validator = ParameterValidator(PROCESSORS_CONFIG[processor])
-            report = validator.validate(data["parameters"][processor])
-            if not report.is_valid:
-                workflow_namespace.abort(
-                    400, "Wrong parameter.",
-                    status=(
-                        "Error while validating parameters \"{0}\""
-                        "for processor \"{1}\" -> \"{2}\"."
-                    ).format(
-                        data["parameters"][processor],
-                        processor,
-                        str(report.errors)
-                    ),
-                    statusCode="400"
-                )
-
-        return data
-
+        return workflow
 
 @workflow_namespace.route("")
 class Workflows(WorkflowBase):
     """ Add workflows and list all of it. """
 
     @api.doc(responses={201: "Created", 400: "Wrong parameter."})
-    @api.expect(workflow_model)
+    @api.expect(workflow_model, validate=True)
     def post(self):
-        """ Add a new workflow. """
+        """ Add a new workflow.
+
+        A workflow is a list of OCRD processors. By default every processor is used with its default values from its `ocrd-tool.json` or from fixed definitions in the butler, e.g. for the folders of the models. Its possible to overwrite these settings directly with given parameters.:
+        [
+            {
+                'ocrd-processor-0': {}
+            },
+            {
+                'ocrd-processor-n': {
+                    'parameter-name-0': 'parameter-value-0',
+                    'parameter-name-n': 'parameter-value-n',
+                }
+            }
+        ]
+        """
 
         data = self.workflow_data(request.json)
         workflow = db_model_Workflow.add(**data)
 
         return make_response({
             "message": "Workflow created.",
+            "uid": workflow.uid,
             "id": workflow.id,
         }, 201)
 
@@ -110,28 +128,31 @@ class Workflow(WorkflowBase):
 
         if workflow is None:
             workflow_namespace.abort(
-                404, "Wrong parameter",
-                status="Can't find a workflow with the id \"{0}\".".format(workflow_id),
-                statusCode="404")
-
+                404, f"Can't find a workflow with the id \"{workflow_id}\".")
         return jsonify(workflow.to_json())
 
     @api.doc(responses={201: "Updated", 404: "Unknown workflow."})
     @api.expect(workflow_model)
-    def put(self, workflow_id):
+    def put(self, workflow_id: str) -> Response:
         """ Update a workflow. """
         workflow = db_model_Workflow.get(id=workflow_id)
         if workflow is None:
             workflow_namespace.abort(
-                404, "Wrong parameter",
-                status="Can't find a workflow with the id \"{0}\".".format(
-                    workflow_id),
-                statusCode="404")
+                404, f"Can't find a workflow with the id \"{workflow_id}\".")
 
-        fields = workflow.to_json().keys()
+        workflow_data = workflow.to_json()
+        fields = workflow_data.keys()
+        update_data = request.json
         for field in fields:
-            if field in request.json:
-                setattr(workflow, field, request.json[field])
+            if field in update_data:
+                if field == 'processors':
+                    processors = OrderedDict()
+                    for processor in update_data["processors"]:
+                        self.validate_processor(processor)
+                        processors.update(processor)
+                    setattr(workflow, field, processors)
+                else:
+                    setattr(workflow, field, update_data[field])
         db.session.commit()
 
         return jsonify({
@@ -139,18 +160,16 @@ class Workflow(WorkflowBase):
             "id": workflow.id,
         })
 
-    @api.doc(responses={200: "Deleted", 404: "Unknown workflow."})
-    def delete(self, workflow_id):
+    @api.doc(responses={200: "Deleted", 404: "Unknown workflow id."})
+    def delete(self, workflow_id: str) -> Response:
         """ Delete the workflow by given id. """
         workflow = db_model_Workflow.get(id=workflow_id)
 
         if workflow is None:
             workflow_namespace.abort(
-                404, "Unknown workflow_id",
-                status="Can't find a workflow with the id \"{0}\".".format(workflow_id),
-                statusCode="404")
+                404, f"Can't find a workflow with the id \"{workflow_id}\".")
         else:
-            message = "Delete workflow \"{0}({1})\"".format(workflow.name, workflow.id)
+            message = f"Delete workflow \"{workflow.name}({workflow.id})\""
             if db_model_Workflow.delete(id=workflow_id):
                 message = f'{message}: success'
             else:

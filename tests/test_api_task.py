@@ -27,7 +27,7 @@ class ApiTests(TestCase):
         response = self.client.post("/api/workflows", json=dict(
             name="New Workflow",
             description="Some foobar workflow.",
-            processors=["ocrd-tesserocr-recognize"]
+            processors=[{"ocrd-tesserocr-recognize": {}}]
         ))
         return response.json["id"]
 
@@ -90,7 +90,6 @@ class ApiTests(TestCase):
         assert response.json["message"].startswith("Unknown task")
 
     def test_task_model(self):
-        assert "uid" in task_model
         assert "src" in task_model
         assert "workflow_id" in task_model
         assert "parameters" in task_model

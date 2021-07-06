@@ -38,22 +38,6 @@ class TasksTestExecution(TestCase):
         for test_dir in test_dirs:
             shutil.rmtree(test_dir, ignore_errors=True)
 
-    def test_task_model(self):
-        """Check our task model."""
-
-        assert "uid" in task_model
-        assert "src" in task_model
-        assert "workflow_id" in task_model
-        assert "parameters" in task_model
-        assert "description" in task_model
-        assert "default_file_grp" in task_model
-        assert "worker_task_id" in task_model  # TODO: should be work_id
-        assert "status" in task_model
-        assert "results" in task_model
-
-        for field in task_model:
-            assert isinstance(task_model[field], fields.String)
-
     # @pytest.mark.celery(result_backend='redis://')
     # def test_run_task(self):
     #     """ Test our run_task task.

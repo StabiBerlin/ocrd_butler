@@ -74,27 +74,43 @@ class Task(db.Model):
 
 
 class Workflow(db.Model):
-    """ Database model for our workflow. """
+    """ Database model for our workflow.
+    [
+        {
+            "processor": "ocrd-sbb-binarize",
+            "parameters": {
+            "model": "/data/sbb_binarization/models",
+            "operation_level": "page"
+            }
+        },
+        {
+            "processor": "ocrd-exmpple",
+            "parameters": {
+            "model": "/data/example/models"
+            }
+        }
+    ]
+    """
     __tablename__ = "workflows"
     id = db.Column(db.Integer, primary_key=True)
+    uid = db.Column(db.String(64))
     name = db.Column(db.String(64))
     description = db.Column(db.String(1024))
     processors = db.Column(db.JSON)
-    parameters = db.Column(db.JSON)
 
-    def __init__(self, name, description, processors, parameters=None):
+    def __init__(self, uid, name, description, processors):
+        self.uid = uid
         self.name = name
         self.description = description
         self.processors = processors
-        self.parameters = parameters
 
     def to_json(self):
         return {
             "id": self.id,
+            "uid": self.uid,
             "name": self.name,
             "description": self.description,
-            "processors": self.processors,
-            "parameters": self.parameters,
+            "processors": self.processors
         }
 
     def __repr__(self):
