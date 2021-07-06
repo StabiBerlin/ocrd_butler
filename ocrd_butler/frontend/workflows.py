@@ -2,6 +2,7 @@
 Routes for the workflows.
 """
 
+from collections import OrderedDict
 import json
 import requests
 
@@ -95,17 +96,12 @@ def workflows():
     new_workflow_form.processors.choices = p_choices
 
     current_workflows = []
-
     for workflow in results:
-        parameters = json.dumps(workflow.parameters, indent=4, separators=(',', ': '))
-        parameters = parameters.replace(' ', '&nbsp;')
-        parameters = parameters.replace('\n', '<br />')
         current_workflows.append({
             "id": workflow.id,
             "name": workflow.name,
             "description": workflow.description,
-            "processors": workflow.processors,
-            "parameters": parameters
+            "processors": OrderedDict(workflow.processors)
         })
 
     return render_template(
