@@ -104,7 +104,7 @@ run-flask:
 	. ../ocrd_all/venv/bin/activate; FLASK_APP=ocrd_butler/app.py flask run
 
 run-flower:
-	. ../ocrd_all/venv/bin/activate; flower --broker redis://localhost:6379 --persistent=True --db=flower [--log=debug
+	. ../ocrd_all/venv/bin/activate; flower --broker redis://localhost:6379 --persistent=True --db=flower --log=debug
 
 tesseract-model: ## install trained model for tesseract
 	mkdir -p /data/tesseract_models && cd /data/tesseract_models; \
