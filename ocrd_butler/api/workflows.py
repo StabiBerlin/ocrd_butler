@@ -14,7 +14,6 @@ from flask_restx import (
     Resource,
     marshal
 )
-import uuid
 from ocrd_validators import ParameterValidator
 
 from ocrd_butler.api.restx import api
@@ -37,8 +36,9 @@ class WorkflowBase(Resource):
     def validate_processor(self, processor):
         """ The OCR-D validator updates all parameters with default values. """
         if not isinstance(processor, Mapping):
-            workflow_namespace.abort(400,
-                f'Wrong parameter. Unknown processor "{processor}".')
+            workflow_namespace.abort(
+                400, f'Wrong parameter. Unknown processor "{processor}".'
+            )
 
         if processor["name"] not in PROCESSOR_NAMES:
             workflow_namespace.abort(
@@ -54,9 +54,10 @@ class WorkflowBase(Resource):
 
         if not report.is_valid:
             workflow_namespace.abort(
-                400, f'Wrong parameter. '
-                        f'Error(s) while validating parameters "{processor["parameters"]}" '
-                        f'for processor "{processor["name"]}" -> "{str(report.errors)}".'
+                400,
+                f'Wrong parameter. '
+                f'Error(s) while validating parameters "{processor["parameters"]}" '
+                f'for processor "{processor["name"]}" -> "{str(report.errors)}".'
             )
 
         return processor
@@ -72,14 +73,15 @@ class WorkflowBase(Resource):
         }
 
         if not data["processors"]:
-            workflow_namespace.abort(400,
-                f'Wrong parameter. Processors "{data["processors"]}" seems empty.')
+            workflow_namespace.abort(
+                400, f'Wrong parameter. Processors "{data["processors"]}" seems empty.')
 
         for processor in data["processors"]:
             validated_processor = self.validate_processor(processor)
             workflow["processors"].append(validated_processor)
 
         return workflow
+
 
 @workflow_namespace.route("")
 class Workflows(WorkflowBase):
@@ -90,18 +92,22 @@ class Workflows(WorkflowBase):
     def post(self):
         """ Add a new workflow.
 
-        A workflow is a list of OCRD processors. By default every processor is used with its default values from its `ocrd-tool.json` or from fixed definitions in the butler, e.g. for the folders of the models. Its possible to overwrite these settings directly with given parameters.:
-        [
-            {
-                "name": "ocrd-example"
-            },
-            {
-                "name": "ocrd-example-2",
-                "parameters": {
-                    "model": "/data/example/models"
-                }
-            },
-        ]
+        A workflow is a list of OCRD processors. By default every processor is
+        used with its default values from its `ocrd-tool.json` or from fixed
+        definitions in the butler, e.g. for the folders of the models. It's
+        possible to overwrite these settings directly with given parameters.::
+
+            [
+                {
+                    "name": "ocrd-example"
+                },
+                {
+                    "name": "ocrd-example-2",
+                    "parameters": {
+                        "model": "/data/example/models"
+                    }
+                },
+            ]
         """
 
         data = self.workflow_data(request.json)
