@@ -2,7 +2,6 @@
 Routes for the workflows.
 """
 
-from collections import OrderedDict
 import json
 import requests
 
@@ -91,7 +90,7 @@ def workflows():
     """
     results = requests.get(
         f"{host_url(request)}api/workflows"
-    ).json
+    ).json()
     new_workflow_form = NewWorkflowForm(meta={'csrf': False})
     p_choices = [(name, name) for name in PROCESSOR_NAMES]
     new_workflow_form.processors.choices = p_choices
@@ -102,7 +101,7 @@ def workflows():
             "id": workflow.id,
             "name": workflow.name,
             "description": workflow.description,
-            "processors": OrderedDict(workflow.processors)
+            "processors": workflow.processors
         })
 
     return render_template(

@@ -43,13 +43,14 @@ for processor, settings in ocrd_config.PROCESSOR_SETTINGS.items():
 for name, config in PROCESSORS_ACTION.items():
     if "package" in config:
         del config["package"]
-
-    parameters = {}
     if "parameters" in config:
-        for p_name, p_values in config["parameters"].items():
-            if "default" in p_values:
-                parameters[p_name] = p_values["default"]
-    config["parameters"] = parameters
+        del config["parameters"]
+    # parameters = {}
+    # if "parameters" in config:
+    #     for p_name, p_values in config["parameters"].items():
+    #         if "default" in p_values:
+    #             parameters[p_name] = p_values["default"]
+    # config["parameters"] = parameters
 
     # Just take the first in-/output file group for now.
     # TODO: This is also connected to the choosen paramters.
@@ -68,7 +69,7 @@ for name, config in PROCESSORS_CONFIG.items():
 
 PROCESSORS_DEFAULTS = {}
 for name, config in PROCESSORS_CONFIG.items():
-    PROCESSORS_DEFAULTS[name] = "parameters" in config and config["parameters"] or {}
+    PROCESSORS_DEFAULTS[name] = config.get("parameters", {})
 
 @processors_namespace.route("")
 class Processors(Resource):

@@ -116,10 +116,10 @@ class ApiTaskActionRunTests(TestCase):
             name="T Workflow",
             description="Some foobar workflow.",
             processors=[
-                {"ocrd-tesserocr-segment-region": {}},
-                {"ocrd-tesserocr-segment-line": {}},
-                {"ocrd-tesserocr-segment-word": {}},
-                {"ocrd-tesserocr-recognize": {}},
+                {"name": "ocrd-tesserocr-segment-region"},
+                {"name": "ocrd-tesserocr-segment-line"},
+                {"name": "ocrd-tesserocr-segment-word"},
+                {"name": "ocrd-tesserocr-recognize"},
             ],
             parameters={
                 "ocrd-tesserocr-recognize": {
@@ -134,7 +134,9 @@ class ApiTaskActionRunTests(TestCase):
         response = self.client.post("/api/workflows", json=dict(
             name="Light Workflow",
             description="Empty but not useless workflow.",
-            processors=[{ "ocrd-tesserocr-segment-region": {} }],
+            processors=[{
+                "name": "ocrd-tesserocr-segment-region"
+            }],
         ))
         return response.json["id"]
 
@@ -149,7 +151,6 @@ class ApiTaskActionRunTests(TestCase):
         ))
         self.client.post("/api/tasks/1/run")
         result_response = self.client.get("/api/tasks/1/results")
-        import ipdb; ipdb.set_trace()
         max_file_dir = os.path.join(result_response.json["result_dir"], "MAX")
         max_files = os.listdir(max_file_dir)
         with open(os.path.join(max_file_dir, max_files[2]), "rb") as img_file:
@@ -202,10 +203,10 @@ class ApiTaskActionRunTests(TestCase):
             name="TC Workflow",
             description="Workflow with tesseract and calamari recog.",
             processors=[
-                {"ocrd-tesserocr-segment-region": {}},
-                {"ocrd-tesserocr-segment-line": {}},
-                {"ocrd-tesserocr-segment-word": {}},
-                {"ocrd-calamari-recognize": {}},
+                { "name": "ocrd-tesserocr-segment-region" },
+                { "name": "ocrd-tesserocr-segment-line" },
+                { "name": "ocrd-tesserocr-segment-word"},
+                { "name": "ocrd-calamari-recognize" },
             ]
         ))
 
@@ -257,17 +258,14 @@ class ApiTaskActionRunTests(TestCase):
             name="TC Workflow",
             description="Workflow with olena binarization, tesseract segmentation"
                         " and calamari recog.",
-            processors=[
-                {"ocrd-olena-binarize": {}},
-                {"ocrd-tesserocr-segment-region": {}},
-                {"ocrd-tesserocr-segment-line": {}},
-                {"ocrd-calamari-recognize": {}},
-            ],
-            parameters={
-                "ocrd-olena-binarize": {
-                    "impl": "sauvola-ms-split"
-                }
-            }
+            processors=[{
+                    "name": "ocrd-olena-binarize",
+                    "parameters": { "impl": "sauvola-ms-split" }
+                },
+                {"name": "ocrd-tesserocr-segment-region" },
+                {"name": "ocrd-tesserocr-segment-line" },
+                {"name": "ocrd-calamari-recognize" },
+            ]
         ))
 
         assert workflow_response.json["id"] == 1
@@ -297,6 +295,7 @@ class ApiTaskActionRunTests(TestCase):
         response = self.client.post(
             "/api/tasks/{0}/run".format(task_response.json["id"])
         )
+
         assert response.status_code == 200
         assert response.json["status"] == "SUCCESS"
 

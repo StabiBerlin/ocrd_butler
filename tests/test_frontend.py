@@ -135,10 +135,10 @@ class FrontendTests(TestCase):
             name="TC Workflow",
             description="Workflow with tesseract and calamari recog.",
             processors=[
-                {"ocrd-tesserocr-segment-region": {}},
-                {"ocrd-tesserocr-segment-line": {}},
-                {"ocrd-tesserocr-segment-word": {}},
-                {"ocrd-calamari-recognize": {}},
+                {"name": "ocrd-tesserocr-segment-region"},
+                {"name": "ocrd-tesserocr-segment-line"},
+                {"name": "ocrd-tesserocr-segment-word"},
+                {"name": "ocrd-calamari-recognize"},
             ]
         ))
         return workflow_response.json["id"]
@@ -149,7 +149,8 @@ class FrontendTests(TestCase):
             name="TC Workflow",
             description="Workflow with tesseract and calamari recog.",
             processors=[{
-                "ocrd-olena-binarize": {
+                "name": "ocrd-olena-binarize",
+                "parameters": {
                     "impl": "sauvola-ms-split"
                 }
             }]
@@ -159,6 +160,8 @@ class FrontendTests(TestCase):
         html = HTML(html=response.data)
         assert "ocrd-olena-binarize" in [elem.text for elem in html.find('h5')]
         assert "impl: sauvola-ms-split" in [elem.text for elem in html.find('li')]
+        # TODO: check if there are the defaults added by validation
+        import ipdb; ipdb.set_trace()
 
     @responses.activate
     def test_create_task(self):

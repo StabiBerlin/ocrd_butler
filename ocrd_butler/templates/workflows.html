@@ -67,12 +67,12 @@
 
                     <h4>Processors</h4>
                     {% for processor in workflow.processors %}
-                        <h5>{{ processor }}</h5>
+                        <h5>{{ processor.name }}</h5>
                         <br />
                         <h5><strong>Parameters:</strong></h6>
                         <ul>
-                            {% for param in workflow.processors[processor] %}
-                                <li>{{ param }}: {{ workflow.processors[processor][param] }}</li>
+                            {% for param in workflow.processors.parameters %}
+                                <li>{{ param }}: {{ workflow.processors.parameters[param] }}</li>
                             {% endfor %}
                         </ul>
                         <br />

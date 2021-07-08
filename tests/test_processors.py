@@ -56,13 +56,13 @@ class ProcessorsTests(TestCase):
 
     def test_tesserocr_parameters(self):
         """Check if ocr_tesserocr is importable."""
-        parameters = PROCESSORS_ACTION["ocrd-tesserocr-recognize"]["parameters"]
+        parameters = PROCESSORS_CONFIG["ocrd-tesserocr-recognize"]["parameters"]
         assert "textequiv_level" in parameters
-        assert parameters["textequiv_level"] == "word"
-        assert parameters["overwrite_segments"] is False
-        parameters = PROCESSORS_ACTION["ocrd-tesserocr-segment-word"]["parameters"]
-        assert parameters["overwrite_words"] is True
-        # assert "model" not in parameters
+        assert parameters["textequiv_level"]["default"] == "word"
+        assert parameters["overwrite_segments"]["default"] is False
+        parameters = PROCESSORS_CONFIG["ocrd-tesserocr-segment-word"]["parameters"]
+        assert parameters["overwrite_words"]["default"] is True
+        assert "model" not in parameters
 
     def test_calamari_integration(self):
         """Check if ocr_calamari is importable."""

@@ -4,11 +4,7 @@
 """ Workflow api implementation.
 """
 
-from collections import (
-    OrderedDict,
-    Mapping,
-)
-from typing import MappingView
+from collections import Mapping
 from flask import (
     make_response,
     jsonify,
@@ -24,6 +20,7 @@ from ocrd_validators import ParameterValidator
 from ocrd_butler.api.restx import api
 from ocrd_butler.api.models import workflow_model
 from ocrd_butler.api.processors import (
+    PROCESSORS_ACTION,
     PROCESSOR_NAMES,
     PROCESSORS_CONFIG
 )
@@ -43,28 +40,35 @@ class WorkflowBase(Resource):
             workflow_namespace.abort(400,
                 f'Wrong parameter. Unknown processor "{processor}".')
 
-        processor_name = list(processor)[0]
-        if processor_name not in PROCESSOR_NAMES:
+        if processor["name"] not in PROCESSOR_NAMES:
             workflow_namespace.abort(
-                400, f'Wrong parameter. Unknown processor "{processor_name}".')
-        validator = ParameterValidator(PROCESSORS_CONFIG[processor_name])
-        report = validator.validate(processor[processor_name])
+                400, f'Wrong parameter. Unknown processor "{processor["name"]}".')
+
+        processor.update(PROCESSORS_ACTION[processor["name"]])
+
+        validator = ParameterValidator(PROCESSORS_CONFIG[processor["name"]])
+        if "parameters" not in processor:
+            processor["parameters"] = {}
+
+        report = validator.validate(processor["parameters"])
+
         if not report.is_valid:
             workflow_namespace.abort(
                 400, f'Wrong parameter. '
-                        f'Error(s) while validating parameters "{processor[processor_name]}" '
-                        f'for processor "{processor_name}" -> "{str(report.errors)}".'
+                        f'Error(s) while validating parameters "{processor["parameters"]}" '
+                        f'for processor "{processor["name"]}" -> "{str(report.errors)}".'
             )
+
+        return processor
 
     def workflow_data(self, json_data):
         """ Validate and prepare workflow database input. """
         data = marshal(data=json_data, fields=workflow_model, skip_none=False)
 
         workflow = {
-            "uid": uuid.uuid4().__str__(),
             "name": data["name"],
             "description": data["description"],
-            "processors": OrderedDict()
+            "processors": []
         }
 
         if not data["processors"]:
@@ -72,8 +76,8 @@ class WorkflowBase(Resource):
                 f'Wrong parameter. Processors "{data["processors"]}" seems empty.')
 
         for processor in data["processors"]:
-            self.validate_processor(processor)
-            workflow["processors"].update(processor)
+            validated_processor = self.validate_processor(processor)
+            workflow["processors"].append(validated_processor)
 
         return workflow
 
@@ -146,10 +150,10 @@ class Workflow(WorkflowBase):
         for field in fields:
             if field in update_data:
                 if field == 'processors':
-                    processors = OrderedDict()
+                    processors = []
                     for processor in update_data["processors"]:
                         self.validate_processor(processor)
-                        processors.update(processor)
+                        processors.append(processor)
                     setattr(workflow, field, processors)
                 else:
                     setattr(workflow, field, update_data[field])

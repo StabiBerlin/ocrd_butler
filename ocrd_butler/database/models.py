@@ -3,13 +3,14 @@
 
 from __future__ import annotations
 from typing import List
+import uuid
 
 from ocrd_butler.database import db
 from ocrd_butler.util import (
     logger,
     to_json,
 )
-# from sqlalchemy.dialects.postgresql import JSON
+
 
 log = logger(__name__)
 
@@ -35,10 +36,12 @@ class Task(db.Model):
     )
 
     def __init__(
-        self, uid, src, workflow_id, parameters={}, description="",
+        self, src, workflow_id, uid=None, parameters={}, description="",
         default_file_grp="DEFAULT", worker_task_id=None,
         status="CREATED", results={}
     ):
+        if uid is None:
+            uid = uuid.uuid4().__str__()
         self.uid = uid
         self.src = src
         self.workflow_id = workflow_id
@@ -75,21 +78,24 @@ class Task(db.Model):
 
 class Workflow(db.Model):
     """ Database model for our workflow.
-    [
-        {
-            "processor": "ocrd-sbb-binarize",
-            "parameters": {
-            "model": "/data/sbb_binarization/models",
-            "operation_level": "page"
+
+    Example usage::
+
+        [
+            {
+                "processor": "ocrd-sbb-binarize",
+                "parameters": {
+                "model": "/data/sbb_binarization/models",
+                "operation_level": "page"
+                }
+            },
+            {
+                "processor": "ocrd-example",
+                "parameters": {
+                "model": "/data/example/models"
+                }
             }
-        },
-        {
-            "processor": "ocrd-exmpple",
-            "parameters": {
-            "model": "/data/example/models"
-            }
-        }
-    ]
+        ]
     """
     __tablename__ = "workflows"
     id = db.Column(db.Integer, primary_key=True)
@@ -98,19 +104,22 @@ class Workflow(db.Model):
     description = db.Column(db.String(1024))
     processors = db.Column(db.JSON)
 
-    def __init__(self, uid, name, description, processors):
+    def __init__(self, name, description, processors, uid=None):
+        if uid is None:
+            uid = uuid.uuid4().__str__()
         self.uid = uid
         self.name = name
         self.description = description
         self.processors = processors
 
     def to_json(self):
+        processors = self.processors
         return {
             "id": self.id,
             "uid": self.uid,
             "name": self.name,
             "description": self.description,
-            "processors": self.processors
+            "processors": processors
         }
 
     def __repr__(self):

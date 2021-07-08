@@ -51,19 +51,20 @@ class WorkflowProcessors(fields.Raw):
     __schema_format__ = 'JSON'
     __schema_example__ = '''[
             {
-                'ocrd-processor-0': {}
+                'name': 'ocrd-processor-0',
+                'parameters': {}
             },
             {
-                'ocrd-processor-n': {
+                'name': 'ocrd-processor-n',
+                'parameters': {
                     'parameter-name-0': 'parameter-value-0',
                     'parameter-name-n': 'parameter-value-n',
                 }
             }
         ]
     '''
-    # min_items=1,
+
     def format(self, value):
-        # return json.dumps(value)
         return value
 
 workflow_model = api.model("Workflow Model", {

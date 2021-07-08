@@ -16,7 +16,7 @@ from ocrd_butler.api.models import (
 from . import load_mock_workflows
 
 
-class ApiTests(TestCase):
+class ApiWorkflowTests(TestCase):
     """Test our api."""
 
     def setUp(self):
@@ -30,7 +30,7 @@ class ApiTests(TestCase):
         return create_app(config=TestingConfig)
 
     def get_workflow(self, name="New Workflow", description="Some foobar workflow.",
-                     processors=[{"ocrd-tesserocr-recognize": {}}]):
+                     processors=[{"name": "ocrd-tesserocr-recognize"}]):
         workflow = self.client.post("/api/workflows", json=dict(
             name=name,
             description=description,
@@ -39,7 +39,7 @@ class ApiTests(TestCase):
         return workflow
 
     def test_create_new_workflow(self):
-        """Check if a new workflow is createdOrderedDict."""
+        """Check if a new workflow is created."""
         response = self.get_workflow()
         assert response.status_code == 201
         assert response.json["message"] == "Workflow created."
@@ -64,7 +64,7 @@ class ApiTests(TestCase):
 
     def test_create_workflow_with_unknown_processor(self):
         """Check if a new workflow is created."""
-        response = self.get_workflow(processors=[{"foobar": {}}])
+        response = self.get_workflow(processors=[{"name": "foobar"}])
         assert response.status_code == 400
         assert response.status == "400 BAD REQUEST"
         assert response.json["message"] == 'Wrong parameter. Unknown processor "foobar".'
@@ -87,36 +87,37 @@ class ApiTests(TestCase):
     def test_create_workflow_with_default_parameters(self):
         """Check if a new workflow is created."""
         self.get_workflow(processors=[
-            { "ocrd-tesserocr-segment-region": {} },
-            { "ocrd-tesserocr-segment-line": {} },
-            { "ocrd-tesserocr-segment-word": {} },
-            { "ocrd-tesserocr-recognize": {} }
+            { "name": "ocrd-tesserocr-segment-region" },
+            { "name": "ocrd-tesserocr-segment-line" },
+            { "name": "ocrd-tesserocr-segment-word" },
+            { "name": "ocrd-tesserocr-recognize" },
         ])
         response = self.client.get("/api/workflows/1")
-        assert "ocrd-tesserocr-segment-region" in response.json["processors"].keys()
-        assert response.json["processors"]["ocrd-tesserocr-recognize"]["textequiv_level"] == "word"
-        assert response.json["processors"]["ocrd-tesserocr-recognize"]["overwrite_segments"] is False
-        assert response.json["processors"]["ocrd-tesserocr-segment-word"]["overwrite_words"] is True
+        assert response.json["processors"][0]["name"] == "ocrd-tesserocr-segment-region"
+        assert response.json["processors"][3]["parameters"]["textequiv_level"] == "word"
+        assert response.json["processors"][3]["parameters"]["overwrite_segments"] is False
+        assert response.json["processors"][3]["parameters"]["overwrite_text"] is True
 
     def test_create_workflow_with_own_parameters(self):
         """Check if a new workflow is created."""
         response = self.get_workflow(processors=[{
-            "ocrd-olena-binarize": {
+            "name": "ocrd-olena-binarize",
+            "parameters": {
                 "impl": "sauvola-ms-split"
             }
         }])
         response = self.client.get("/api/workflows/1")
-        assert "ocrd-olena-binarize" == list(response.json["processors"])[0]
-        processor = response.json["processors"]["ocrd-olena-binarize"]
-        assert processor["impl"] == "sauvola-ms-split"
-        assert processor["k"] == 0.34
-        assert processor["win-size"] == 0
-        assert processor["dpi"] == 0
+        processor = response.json["processors"][0]
+        assert processor["name"] == "ocrd-olena-binarize"
+        assert processor["parameters"]["impl"] == "sauvola-ms-split"
+        assert processor["parameters"]["win-size"] == 0
+        assert processor["parameters"]["dpi"] == 0
 
     def test_create_workflow_with_wrong_parameters(self):
         """Check if a new workflow is created."""
         response = self.get_workflow(processors=[{
-            "ocrd-olena-binarize": {
+            "name": "ocrd-olena-binarize",
+            "parameters": {
                 "impl": "foobar"
             }
         }])
@@ -129,7 +130,7 @@ class ApiTests(TestCase):
     def test_get_workflow(self):
         """Check if an existing workflow is returned."""
         self.get_workflow(processors=[{
-            "ocrd-olena-binarize": {}
+            "name": "ocrd-olena-binarize"
         }])
         response = self.client.get("/api/workflows/1")
         assert response.status_code == 200
@@ -137,12 +138,12 @@ class ApiTests(TestCase):
         assert response.json["name"] == "New Workflow"
         assert response.json["description"] == "Some foobar workflow."
         assert len(response.json["processors"]) == 1
-        assert list(response.json["processors"])[0] == "ocrd-olena-binarize"
+        assert response.json["processors"][0]["name"] == "ocrd-olena-binarize"
 
     def test_delete_workflow(self):
         """Check if a new workflow is created."""
         self.get_workflow(processors=[{
-            "ocrd-tesserocr-recognize": {}
+            "name": "ocrd-tesserocr-recognize"
         }])
         response = self.client.delete("/api/workflows/1")
         assert response.status_code == 200
@@ -165,7 +166,7 @@ class ApiTests(TestCase):
         assert response.json["message"].startswith("Can't find a workflow with the id \"23\".")
 
     @mock.patch('ocrd_butler.database.models.Workflow.get_all')
-    def test_get_all_chains(self, model_mock):
+    def test_get_all_workflows(self, model_mock):
         model_mock.return_value = list(
             load_mock_workflows('ocrd_butler/examples/workflows.json')
         )
@@ -177,11 +178,11 @@ class ApiTests(TestCase):
     def test_get_workflows(self):
         """Check if a new workflow can be retrieved."""
         assert self.get_workflow(name="First Workflow", processors=[{
-            "ocrd-olena-binarize": {}
+            "name": "ocrd-olena-binarize"
         }]).status_code == 201
         assert self.get_workflow(name="Second Workflow",
             description="Some barfoo workflow.", processors=[{
-                "ocrd-sbb-textline-detector": {}
+                "name": "ocrd-sbb-textline-detector"
         }]).status_code == 201
         response = self.client.get("/api/workflows")
         assert response.status_code == 200
@@ -189,40 +190,38 @@ class ApiTests(TestCase):
         assert response.json[0]["id"] == 1
         assert response.json[0]["name"] == "First Workflow"
         assert response.json[0]["description"] == "Some foobar workflow."
-        assert "ocrd-olena-binarize" in response.json[0]["processors"]
+        assert response.json[0]["processors"][0]["name"] == "ocrd-olena-binarize"
+        assert response.json[0]["processors"][0]["parameters"]["dpi"] == 0
         assert response.json[1]["id"] == 2
         assert response.json[1]["name"] == "Second Workflow"
         assert response.json[1]["description"] == "Some barfoo workflow."
-        assert "ocrd-sbb-textline-detector" in list(response.json[1]["processors"])
+        assert response.json[1]["processors"][0]["name"] == "ocrd-sbb-textline-detector"
 
     def test_update_workflow(self):
         """Check if a new workflow is created."""
         self.get_workflow(name="First Workflow", processors=[{
-            "ocrd-tesserocr-recognize": {}
+            "name": "ocrd-tesserocr-recognize"
         }])
         response = self.client.get("/api/workflows/1")
         assert response.status_code == 200
         assert response.json["id"] == 1
         assert response.json["name"] == "First Workflow"
         assert response.json["description"] == "Some foobar workflow."
-        assert "ocrd-tesserocr-recognize" in list(response.json["processors"])
+        assert response.json["processors"][0]["name"] == "ocrd-tesserocr-recognize"
 
         response = self.client.put("/api/workflows/1", json=dict(
             name="Updated Workflow",
             description="Some barfoo workflow.",
-            processors=[{"ocrd-tesserocr-segment-word": {}}],
+            processors=[{
+                "name": "ocrd-tesserocr-segment-word"
+            }],
         ))
         response = self.client.get("/api/workflows/1")
         assert response.status_code == 200
         assert response.json["id"] == 1
         assert response.json["name"] == "Updated Workflow"
         assert response.json["description"] == "Some barfoo workflow."
-        assert "ocrd-tesserocr-recognize" not in list(response.json["processors"])
-        assert "ocrd-tesserocr-segment-word" in list(response.json["processors"])
-
-        response = self.client.put("/api/workflows/1", json=dict(
-            name="Again updated Workflow",
-        ))
+        assert response.json["processors"][0]["name"] == "ocrd-tesserocr-segment-word"
 
     def test_workflow_model(self):
         assert "name" in workflow_model
