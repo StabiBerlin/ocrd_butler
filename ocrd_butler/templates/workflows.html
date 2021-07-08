@@ -71,8 +71,8 @@
                         <br />
                         <h5><strong>Parameters:</strong></h6>
                         <ul>
-                            {% for param in processor.parameters.keys() %}
-                                <li>{{ param }}: {{ processor.parameters[param] }}</li>
+                            {% for param, value in processor.get('parameters', {}).items() %}
+                                <li>{{ param }}: {{ value }}</li>
                             {% endfor %}
                         </ul>
                         <br />
