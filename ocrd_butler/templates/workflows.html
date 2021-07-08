@@ -71,8 +71,8 @@
                         <br />
                         <h5><strong>Parameters:</strong></h6>
                         <ul>
-                            {% for param in workflow.processors.parameters %}
-                                <li>{{ param }}: {{ workflow.processors.parameters[param] }}</li>
+                            {% for param in processor.parameters.keys() %}
+                                <li>{{ param }}: {{ processor.parameters[param] }}</li>
                             {% endfor %}
                         </ul>
                         <br />

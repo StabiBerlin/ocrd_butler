@@ -93,20 +93,19 @@ class Workflows(WorkflowBase):
         A workflow is a list of OCRD processors. By default every processor is used with its default values from its `ocrd-tool.json` or from fixed definitions in the butler, e.g. for the folders of the models. Its possible to overwrite these settings directly with given parameters.:
         [
             {
-                'ocrd-processor-0': {}
+                "name": "ocrd-example"
             },
             {
-                'ocrd-processor-n': {
-                    'parameter-name-0': 'parameter-value-0',
-                    'parameter-name-n': 'parameter-value-n',
+                "name": "ocrd-example-2",
+                "parameters": {
+                    "model": "/data/example/models"
                 }
-            }
+            },
         ]
         """
 
         data = self.workflow_data(request.json)
         workflow = db_model_Workflow.add(**data)
-
         return make_response({
             "message": "Workflow created.",
             "uid": workflow.uid,

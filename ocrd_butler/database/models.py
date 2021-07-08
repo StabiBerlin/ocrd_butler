@@ -83,18 +83,11 @@ class Workflow(db.Model):
 
         [
             {
-                "processor": "ocrd-sbb-binarize",
+                "name": "ocrd-example",
                 "parameters": {
-                "model": "/data/sbb_binarization/models",
-                "operation_level": "page"
+                    "model": "/data/example/models"
                 }
             },
-            {
-                "processor": "ocrd-example",
-                "parameters": {
-                "model": "/data/example/models"
-                }
-            }
         ]
     """
     __tablename__ = "workflows"
@@ -113,13 +106,12 @@ class Workflow(db.Model):
         self.processors = processors
 
     def to_json(self):
-        processors = self.processors
         return {
             "id": self.id,
             "uid": self.uid,
             "name": self.name,
             "description": self.description,
-            "processors": processors
+            "processors": self.processors
         }
 
     def __repr__(self):
