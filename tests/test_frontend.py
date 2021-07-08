@@ -161,7 +161,6 @@ class FrontendTests(TestCase):
         assert "ocrd-olena-binarize" in [elem.text for elem in html.find('h5')]
         assert "impl: sauvola-ms-split" in [elem.text for elem in html.find('li')]
         # TODO: check if there are the defaults added by validation
-        import ipdb; ipdb.set_trace()
 
     @responses.activate
     def test_create_task(self):
