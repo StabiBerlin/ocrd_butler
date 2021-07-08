@@ -318,7 +318,7 @@ class FrontendTests(TestCase):
         assert len(workflows) == 5
         assert type(workflows[0]) == models.Workflow
         mock_requests_get.return_value = type('', (object,), {
-            "json": [workflow.to_json() for workflow in workflows],
+            "json": lambda: [workflow.to_json() for workflow in workflows],
             "status_code": 200
         })
         response = self.client.get("/workflows")

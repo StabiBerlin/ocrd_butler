@@ -98,10 +98,10 @@ def workflows():
     current_workflows = []
     for workflow in results:
         current_workflows.append({
-            "id": workflow.id,
-            "name": workflow.name,
-            "description": workflow.description,
-            "processors": workflow.processors
+            "id": workflow.get('id'),
+            "name": workflow.get('name'),
+            "description": workflow.get('description'),
+            "processors": workflow.get('processors'),
         })
 
     return render_template(
