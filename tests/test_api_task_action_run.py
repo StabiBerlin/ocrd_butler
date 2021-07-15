@@ -119,13 +119,13 @@ class ApiTaskActionRunTests(TestCase):
                 {"name": "ocrd-tesserocr-segment-region"},
                 {"name": "ocrd-tesserocr-segment-line"},
                 {"name": "ocrd-tesserocr-segment-word"},
-                {"name": "ocrd-tesserocr-recognize"},
+                {
+                    "name": "ocrd-tesserocr-recognize",
+                    "parameters": {
+                        "model": "deu"
+                    }
+                },
             ],
-            parameters={
-                "ocrd-tesserocr-recognize": {
-                    "model": "deu"
-                }
-            }
         ))
         return response.json["id"]
 
