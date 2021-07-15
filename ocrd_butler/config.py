@@ -120,6 +120,7 @@ class Config(object):
         # "ocrd-skimage-denoise",
         # "ocrd-skimage-denoise-raw",
         # "ocrd-skimage-normalize",
+        "ocrd-dummy",
     ]
 
     PROCESSOR_SETTINGS = {
