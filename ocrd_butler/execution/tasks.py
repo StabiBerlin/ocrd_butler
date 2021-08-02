@@ -168,7 +168,9 @@ def run_task(self, task: models.Task) -> dict:
         # reload mets
         workspace.reload_mets()
 
-        current_app.logger.info("Finished processing task '%s'.", task["id"])
+        current_app.logger.info(f'Finished processor {processor["name"]} for task {task["uid"]}.')
+
+    current_app.logger.info(f'Finished processing task {task["uid"]}.')
 
     return {
         "task_id": task["id"],
