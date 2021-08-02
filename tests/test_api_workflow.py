@@ -54,7 +54,6 @@ class ApiWorkflowTests(TestCase):
         assert response.json["message"] == "Input payload validation failed"
         assert response.json["errors"] == {'processors': "'foobar' is not of type 'array'"}
 
-
     def test_create_workflow_with_wrong_processor_format(self):
         """Check if a new workflow is created."""
         response = self.get_workflow(processors=["foobar"])
@@ -126,6 +125,22 @@ class ApiWorkflowTests(TestCase):
         # OCR-D validator updates all parameters with default values.
         assert response.json["message"].startswith(
             "Wrong parameter. Error(s) while validating parameters \"{\'impl\': \'foobar\',")
+
+    def test_create_workflow_with_reused_processors(self):
+        """Check if a workflow with processors that are used multiple is created."""
+        foor = self.get_workflow(processors=[
+            {"name": "ocrd-olena-binarize"},
+            {"name": "ocrd-tesserocr-recognize"},
+            {"name": "ocrd-olena-binarize", "parameters": {"impl": "otsu"}},
+            {"name": "ocrd-olena-binarize"},
+        ])
+        response = self.client.get("/api/workflows/1")
+        assert response.json["processors"][0]["name"] == "ocrd-olena-binarize"
+        assert response.json["processors"][0]["parameters"]["impl"] != "otsu"
+        assert response.json["processors"][2]["name"] == "ocrd-olena-binarize"
+        assert response.json["processors"][2]["parameters"]["impl"] == "otsu"
+        assert response.json["processors"][3]["name"] == "ocrd-olena-binarize"
+        assert response.json["processors"][3]["parameters"]["impl"] != "otsu"
 
     def test_get_workflow(self):
         """Check if an existing workflow is returned."""
