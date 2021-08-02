@@ -187,7 +187,7 @@ class ApiTaskActionRunTests(TestCase):
         with open(os.path.join(ocr_results, result_files[2])) as result_file:
             text = result_file.read()
             assert text.startswith('<?xml version="1.0" encoding="UTF-8"?>')
-            assert "<pc:Unicode>" in text
+            assert "<pc:Word" in text
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
