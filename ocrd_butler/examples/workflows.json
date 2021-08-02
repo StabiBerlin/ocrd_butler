@@ -1,67 +1,77 @@
 {
     "workflows": [
         {
-            "name": "SBB - b-t-c-p2a",
-            "description": "Workflow with olena binarization and calamari recognize.",
-            "processors": [
-                "ocrd-sbb-binarize",
-                "ocrd-sbb-textline-detector",
-                "ocrd-calamari-recognize",
-                "ocrd-fileformat-transform"
-            ],
-            "parameters": {
-                "ocrd-sbb-binarize": {
-                    "model": "/data/sbb_binarization/models",
-                    "operation_level": "page"
-                },
-                "ocrd-sbb-textline-detector": {
-                    "model": "/data/sbb_textline_detector"
-                },
-                "ocrd-calamari-recognize": {
-                    "checkpoint": "/data/calamari_models/*ckpt.json",
-                    "voter": "confidence_voter_default_ctc",
-                    "textequiv_level": "word",
-                    "glyph_conf_cutoff": 0.001
-                },
-                "ocrd-fileformat-transform": {
-                    "from-to": "page alto"
-                }
-            }
-        }
-        ,
-        {
             "name": "SBB - binarize - textline - calamari",
             "description": "Workflow with olena binarization and calamari recognize.",
             "processors": [
-                "ocrd-sbb-binarize",
-                "ocrd-sbb-textline-detector",
-                "ocrd-calamari-recognize"
-            ],
-            "parameters": {
-                "ocrd-sbb-binarize": {
-                    "model": "/data/sbb_binarization/models",
-                    "operation_level": "page"
+                {
+                    "name": "ocrd-sbb-binarize",
+                    "parameters": {
+                        "model": "/data/sbb_binarization/models",
+                        "operation_level": "page"
+                    }
                 },
-                "ocrd-sbb-textline-detector": {
-                    "model": "/data/sbb_textline_detector"
+                {
+                    "name": "ocrd-sbb-textline-detector",
+                    "parameters": {
+                        "model": "/data/sbb_textline_detector"
+                    }
                 },
-                "ocrd-calamari-recognize": {
-                    "checkpoint": "/data/calamari_models/*ckpt.json",
-                    "voter": "confidence_voter_default_ctc",
-                    "textequiv_level": "word",
-                    "glyph_conf_cutoff": 0.001
+                {
+                    "name": "ocrd-calamari-recognize",
+                    "parameters": {
+                        "checkpoint": "/data/calamari_models/*ckpt.json",
+                        "voter": "confidence_voter_default_ctc",
+                        "textequiv_level": "word",
+                        "glyph_conf_cutoff": 0.001
+                    }
                 }
-            }
+            ]
+        }
+        ,
+        {
+            "name": "SBB - b-t-c-p2a",
+            "description": "Workflow with olena binarization and calamari recognize.",
+            "processors": [
+                {
+                    "name": "ocrd-sbb-binarize",
+                    "parameters": {
+                        "model": "/data/sbb_binarization/models",
+                        "operation_level": "page"
+                    }
+                },
+                {
+                    "name": "ocrd-sbb-textline-detector",
+                    "parameters": {
+                        "model": "/data/sbb_textline_detector"
+                    }
+                },
+                {
+                    "name": "ocrd-calamari-recognize",
+                    "parameters": {
+                        "checkpoint": "/data/calamari_models/*ckpt.json",
+                        "voter": "confidence_voter_default_ctc",
+                        "textequiv_level": "word",
+                        "glyph_conf_cutoff": 0.001
+                    }
+                },
+                {
+                    "name": "ocrd-fileformat-transform",
+                    "parameters": {
+                        "from-to": "page alto"
+                    }
+                }
+            ]
         }
         ,
         {
             "name": "Tesseract",
             "description": "Workflow with only tesseract processors",
             "processors": [
-                "ocrd-tesserocr-segment-region",
-                "ocrd-tesserocr-segment-line",
-                "ocrd-tesserocr-segment-word",
-                "ocrd-tesserocr-recognize"
+                { "name": "ocrd-tesserocr-segment-region" },
+                { "name": "ocrd-tesserocr-segment-line" },
+                { "name": "ocrd-tesserocr-segment-word" },
+                { "name": "ocrd-tesserocr-recognize" }
             ]
         }
         ,
@@ -69,35 +79,37 @@
             "name": "Tesseract - Calamari",
             "description": "Workflow with tesserocr preps and calamari recognize",
             "processors": [
-                "ocrd-tesserocr-segment-region",
-                "ocrd-tesserocr-segment-line",
-                "ocrd-tesserocr-segment-word",
-                "ocrd-calamari-recognize"
-            ],
-            "parameters": {
-                "ocrd-calamari-recognize": {
-                    "checkpoint": "/data/calamari_models/*ckpt.json"
+                { "name": "ocrd-tesserocr-segment-region" },
+                { "name": "ocrd-tesserocr-segment-line" },
+                { "name": "ocrd-tesserocr-segment-word" },
+                {
+                    "name": "ocrd-calamari-recognize",
+                    "parameters": {
+                        "checkpoint": "/data/calamari_models/*ckpt.json"
+                    }
                 }
-            }
+            ]
         }
         ,
         {
             "name": "Olena - Calamari",
             "description": "Workflow with olena binarization and calamari recognize",
             "processors": [
-                "ocrd-olena-binarize",
-                "ocrd-tesserocr-segment-region",
-                "ocrd-tesserocr-segment-line",
-                "ocrd-calamari-recognize"
-            ],
-            "parameters": {
-                "ocrd-olena-binarize": {
-                    "impl": "sauvola-ms-split"
+                {
+                    "name": "ocrd-olena-binarize",
+                    "parameters": {
+                        "impl": "sauvola-ms-split"
+                    }
                 },
-                "ocrd-calamari-recognize": {
-                    "checkpoint": "/data/calamari_models/*ckpt.json"
+                { "name": "ocrd-tesserocr-segment-line" },
+                { "name": "ocrd-tesserocr-segment-word" },
+                {
+                    "name": "ocrd-calamari-recognize",
+                    "parameters": {
+                        "checkpoint": "/data/calamari_models/*ckpt.json"
+                    }
                 }
-            }
+            ]
         }
     ]
 }

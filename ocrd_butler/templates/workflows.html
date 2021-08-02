@@ -67,11 +67,16 @@
 
                     <h4>Processors</h4>
                     {% for processor in workflow.processors %}
-                        {{ processor }}
+                        <h5>{{ processor.name }}</h5>
+                        <br />
+                        <h5><strong>Parameters:</strong></h6>
+                        <ul>
+                            {% for param, value in processor.get('parameters', {}).items() %}
+                                <li>{{ param }}: {{ value }}</li>
+                            {% endfor %}
+                        </ul>
                         <br />
                     {% endfor %}
-                    <h4>Parameters</h4>
-                    {{ workflow.parameters|safe }}
                 </p>
             {% endfor %}
 

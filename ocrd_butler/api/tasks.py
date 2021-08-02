@@ -271,22 +271,20 @@ class TaskActions(TasksBase):
 
     def run(self, task: db_model_Task):
         """ Run this task. """
-        # worker_task = run_task.apply_async(args=[task.to_json()],
-        #                                    countdown=20)
-        # worker_task = run_task(task.to_json())
         log.info("run task: %s", task)
-        worker_task = run_task.delay(task.to_json())
-        task.worker_task_id = worker_task.id
+
+        # run_task(task.to_json())  # use for debugging
+        celery_worker_task = run_task.delay(task.to_json())
+        # celery_worker_task = run_task.apply_async(args=[task.to_json()],
+        #                                    countdown=20)
+
+        task.worker_task_id = celery_worker_task.id
         db.session.commit()
 
         result = {
-            "worker_task_id": worker_task.id,
-            "status": worker_task.status,
-            "traceback": worker_task.traceback,
-            # "result_dir": worker_task["result_dir"],
-            # 'current': worker_task.info.get('current', 0),
-            # 'total': worker_task.info.get('total', 1),
-            # 'status': worker_task.info.get('status', '')
+            "worker_task_id": celery_worker_task.id,
+            "status": celery_worker_task.status,
+            "traceback": celery_worker_task.traceback,
         }
 
         return jsonify(result)

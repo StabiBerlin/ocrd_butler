@@ -77,6 +77,26 @@ class FrontendTests(TestCase):
             status=200
         )
 
+        responses.add(
+            method=responses.GET,
+            url='http://localhost/api/workflows',
+            body=json.dumps([
+                models.Workflow(
+                    **dict(
+                        name="TC Workflow",
+                        description="Workflow with tesseract and calamari recog.",
+                        processors=[{
+                            "name": "ocrd-olena-binarize",
+                            "parameters": {
+                                "impl": "sauvola-ms-split"
+                            }
+                        }]
+                    )
+                ).to_json()
+            ]),
+            status=200
+        )
+
     def tearDown(self):
         db.session.remove()
         db.drop_all()
@@ -93,7 +113,6 @@ class FrontendTests(TestCase):
             workflow_id="1",
             src="src",
         )
-        task.id = uid
         return task
 
     @mock.patch("ocrd_butler.database.models.Task.get_all")
@@ -136,13 +155,34 @@ class FrontendTests(TestCase):
             name="TC Workflow",
             description="Workflow with tesseract and calamari recog.",
             processors=[
-                "ocrd-tesserocr-segment-region",
-                "ocrd-tesserocr-segment-line",
-                "ocrd-tesserocr-segment-word",
-                "ocrd-calamari-recognize"
+                {"name": "ocrd-tesserocr-segment-region"},
+                {"name": "ocrd-tesserocr-segment-line"},
+                {"name": "ocrd-tesserocr-segment-word"},
+                {"name": "ocrd-calamari-recognize"},
             ]
         ))
         return workflow_response.json["id"]
+
+    def test_create_workflow(self):
+        assert self.client.post("/api/workflows", json=dict(
+            name="TC Workflow",
+            description="Workflow with tesseract and calamari recog.",
+            processors=[{
+                "name": "ocrd-olena-binarize",
+                "parameters": {
+                    "impl": "sauvola-ms-split"
+                }
+            }]
+        )).status == "201 CREATED"
+
+    @responses.activate
+    def test_show_workflows(self):
+        """Check if workflows are shown."""
+        response = self.client.get("/workflows")
+        html = HTML(html=response.data)
+        assert "ocrd-olena-binarize" in [elem.text for elem in html.find('h5')]
+        assert "impl: sauvola-ms-split" in [elem.text for elem in html.find('li')]
+        # TODO: check if there are the defaults added by validation
 
     @responses.activate
     def test_create_task(self):
@@ -297,14 +337,11 @@ class FrontendTests(TestCase):
         workflows = list(
             load_mock_workflows('ocrd_butler/examples/workflows.json')
         )
-        assert len(workflows) == 5
-        assert type(workflows[0]) == models.Workflow
         mock_requests_get.return_value = type('', (object,), {
-            "json": [workflow.to_json() for workflow in workflows],
+            "json": lambda: [workflow.to_json() for workflow in workflows],
             "status_code": 200
         })
         response = self.client.get("/workflows")
-        assert response.status_code == 200
         html = HTML(html=response.data)
         assert html.find(
             'body > div > div > div > h3:nth-child(2) > a'

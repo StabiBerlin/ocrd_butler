@@ -6,11 +6,6 @@ from flask_restx import fields
 from ocrd_butler.api.restx import api
 
 task_model = api.model("Task Model", {
-    "uid": fields.String(
-        title="UID",
-        required=True,
-        description="UID of the task",
-        help="Unique id used interal."),
     "src": fields.String(
         title="Source",
         required=True,
@@ -51,26 +46,26 @@ task_model = api.model("Task Model", {
         default={}),
 })
 
-
-class WorkflowProcessorsField(fields.Raw):
-    __schema_type__ = 'list'
+class WorkflowProcessors(fields.Raw):
+    __schema_type__ = 'array'
     __schema_format__ = 'JSON'
-    __schema_example__ = '["processor-1", "processor-2", ...]'
+    __schema_example__ = '''[
+            {
+                'name': 'ocrd-processor-0',
+                'parameters': {}
+            },
+            {
+                'name': 'ocrd-processor-n',
+                'parameters': {
+                    'parameter-name-0': 'parameter-value-0',
+                    'parameter-name-n': 'parameter-value-n',
+                }
+            }
+        ]
+    '''
 
     def format(self, value):
-        # return json.dumps(value)
         return value
-
-
-class WorkflowParametersField(fields.Raw):
-    __schema_type__ = 'dict'
-    __schema_format__ = 'JSON'
-    __schema_example__ = '{"processor-1": {"pamameter-1":"value-1", ...}, ...}'
-
-    def format(self, value):
-        # return json.dumps(value)
-        return value
-
 
 workflow_model = api.model("Workflow Model", {
     "name": fields.String(
@@ -83,19 +78,11 @@ workflow_model = api.model("Workflow Model", {
         required=False,
         description="Some more information what the workflow should fulfil.",
         help="Be as elaborative as needed."),
-    "processors": fields.List(
-        fields.String,
+    "processors": WorkflowProcessors(
         title="Processors",
         required=True,
         min_items=1,
-        unique=True,
-        description="The processor to be used.",
-        help="The processors will be executed in the given order."),
-    "parameters": WorkflowParametersField(
-        title="Parameters",
-        required=False,
-        unique=True,
-        default={},
-        description="The default parameters for the processors.",
-        help="The parameters will be use while running the processor. Can be overwritten in a task."),
+        unique=False,
+        description="The processors to be used in the workflow.",
+        help="The processors will be executed in the given order. The parameters will be filled up with the defaults. Can be overwritten in a task."),
 })

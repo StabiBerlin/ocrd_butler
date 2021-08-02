@@ -116,34 +116,62 @@ class ApiTaskActionRunTests(TestCase):
             name="T Workflow",
             description="Some foobar workflow.",
             processors=[
-                "ocrd-tesserocr-segment-region",
-                "ocrd-tesserocr-segment-line",
-                "ocrd-tesserocr-segment-word",
-                "ocrd-tesserocr-recognize",
+                {"name": "ocrd-tesserocr-segment-region"},
+                {"name": "ocrd-tesserocr-segment-line"},
+                {"name": "ocrd-tesserocr-segment-word"},
+                {
+                    "name": "ocrd-tesserocr-recognize",
+                    "parameters": {
+                        "model": "deu"
+                    }
+                },
             ],
-            parameters={
-                "ocrd-tesserocr-recognize": {
-                    "model": "deu"
-                }
-            }
         ))
         return response.json["id"]
 
-    def empty_workflow(self):
+    def light_workflow(self):
         """Creates a workflow without processors."""
         response = self.client.post("/api/workflows", json=dict(
-            name="Empty Workflow",
+            name="Light Workflow",
             description="Empty but not useless workflow.",
-            processors=[],
-            parameters={}
+            processors=[{
+                "name": "ocrd-tesserocr-segment-region"
+            }],
         ))
         return response.json["id"]
 
     @responses.activate
+    def test_task_run_dummy(self):
+        workflow_response = self.client.post(
+            '/api/workflows',
+            json=dict(
+                name='dummy workflow',
+                description='workflow containing only a dummy processor task',
+                processors=[dict(
+                    name='ocrd-dummy'
+                )]
+            )
+        ).json
+        assert workflow_response['message'] == 'Workflow created.'
+        task_response = self.client.post(
+            '/api/tasks',
+            json=dict(
+                workflow_id=workflow_response['id'],
+                src="http://foo.bar/mets.xml",
+            )
+        ).json
+        assert task_response['message'] == 'Task created.'
+        run_response = self.client.post(
+            f"/api/tasks/{task_response['id']}/run"
+        ).json
+        assert run_response['status'] == 'SUCCESS'
+
+    @responses.activate
+    @require_ocrd_processors("ocrd-tesserocr-segment-region")
     def test_task_max_file_download(self):
         """Check if the workspace is created."""
         self.client.post("/api/tasks", json=dict(
-            workflow_id=self.empty_workflow(),
+            workflow_id=self.light_workflow(),
             src="http://foo.bar/mets.xml",
             description="Check workspace task.",
             default_file_grp="MAX"
@@ -186,7 +214,7 @@ class ApiTaskActionRunTests(TestCase):
         with open(os.path.join(ocr_results, result_files[2])) as result_file:
             text = result_file.read()
             assert text.startswith('<?xml version="1.0" encoding="UTF-8"?>')
-            assert "<pc:Unicode>" in text
+            assert "<pc:Word" in text
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
@@ -202,10 +230,10 @@ class ApiTaskActionRunTests(TestCase):
             name="TC Workflow",
             description="Workflow with tesseract and calamari recog.",
             processors=[
-                "ocrd-tesserocr-segment-region",
-                "ocrd-tesserocr-segment-line",
-                "ocrd-tesserocr-segment-word",
-                "ocrd-calamari-recognize"
+                {"name": "ocrd-tesserocr-segment-region"},
+                {"name": "ocrd-tesserocr-segment-line"},
+                {"name": "ocrd-tesserocr-segment-word"},
+                {"name": "ocrd-calamari-recognize"},
             ]
         ))
 
@@ -258,19 +286,19 @@ class ApiTaskActionRunTests(TestCase):
             description="Workflow with olena binarization, tesseract segmentation"
                         " and calamari recog.",
             processors=[
-                "ocrd-olena-binarize",
-                "ocrd-tesserocr-segment-region",
-                "ocrd-tesserocr-segment-line",
-                "ocrd-calamari-recognize"
-            ],
-            parameters={
-                "ocrd-olena-binarize": {
-                    "impl": "sauvola-ms-split"
-                }
-            }
+                {
+                    "name": "ocrd-olena-binarize",
+                    "parameters": {"impl": "sauvola-ms-split"}
+                },
+                {"name": "ocrd-tesserocr-segment-region"},
+                {"name": "ocrd-tesserocr-segment-line"},
+                {"name": "ocrd-calamari-recognize"},
+            ]
         ))
 
-        assert workflow_response.json == {'id': 1, 'message': 'Workflow created.'}
+        assert workflow_response.json["id"] == 1
+        assert workflow_response.json["uid"] is not None
+        assert workflow_response.json["message"] == "Workflow created."
 
         task_response = self.client.post("/api/tasks", json=dict(
             workflow_id=workflow_response.json["id"],
@@ -295,6 +323,7 @@ class ApiTaskActionRunTests(TestCase):
         response = self.client.post(
             "/api/tasks/{0}/run".format(task_response.json["id"])
         )
+
         assert response.status_code == 200
         assert response.json["status"] == "SUCCESS"
 

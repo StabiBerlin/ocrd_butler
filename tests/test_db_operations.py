@@ -1,4 +1,5 @@
 from flask_testing import TestCase
+from ocrd_butler.api.processors import Processors
 
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.factory import create_app, db
@@ -12,6 +13,22 @@ task_data = dict(
     description="desc",
 )
 
+workflow_data = dict(
+    uid="123",
+    name="name",
+    description="desc",
+    processors = [{
+        "name": "foo"
+    }]
+)
+
+workflow_data_no_uid = dict(
+    name="name2",
+    description="desc2",
+    processors = [{
+        "name": "bar"
+    }]
+)
 
 class DatabaseModelTests(TestCase):
 
@@ -47,3 +64,11 @@ class DatabaseModelTests(TestCase):
         assert models.Task.count() > 0
         assert models.Task.delete(task.id) is True
         assert models.Task.delete(task.id) is False
+
+    def test_workflow(self):
+        workflow = models.Workflow.create(**workflow_data).save()
+        assert models.Workflow.count() == 1
+        workflows = models.Workflow.get_all()
+        assert type(workflows[0]) == models.Workflow
+        workflow = models.Workflow.create(**workflow_data_no_uid).save()
+        assert workflow is not None

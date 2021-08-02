@@ -3,13 +3,14 @@
 
 from __future__ import annotations
 from typing import List
+import uuid
 
 from ocrd_butler.database import db
 from ocrd_butler.util import (
     logger,
     to_json,
 )
-# from sqlalchemy.dialects.postgresql import JSON
+
 
 log = logger(__name__)
 
@@ -35,10 +36,12 @@ class Task(db.Model):
     )
 
     def __init__(
-        self, uid, src, workflow_id, parameters={}, description="",
+        self, src, workflow_id, uid=None, parameters={}, description="",
         default_file_grp="DEFAULT", worker_task_id=None,
         status="CREATED", results={}
     ):
+        if uid is None:
+            uid = uuid.uuid4().__str__()
         self.uid = uid
         self.src = src
         self.workflow_id = workflow_id
@@ -74,27 +77,41 @@ class Task(db.Model):
 
 
 class Workflow(db.Model):
-    """ Database model for our workflow. """
+    """ Database model for our workflow.
+
+    Example usage::
+
+        [
+            {
+                "name": "ocrd-example",
+                "parameters": {
+                    "model": "/data/example/models"
+                }
+            },
+        ]
+    """
     __tablename__ = "workflows"
     id = db.Column(db.Integer, primary_key=True)
+    uid = db.Column(db.String(64))
     name = db.Column(db.String(64))
     description = db.Column(db.String(1024))
     processors = db.Column(db.JSON)
-    parameters = db.Column(db.JSON)
 
-    def __init__(self, name, description, processors, parameters=None):
+    def __init__(self, name, description, processors, uid=None):
+        if uid is None:
+            uid = uuid.uuid4().__str__()
+        self.uid = uid
         self.name = name
         self.description = description
         self.processors = processors
-        self.parameters = parameters
 
     def to_json(self):
         return {
             "id": self.id,
+            "uid": self.uid,
             "name": self.name,
             "description": self.description,
-            "processors": self.processors,
-            "parameters": self.parameters,
+            "processors": self.processors
         }
 
     def __repr__(self):
