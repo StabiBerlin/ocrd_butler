@@ -119,13 +119,13 @@ class ApiTaskActionRunTests(TestCase):
                 {"name": "ocrd-tesserocr-segment-region"},
                 {"name": "ocrd-tesserocr-segment-line"},
                 {"name": "ocrd-tesserocr-segment-word"},
-                {"name": "ocrd-tesserocr-recognize"},
+                {
+                    "name": "ocrd-tesserocr-recognize",
+                    "parameters": {
+                        "model": "deu"
+                    }
+                },
             ],
-            parameters={
-                "ocrd-tesserocr-recognize": {
-                    "model": "deu"
-                }
-            }
         ))
         return response.json["id"]
 
@@ -141,6 +141,33 @@ class ApiTaskActionRunTests(TestCase):
         return response.json["id"]
 
     @responses.activate
+    def test_task_run_dummy(self):
+        workflow_response = self.client.post(
+            '/api/workflows',
+            json=dict(
+                name='dummy workflow',
+                description='workflow containing only a dummy processor task',
+                processors=[dict(
+                    name='ocrd-dummy'
+                )]
+            )
+        ).json
+        assert workflow_response['message'] == 'Workflow created.'
+        task_response = self.client.post(
+            '/api/tasks',
+            json=dict(
+                workflow_id=workflow_response['id'],
+                src="http://foo.bar/mets.xml",
+            )
+        ).json
+        assert task_response['message'] == 'Task created.'
+        run_response = self.client.post(
+            f"/api/tasks/{task_response['id']}/run"
+        ).json
+        assert run_response['status'] == 'SUCCESS'
+
+    @responses.activate
+    @require_ocrd_processors("ocrd-tesserocr-segment-region")
     def test_task_max_file_download(self):
         """Check if the workspace is created."""
         self.client.post("/api/tasks", json=dict(
@@ -203,10 +230,10 @@ class ApiTaskActionRunTests(TestCase):
             name="TC Workflow",
             description="Workflow with tesseract and calamari recog.",
             processors=[
-                { "name": "ocrd-tesserocr-segment-region" },
-                { "name": "ocrd-tesserocr-segment-line" },
-                { "name": "ocrd-tesserocr-segment-word"},
-                { "name": "ocrd-calamari-recognize" },
+                {"name": "ocrd-tesserocr-segment-region"},
+                {"name": "ocrd-tesserocr-segment-line"},
+                {"name": "ocrd-tesserocr-segment-word"},
+                {"name": "ocrd-calamari-recognize"},
             ]
         ))
 
@@ -258,13 +285,14 @@ class ApiTaskActionRunTests(TestCase):
             name="TC Workflow",
             description="Workflow with olena binarization, tesseract segmentation"
                         " and calamari recog.",
-            processors=[{
+            processors=[
+                {
                     "name": "ocrd-olena-binarize",
-                    "parameters": { "impl": "sauvola-ms-split" }
+                    "parameters": {"impl": "sauvola-ms-split"}
                 },
-                {"name": "ocrd-tesserocr-segment-region" },
-                {"name": "ocrd-tesserocr-segment-line" },
-                {"name": "ocrd-calamari-recognize" },
+                {"name": "ocrd-tesserocr-segment-region"},
+                {"name": "ocrd-tesserocr-segment-line"},
+                {"name": "ocrd-calamari-recognize"},
             ]
         ))
 
