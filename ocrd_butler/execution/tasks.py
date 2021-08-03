@@ -4,6 +4,7 @@
 
 import json
 from pathlib import PurePosixPath
+import requests
 from urllib.parse import (
     urlparse,
     unquote
@@ -16,7 +17,10 @@ from celery.signals import (
     task_success,
 )
 
-from flask import current_app
+from flask import (
+    current_app,
+    request
+)
 
 from ocrd_models import OcrdFile
 from ocrd.resolver import Resolver
@@ -24,13 +28,15 @@ from ocrd.processor.base import run_cli
 from ocrd.workspace import Workspace
 
 from ocrd_butler import celery
-from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.database import (
     db,
     models,
 )
 from ocrd_butler.database.models import Task as db_model_Task
-from ocrd_butler.util import logger
+from ocrd_butler.util import (
+    logger,
+    host_url
+)
 
 log = logger(__name__)
 
@@ -146,8 +152,6 @@ def run_task(self, task: models.Task) -> dict:
 
         # Its possible to override the parameters of the processor in the task.
         kwargs = {"parameter": {}}
-        # if processor["name"] in task["workflow"]["processors"]:
-        #     kwargs["parameter"].update(task["workflow"]["processors"][processor_name])
         if "parameters" in processor:
             kwargs["parameter"].update(processor["parameters"])
         if processor["name"] in task["parameters"]:
@@ -169,6 +173,11 @@ def run_task(self, task: models.Task) -> dict:
         workspace.reload_mets()
 
         current_app.logger.info(f'Finished processor {processor["name"]} for task {task["uid"]}.')
+
+    # if there are produced page xml results, convert it also to alto
+    response = requests.post(f"{host_url(request)}api/tasks/{task['uid']}/page_to_alto")
+    if response.json().get('status') == 'SUCCESS':
+        current_app.logger.info(f'Finished creating alto from page for task {task["uid"]}.')
 
     current_app.logger.info(f'Finished processing task {task["uid"]}.')
 

@@ -4,6 +4,7 @@
 
 import pytest
 import os
+import json
 import glob
 import responses
 import shutil
@@ -161,21 +162,38 @@ class ApiTaskActionRunTests(TestCase):
             )
         ).json
         assert task_response['message'] == 'Task created.'
+        self.add_response_action(task_response['uid'])
         run_response = self.client.post(
             f"/api/tasks/{task_response['id']}/run"
         ).json
         assert run_response['status'] == 'SUCCESS'
 
+    def add_response_action(self, uid, action='page_to_alto'):
+        responses.add(
+            method=responses.POST,
+            url=(
+                f"http://localhost/api/tasks/{uid}/{action}"
+            ),
+            body=json.dumps({
+                "status": "SUCCESS",
+                "msg": f"works"
+            }).encode('utf-8'),
+            status=200,
+            content_type="application/json"
+        )
+
     @responses.activate
     @require_ocrd_processors("ocrd-tesserocr-segment-region")
     def test_task_max_file_download(self):
         """Check if the workspace is created."""
-        self.client.post("/api/tasks", json=dict(
+        task_response = self.client.post("/api/tasks", json=dict(
             workflow_id=self.light_workflow(),
             src="http://foo.bar/mets.xml",
             description="Check workspace task.",
             default_file_grp="MAX"
         ))
+        self.add_response_action(task_response.json['uid'])
+
         self.client.post("/api/tasks/1/run")
         result_response = self.client.get("/api/tasks/1/results")
         max_file_dir = os.path.join(result_response.json["result_dir"], "MAX")
@@ -194,11 +212,12 @@ class ApiTaskActionRunTests(TestCase):
     )
     def test_task_tesserocr(self, mock_run_task):
         """Check if a new task is created."""
-        response = self.client.post("/api/tasks", json=dict(
+        task_response = self.client.post("/api/tasks", json=dict(
             workflow_id=self.t_workflow(),
             src="http://foo.bar/mets.xml",
             description="Tesserocr task."
         ))
+        self.add_response_action(task_response.json['uid'])
 
         response = self.client.post("/api/tasks/1/run")
         assert response.status_code == 200
@@ -248,6 +267,7 @@ class ApiTaskActionRunTests(TestCase):
                 }
             }
         ))
+        self.add_response_action(task_response.json['uid'])
 
         response = self.client.post("/api/tasks/{0}/run".format(
             task_response.json["uid"]))
@@ -319,6 +339,8 @@ class ApiTaskActionRunTests(TestCase):
         assert task_response.json["id"] == 1
         assert len(task_response.json["uid"]) == 36
         assert task_response.json["message"] == "Task created."
+
+        self.add_response_action(task_response.json['uid'])
 
         response = self.client.post(
             "/api/tasks/{0}/run".format(task_response.json["id"])
