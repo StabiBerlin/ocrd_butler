@@ -36,22 +36,18 @@ from ocrd_butler.database.models import Workflow as db_model_Workflow
 from ocrd_butler.database.models import Task as db_model_Task
 
 from ocrd_butler.execution.tasks import run_task
-from ocrd_butler.util import logger, to_json, host_url, flower_url
+from ocrd_butler.util import (
+    logger,
+    to_json,
+    host_url,
+    flower_url,
+    ocr_result_path,
+    page_xml_namespaces,
+)
 
 log = logger(__name__)
 
 task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
-
-page_xml_namespaces = {
-    "page_2009-03-16": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2009-03-16",
-    "page_2010-01-12": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2010-01-12",
-    "page_2010-03-19": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2010-03-19",
-    "page_2013-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15",
-    "page_2016-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2016-07-15",
-    "page_2017-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2017-07-15",
-    "page_2018-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2018-07-15",
-    "page_2019-07-15": "http://schema.primaresearch.org/PAGE/gts/pagecontent/2019-07-15"
-}
 
 
 # get the status of a task
@@ -307,11 +303,10 @@ class TaskActions(TasksBase):
     def page_to_alto(self, task):
         """ Convert page files to alto. """
         task_info = task_information(task.worker_task_id)
-        page_result_dir = self.page_result_dir(task_info)
-        page_result_path = pathlib.Path(page_result_dir)
+        page_result_path = ocr_result_path(task_info['result']['result_dir'])
         alto_result_path = self.alto_result_path(task_info)
 
-        if page_result_dir is None:
+        if page_result_path is None:
             return jsonify({
                 "status": "ERROR",
                 "msg": f"Can't find page results for task {task_info['result']['task_id']}"
@@ -330,17 +325,6 @@ class TaskActions(TasksBase):
             "msg": f"You can get the results via {host_url(request)}api/tasks/{task.uid}/download_alto"
         })
 
-    def page_result_dir(self, task_info: dict, path_part: str = "OCR-D-OCR") -> pathlib.Path:
-        """ Get base path to the page xml results of the task. """
-        result_xml_files = glob.glob(f"{task_info['result']['result_dir']}/*/*.xml")
-        for file in result_xml_files:
-            if not path_part in file:  # This is a bit fixed.
-                continue
-            tree = ET.parse(file)
-            xmlns = tree.getroot().tag.split("}")[0].strip("{")
-            if xmlns in page_xml_namespaces.values():
-                return os.path.dirname(file)
-
     def alto_result_path(self, task_info: dict) -> pathlib.Path:
         """ Get path to dir for alto xml files. If it not exists, it will be created. """
         alto_path = f"{task_info['result']['result_dir']}/OCR-D-OCR-ALTO"
@@ -353,10 +337,9 @@ class TaskActions(TasksBase):
             METS file and DEFAULT images.
         """
         task_info = task_information(task.worker_task_id)
-        page_result_dir = self.page_result_dir(task_info)
-        page_result_path = pathlib.Path(page_result_dir)
+        page_result_path = ocr_result_path(task_info['result']['result_dir'])
 
-        if page_result_dir is None:
+        if page_result_path is None:
             return jsonify({
                 "status": "ERROR",
                 "msg": f"Can't find page results for task {task_info['result']['task_id']}"
@@ -418,10 +401,9 @@ class TaskActions(TasksBase):
         """ Download the results of the task as text. """
         # https://github.com/qurator-spk/dinglehopper/blob/master/qurator/dinglehopper/extracted_text.py#L95
         task_info = task_information(task.worker_task_id)
-        page_result_dir = self.page_result_dir(task_info)
-        page_result_path = pathlib.Path(page_result_dir)
+        page_result_path = ocr_result_path(task_info['result']['result_dir'])
 
-        if page_result_dir is None:
+        if page_result_path is None:
             return jsonify({
                 "status": "ERROR",
                 "msg": f"Can't find page results for task {task_info['result']['task_id']}"
