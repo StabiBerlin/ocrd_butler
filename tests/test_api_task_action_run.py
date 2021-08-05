@@ -13,6 +13,7 @@ from unittest import mock
 from flask_testing import TestCase
 
 from ocrd_butler.config import TestingConfig
+from ocrd_butler.database import models as db_model
 from ocrd_butler.factory import create_app, db
 
 from . import require_ocrd_processors
@@ -185,7 +186,7 @@ class ApiTaskActionRunTests(TestCase):
     @responses.activate
     @require_ocrd_processors("ocrd-tesserocr-segment-region")
     def test_task_max_file_download(self):
-        """Check if the workspace is created."""
+        """Check if max size images are downloaded."""
         task_response = self.client.post("/api/tasks", json=dict(
             workflow_id=self.light_workflow(),
             src="http://foo.bar/mets.xml",
@@ -201,6 +202,30 @@ class ApiTaskActionRunTests(TestCase):
         with open(os.path.join(max_file_dir, max_files[2]), "rb") as img_file:
             content = img_file.read()
             assert content.startswith(b"\xff\xd8\xff\xe0\x00\x10JFIF")
+
+    @responses.activate
+    @require_ocrd_processors("ocrd-tesserocr-segment-region")
+    def test_task_status_change(self):
+        """ test response codes for API for task status
+        """
+        task_response = self.client.post("/api/tasks", json=dict(
+            workflow_id=self.light_workflow(),
+            src="http://foo.bar/mets.xml",
+            description="Check workspace task.",
+            default_file_grp="MAX"
+        ))
+        self.add_response_action(task_response.json['uid'])
+
+        response = self.client.get(f"/api/tasks/{task_response.json['uid']}/status")
+        assert response.status_code == 200
+        assert response.data == b'{\n  "status": "CREATED"\n}\n'
+
+        response = self.client.post("/api/tasks/1/run")
+
+        response = self.client.get(f"/api/tasks/{task_response.json['uid']}/status")
+        assert response.status_code == 200
+        assert response.data == b'{\n  "status": "SUCCESS"\n}\n'
+
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate

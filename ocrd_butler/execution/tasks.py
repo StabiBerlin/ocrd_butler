@@ -43,11 +43,17 @@ log = logger(__name__)
 
 @task_prerun.connect
 def task_prerun_handler(task_id, task, *args, **kwargs):
+    task = db_model_Task.query.filter_by(id=task["task_id"]).first()
+    task.status = "STARTED"
+    db.session.commit()
     current_app.logger.info("Start processing task '%s'.", task_id)
 
 
 @task_postrun.connect
 def task_postrun_handler(task_id, task, *args, **kwargs):
+    task = db_model_Task.query.filter_by(id=task["task_id"]).first()
+    task.status = "FINISHED"
+    db.session.commit()
     current_app.logger.info("Finished processing task '%s'.", task_id)
 
 
