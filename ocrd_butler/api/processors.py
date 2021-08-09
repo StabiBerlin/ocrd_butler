@@ -8,13 +8,14 @@ import copy
 
 from flask import jsonify
 from flask_restx import Resource
+import ocrd_butler
 
 from ocrd_butler.api.restx import api
 from ocrd_butler.util import logger
 from ocrd_butler import config as ocrd_config
 
 
-log = logger(__name__)
+log = logger('butler')
 
 processors_namespace = api.namespace(
     "processors",

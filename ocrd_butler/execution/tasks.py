@@ -38,7 +38,7 @@ from ocrd_butler.util import (
     host_url
 )
 
-log = logger(__name__)
+log = logger('butler_tasks')
 
 
 @task_prerun.connect
@@ -143,6 +143,7 @@ def run_task(self, task: models.Task) -> dict:
                              task["uid"])
     resolver = Resolver()
     workspace = prepare_workspace(task, resolver, dst_dir)
+    current_app.logger.info(f"Prepared workspace for task '{task['uid']}'.")
     task_processors = task["workflow"]["processors"]
 
     # TODO: Steps could be saved along the other task information to get a

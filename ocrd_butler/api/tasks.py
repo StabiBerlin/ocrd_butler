@@ -45,13 +45,12 @@ from ocrd_butler.util import (
     page_xml_namespaces,
 )
 
-log = logger(__name__)
+log = logger('butler')
 
 task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 
 
 # get the status of a task
-# get the results of a task - this collect links to the resources like mets files, images, etc.
 # stop a running task
 # delete a task
 # archive a task
@@ -269,7 +268,7 @@ class TaskActions(TasksBase):
         """ Run this task. """
         log.info("run task: %s", task)
 
-        # run_task(task.to_json())  # use for debugging
+        # celery_worker_task = run_task(task.to_json())  # use for debugging
         celery_worker_task = run_task.delay(task.to_json())
         # celery_worker_task = run_task.apply_async(args=[task.to_json()],
         #                                    countdown=20)

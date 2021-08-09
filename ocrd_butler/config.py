@@ -9,7 +9,7 @@ import subprocess
 
 from .util import logger
 
-log = logger(__name__)
+log = logger('butler')
 DEFAULT_PROFILE = 'DEV'
 
 

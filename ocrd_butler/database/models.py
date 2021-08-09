@@ -12,7 +12,7 @@ from ocrd_butler.util import (
 )
 
 
-log = logger(__name__)
+log = logger('butler')
 
 
 class Task(db.Model):

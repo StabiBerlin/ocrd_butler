@@ -9,6 +9,7 @@ import pathlib
 import re
 import logging.config
 import xml.etree.ElementTree as ET
+import yaml
 
 
 page_xml_namespaces = {
@@ -24,15 +25,15 @@ page_xml_namespaces = {
 
 
 system_conf = '/data/ocrd-butler/logging.conf'
-local_conf = f'{os.getcwd()}/logging.conf'
+local_conf = f'{os.getcwd()}/logging.yaml'
 
 for conf in (system_conf, local_conf):
     if(os.path.exists(conf)):
         conf_path = os.path.normpath(os.path.join(os.path.dirname(__file__), conf))
-        logging.config.fileConfig(conf_path)
-        break
-log = logging.getLogger(__name__)
-
+        with open(conf_path, 'rt') as f:
+            config = yaml.safe_load(f.read())
+            logging.config.dictConfig(config)
+            break
 
 def logger(name: str) -> logging.Logger:
     """ returns logger instance for given identifier.
@@ -43,12 +44,7 @@ def logger(name: str) -> logging.Logger:
     """
     return logging.getLogger(name)
 
-
-logging_conf_path = os.path.normpath(os.path.join(
-    os.path.dirname(__file__), '../logging.conf'))
-logging.config.fileConfig(logging_conf_path)
-log = logging.getLogger(__name__)
-
+log = logging.getLogger('butler')
 
 def camel_case_split(identifier):
     """CamelCase split"""

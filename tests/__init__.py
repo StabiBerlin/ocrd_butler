@@ -12,7 +12,7 @@ from ocrd_butler.config import Config
 from ocrd_butler.database.models import Workflow
 
 
-log = logger(__name__)
+log = logger('butler')
 
 
 def load_mock_workflows(filename: str) -> Iterable:
