@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Utils module."""
+from typing import Dict, List, Union
 
 import os
 import json
@@ -77,7 +78,10 @@ def flower_url(request):
     return f"{request.host_url}/flower"
 
 
-def to_json(data):
+def to_json(data: str) -> Union[Dict, List]:
+    """ deserialize string, after replacing all occurrences of single quotes
+    with double quotes. If input is not a string, it is being returned as-is.
+    """
     if isinstance(data, str):
         data = data.replace("'", '"')
         data = json.loads(data)
