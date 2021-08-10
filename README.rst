@@ -102,13 +102,13 @@ For some modules in `ocrd_all`_ there are further files nessesary, e.g. trained 
   > ocrd resmgr download ocrd-sbb-binarize default -al cwd
 
 
-Start celery worker:
+Start celery worker (i.e. ``make run-celery``):
 
 .. code-block:: bash
 
     ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
 
-Start flower monitor:
+Start flower monitor (i.e. ``make run-flower``):
 
 .. code-block:: bash
 
@@ -117,7 +117,7 @@ Start flower monitor:
 Flower monitor: http://localhost:5555
 
 
-Run the app:
+Run the app (i.e. ``make run-flask``):
 
 .. code-block:: bash
 

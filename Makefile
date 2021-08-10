@@ -97,13 +97,16 @@ dist: clean ## builds source and wheel package
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
-run-celery:
+run-celery: ## activate venv && start celery worker ocrd_butler.celery_worker
 	. ../ocrd_all/venv/bin/activate; TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
 
-run-flask:
+run-flask: ## activate venv && run ocrd_butler/app.py
 	. ../ocrd_all/venv/bin/activate; FLASK_APP=ocrd_butler/app.py flask run
 
-run-flower:
+flask-routes: ## list routes handled by butler app
+	. ../ocrd_all/venv/bin/activate; FLASK_APP=ocrd_butler/app.py flask routes
+
+run-flower: ## activate venv && start flower instance, connecting to redis broker at port 6379
 	. ../ocrd_all/venv/bin/activate; flower --broker redis://localhost:6379 --persistent=True --db=flower --log=debug
 
 tesseract-model: ## install trained model for tesseract
