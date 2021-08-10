@@ -107,16 +107,16 @@ run-flower:
 	. ../ocrd_all/venv/bin/activate; flower --broker redis://localhost:6379 --persistent=True --db=flower --log=debug
 
 tesseract-model: ## install trained model for tesseract
-	mkdir -p /data/tesseract_models && cd /data/tesseract_models; \
-	wget https://qurator-data.de/tesseract-models/GT4HistOCR/models.tar; \
-	tar -xf models.tar -C /usr/share/tesseract-ocr/4.00/tessdata/ GT4HistOCR_2000000.traineddata
+	ocrd resmgr download ocrd-tesserocr-recognize Fraktur_GT4HistOCR.traineddata -a
 
 calamari-model: ## install trained model for calamari
-	mkdir -p /data/calamari_models && cd /data/calamari_models; \
-	wget https://qurator-data.de/calamari-models/GT4HistOCR/model.tar.xz; \
-	tar -xf model.tar.xz
+	mkdir -p /data && cd /data; \
+	ocrd resmgr download ocrd-calamari-recognize qurator-gt4histocr-1.0 -al cwd
 
 textline-detector-model: ## install trained model for sbb textline detector
-	mkdir -p /data/sbb_textline_detector && cd /data/sbb_textline_detector; \
-	wget https://qurator-data.de/sbb_textline_detector/models.tar.gz; \
-	tar -xzf models.tar.gz
+	mkdir -p /data && cd /data; \
+	ocrd resmgr download ocrd-sbb-textline-detector default -al cwd
+
+sbb-binarize-model: ## install trained model for the sbb binarization processor
+	mkdir -p /data && cd /data; \
+	ocrd resmgr download ocrd-sbb-binarize default -al cwd
