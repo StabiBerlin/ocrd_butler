@@ -61,7 +61,7 @@ test-init: ## download current checkpoint data files from Calamari OCR github re
 	done; done
         endif
 
-test: test-init ## run tests quickly with the default Python
+test: test-init ocrd-venv ## run tests quickly with the default Python
 	PROFILE=test TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata py.test
 
 test-all: ## run tests on every Python version with tox
@@ -97,17 +97,20 @@ dist: clean ## builds source and wheel package
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
-run-celery: ## activate venv && start celery worker ocrd_butler.celery_worker
-	. ../ocrd_all/venv/bin/activate; TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
+ocrd-venv: ## activate python virtual environment under relative path ../ocrd_all/venv
+	which deactivate &>/dev/null || . ../ocrd_all/venv/bin/activate
 
-run-flask: ## activate venv && run ocrd_butler/app.py
-	. ../ocrd_all/venv/bin/activate; FLASK_APP=ocrd_butler/app.py flask run
+run-celery: ocrd-venv ## start celery worker ocrd_butler.celery_worker
+	TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
 
-flask-routes: ## list routes handled by butler app
-	. ../ocrd_all/venv/bin/activate; FLASK_APP=ocrd_butler/app.py flask routes
+run-flask: ocrd-venv ##run ocrd_butler/app.py
+	FLASK_APP=ocrd_butler/app.py flask run
 
-run-flower: ## activate venv && start flower instance, connecting to redis broker at port 6379
-	. ../ocrd_all/venv/bin/activate; flower --broker redis://localhost:6379 --persistent=True --db=flower --log=debug
+flask-routes: ocrd-venv ## list routes handled by butler app
+	FLASK_APP=ocrd_butler/app.py flask routes
+
+run-flower: ocrd-venv ## start flower instance, connecting to redis broker at port 6379
+	NO_PROXY='localhost,content.staatsbibliothek-berlin.de' flower --broker redis://localhost:6379 --persistent=True --db=flower --log=debug
 
 tesseract-model: ## install trained model for tesseract
 	ocrd resmgr download ocrd-tesserocr-recognize Fraktur_GT4HistOCR.traineddata -a
