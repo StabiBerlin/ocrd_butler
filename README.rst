@@ -72,18 +72,17 @@ For some modules in `ocrd_all`_ there are further files nessesary, e.g. trained 
 
 .. code-block:: bash
 
-  > mkdir -p /data/sbb_textline_detector && cd /data/sbb_textline_detector
-  > wget https://qurator-data.de/sbb_textline_detector/models.tar.gz
-  > tar xfz models.tar.gz
+  > mkdir -p /data && cd /data; \
+  > ocrd resmgr download ocrd-sbb-textline-detector default -al cwd
 
 
 * ``ocrd_calamari`` (i.e. ``make calamari-model``):
 
 .. code-block:: bash
 
-  > mkdir -p /data/calamari_models && cd /data/calamari_models
-  > wget https://qurator-data.de/calamari-models/GT4HistOCR/model.tar.xz
-  > tar xf model.tar.xz
+  > mkdir -p /data && cd /data; \
+  > ocrd resmgr download ocrd-calamari-recognize qurator-gt4histocr-1.0 -al cwd
+
 
 * ``ocrd_tesserocr`` (i.e. ``make tesseract-model``):
 
@@ -95,14 +94,21 @@ For some modules in `ocrd_all`_ there are further files nessesary, e.g. trained 
   > cp GT4HistOCR_2000000.traineddata /usr/share/tesseract-ocr/4.00/tessdata/
 
 
+* ``ocrd-sbb-binarize`` (i.e. ``make sbb-binarize-model``)
 
-Start celery worker:
+.. code-block:: bash
+
+  > mkdir -p /data && cd /data; \
+  > ocrd resmgr download ocrd-sbb-binarize default -al cwd
+
+
+Start celery worker (i.e. ``make run-celery``):
 
 .. code-block:: bash
 
     ╰─$ TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
 
-Start flower monitor:
+Start flower monitor (i.e. ``make run-flower``):
 
 .. code-block:: bash
 
@@ -111,7 +117,7 @@ Start flower monitor:
 Flower monitor: http://localhost:5555
 
 
-Run the app:
+Run the app (i.e. ``make run-flask``):
 
 .. code-block:: bash
 

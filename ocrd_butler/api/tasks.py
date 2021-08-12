@@ -175,6 +175,17 @@ class TaskRoot(TasksBase):
             "uid": task.uid,
         }, 201)
 
+    @api.doc(reponses={200: "Found"})
+    def get(self):
+        """ Get all tasks.
+        """
+        return jsonify(
+            [
+                task.to_json()
+                for task in db_model_Task.get_all()
+            ]
+        )
+
 
 @task_namespace.route("/<string:task_id>/<string:action>")
 class TaskActions(TasksBase):

@@ -52,6 +52,20 @@ class ApiTaskTests(TestCase):
         assert response.json["status"] == "CREATED"
         assert response.json["results"] == {}
 
+    def test_get_all_tasks(self):
+        """ test /api/tasks GET response
+        """
+        self.client.post(
+            '/api/tasks',
+            json={
+                'workflow_id': self.workflow(),
+                'src': 'http://url',
+            }
+        )
+        response = self.client.get('/api/tasks')
+        assert response.status_code == 200
+        assert len(response.json) == 1
+
     def test_change_task(self):
         """Check if a new task is created."""
         response = self.client.post("/api/tasks", json=dict(

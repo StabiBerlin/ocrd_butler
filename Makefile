@@ -61,8 +61,8 @@ test-init: ## download current checkpoint data files from Calamari OCR github re
 	done; done
         endif
 
-test: test-init ## run tests quickly with the default Python
-	PROFILE=test TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata py.test --doctest-modules ocrd_butler
+test: test-init ocrd-venv ## run tests quickly with the default Python
+	PROFILE=test TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata py.test
 
 test-all: ## run tests on every Python version with tox
 	tox
@@ -97,26 +97,32 @@ dist: clean ## builds source and wheel package
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
-run-celery:
-	. ../ocrd_all/venv/bin/activate; TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
+ocrd-venv: ## activate python virtual environment under relative path ../ocrd_all/venv
+	which deactivate &>/dev/null || . ../ocrd_all/venv/bin/activate
 
-run-flask:
-	. ../ocrd_all/venv/bin/activate; FLASK_APP=ocrd_butler/app.py flask run
+run-celery: ocrd-venv ## start celery worker ocrd_butler.celery_worker
+	TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
 
-run-flower:
-	. ../ocrd_all/venv/bin/activate; flower --broker redis://localhost:6379 --persistent=True --db=flower --log=debug
+run-flask: ocrd-venv ##run ocrd_butler/app.py
+	FLASK_APP=ocrd_butler/app.py flask run
+
+flask-routes: ocrd-venv ## list routes handled by butler app
+	FLASK_APP=ocrd_butler/app.py flask routes
+
+run-flower: ocrd-venv ## start flower instance, connecting to redis broker at port 6379
+	NO_PROXY='localhost,content.staatsbibliothek-berlin.de' flower --broker redis://localhost:6379 --persistent=True --db=flower --log=debug
 
 tesseract-model: ## install trained model for tesseract
-	mkdir -p /data/tesseract_models && cd /data/tesseract_models; \
-	wget https://qurator-data.de/tesseract-models/GT4HistOCR/models.tar; \
-	tar -xf models.tar -C /usr/share/tesseract-ocr/4.00/tessdata/ GT4HistOCR_2000000.traineddata
+	ocrd resmgr download ocrd-tesserocr-recognize Fraktur_GT4HistOCR.traineddata -a
 
 calamari-model: ## install trained model for calamari
-	mkdir -p /data/calamari_models && cd /data/calamari_models; \
-	wget https://qurator-data.de/calamari-models/GT4HistOCR/model.tar.xz; \
-	tar -xf model.tar.xz
+	mkdir -p /data && cd /data; \
+	ocrd resmgr download ocrd-calamari-recognize qurator-gt4histocr-1.0 -al cwd
 
 textline-detector-model: ## install trained model for sbb textline detector
-	mkdir -p /data/sbb_textline_detector && cd /data/sbb_textline_detector; \
-	wget https://qurator-data.de/sbb_textline_detector/models.tar.gz; \
-	tar -xzf models.tar.gz
+	mkdir -p /data && cd /data; \
+	ocrd resmgr download ocrd-sbb-textline-detector default -al cwd
+
+sbb-binarize-model: ## install trained model for the sbb binarization processor
+	mkdir -p /data && cd /data; \
+	ocrd resmgr download ocrd-sbb-binarize default -al cwd

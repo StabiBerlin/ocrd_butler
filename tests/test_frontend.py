@@ -17,7 +17,12 @@ from ocrd_butler.factory import (
 )
 from ocrd_butler.database import models
 
-from . import load_mock_workflows
+from . import (
+    load_mock_workflows,
+)
+
+
+COLUMN_COUNT = 10
 
 
 class FrontendTests(TestCase):
@@ -28,12 +33,12 @@ class FrontendTests(TestCase):
 
         def create_api_task_callback(request):
             db_task = models.Task.create(
-                uid="id",
+                uid="uid",
                 src="mets_url",
                 default_file_grp="file_grp",
                 worker_task_id="worker_task.id",
-                workflow_id="workflow.id",
-                parameters="")
+                workflow_id=1,
+            )
             db.session.add(db_task)
             db.session.commit()
             headers = {}
@@ -45,12 +50,34 @@ class FrontendTests(TestCase):
             db.session.commit()
             return (200, {}, json.dumps({"task_id": 1, "deleted": True}))
 
+        def get_api_tasks_callback(request):
+            tasks = []
+            for task in models.Task.get_all():
+                workflow = models.Workflow.get(id=task.workflow_id)
+                task.workflow = workflow
+                tasks.append(task)
+            return (
+                200, {},
+                json.dumps(
+                    [
+                        task.to_json()
+                        for task in tasks
+                    ]
+                )
+            )
+
         responses.add_callback(
             responses.POST, "http://localhost/api/tasks",
             callback=create_api_task_callback)
 
         responses.add(responses.GET, "http://foo.bar/mets.xml",
                       body="<xml>foo</xml>", status=200)
+
+        responses.add_callback(
+            method=responses.GET,
+            url='http://localhost/api/tasks',
+            callback=get_api_tasks_callback,
+        )
 
         responses.add_callback(
             responses.DELETE, "http://localhost/api/tasks/1",
@@ -115,13 +142,16 @@ class FrontendTests(TestCase):
         )
         return task
 
-    @mock.patch("ocrd_butler.database.models.Task.get_all")
+    @responses.activate
     @mock.patch("ocrd_butler.frontend.tasks.task_information")
-    def test_task_page(self, mock_task_information, mock_get_all):
+    def test_task_page(self, mock_task_information):
         """Check if tasks page is visible."""
-        mock_get_all.return_value = [
-            self._create_task(uid) for uid in "123"
-        ]
+        self.client.post("/new-task", data=dict(
+            task_id="foo",
+            description="barfoo",
+            src="http://foo.bar/mets.xml",
+            workflow_id=self.get_workflow_id()
+        ))
         mock_task_information.return_value = {
             "ready": True,
             "result": {
@@ -141,13 +171,13 @@ class FrontendTests(TestCase):
         self.assert_template_used("tasks.html")
         html = HTML(html=response.data)
 
-        assert len(html.find("table > tr > th")) == 10
-        assert len(html.find("table > tr > td")) == 30
+        assert len(html.find("table > tr > th")) == COLUMN_COUNT
+        assert len(html.find("table > tr > td")) == COLUMN_COUNT
 
         download_links = html.find("table > tr:nth-child(2) > td:nth-child(9) > a")
-        assert download_links[0].links == {'/download/page/1'}
-        assert download_links[1].links == {'/download/alto/1'}
-        assert download_links[2].links == {'/download/txt/1'}
+        assert download_links[0].links == {'/download/page/uid'}
+        assert download_links[1].links == {'/download/alto/uid'}
+        assert download_links[2].links == {'/download/txt/uid'}
 
     def get_workflow_id(self):
         """Create a workflow for the tests."""
@@ -197,7 +227,7 @@ class FrontendTests(TestCase):
 
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
-        assert len(html.find('table > tr > td')) == 10
+        assert len(html.find('table > tr > td')) == COLUMN_COUNT
         assert html.find('table > tr > td')[2].text == "file_grp"
         assert html.find('table > tr > td')[6].text == "worker_task.id"
         self.client.get("/task/delete/1")
@@ -215,7 +245,7 @@ class FrontendTests(TestCase):
 
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
-        assert len(html.find('table > tr > td')) == 10
+        assert len(html.find('table > tr > td')) == COLUMN_COUNT
 
         delete_link = html.find('table > tr > td > a.delete-task')[0].attrs["href"]
         assert delete_link == "/task/delete/1"
