@@ -1,28 +1,39 @@
 import os
 import json
-import functools
+from functools import partial
 import subprocess
 from itertools import filterfalse
-from typing import Callable, Iterable, List
+from typing import Callable, Iterable, List, Type
 
 import pytest
 
 from ocrd_butler.util import logger
 from ocrd_butler.config import Config
-from ocrd_butler.database.models import Workflow
+from ocrd_butler.database.models import (
+    db,
+    Workflow,
+    Task,
+)
 
 
 log = logger(__name__)
 
 
-def load_mock_workflows(filename: str) -> Iterable:
-    """ load workflow data from JSON file and instantiate model instances
+def load_mock_db_model(
+    model_class: Type[db.Model], root_node: str, filename: str
+) -> Iterable:
+    """ load example data from JSON file and instantiate model instances
     """
     with open(filename, 'r') as f:
-        for i, workflow in enumerate(json.load(f)['workflows']):
-            model_instance = Workflow.create(**workflow)
-            model_instance.id = i + 1
+        for i, data in enumerate(json.load(f)[root_node]):
+            _id = data.pop('id', None)
+            model_instance = model_class.create(**data)
+            model_instance.id = _id or i + 1
             yield model_instance
+
+
+load_mock_workflows = partial(load_mock_db_model, Workflow, 'workflows')
+load_mock_tasks = partial(load_mock_db_model, Task, 'tasks')
 
 
 def test_profile_active() -> bool:
@@ -80,7 +91,7 @@ def require_ocrd_processors(*processors: List[str]) -> Callable:
     return decorator
 
 
-skip_in_test_profile = functools.partial(
+skip_in_test_profile = partial(
     pytest.mark.skipif(
         test_profile_active(),
         reason='Test not supposed to be run in `TEST` profile.'
