@@ -94,11 +94,11 @@ def task_success_handler(sender, result, **kwargs):
 
 
 @task_failure.connect
-def task_failure_handler(sender, result, **kwargs):
+def task_failure_handler(sender, **kwargs):
     logger.error(f'handle task failure. sender={sender}, kwargs={kwargs}.')
-    task = db_model_Task.query.filter_by(id=result["task_id"]).first()
-    task.status = "FAILURE"
-    db.session.commit()
+    # task = db_model_Task.query.filter_by(id=result["task_id"]).first()
+    # task.status = "FAILURE"
+    # db.session.commit()
 
 
 def add_max_file_to_workspace(workspace: Workspace, file_name: OcrdFile) -> OcrdFile:
