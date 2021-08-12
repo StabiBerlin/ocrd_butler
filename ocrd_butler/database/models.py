@@ -12,8 +12,6 @@ from ocrd_butler.util import (
 )
 
 
-log = logger('butler')
-
 
 class Task(db.Model):
     """ Database model for our tasks. """
@@ -128,7 +126,7 @@ def delete(model: type, id: str) -> bool:
         db.session.commit()
         return True
     else:
-        log.info(f"Can't delete {model.__name__} `{id}`: not found!")
+        logger.info(f"Can't delete {model.__name__} `{id}`: not found!")
         return False
 
 

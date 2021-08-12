@@ -12,8 +12,6 @@ from ocrd_butler.config import Config
 from ocrd_butler.database.models import Workflow
 
 
-log = logger('butler')
-
 
 def load_mock_workflows(filename: str) -> Iterable:
     """ load workflow data from JSON file and instantiate model instances
@@ -41,7 +39,7 @@ def ocrd_processor_available(processor: str) -> bool:
                 ['which', processor]
             ) is not None
         except Exception:
-            log.error(
+            logger.error(
                 'No executable found for processor `%s`', processor
             )
             return False

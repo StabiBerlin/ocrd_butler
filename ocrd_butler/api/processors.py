@@ -15,7 +15,6 @@ from ocrd_butler.util import logger
 from ocrd_butler import config as ocrd_config
 
 
-log = logger('butler')
 
 processors_namespace = api.namespace(
     "processors",

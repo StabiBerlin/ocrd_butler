@@ -45,7 +45,6 @@ from ocrd_butler.util import (
     page_xml_namespaces,
 )
 
-log = logger('butler')
 
 task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 
@@ -195,7 +194,7 @@ class TaskActions(TasksBase):
 
         TODO: Return the actions as OPTIONS.
         """
-        log.info(f"Task {task_id} post action {action} called.")
+        logger.info(f"Task {task_id} post action {action} called.")
 
         task = db_model_Task.get(id=task_id)
         if task is None:
@@ -237,7 +236,7 @@ class TaskActions(TasksBase):
 
         TODO: Return the actions as OPTIONS.
         """
-        log.info(f"Task {task_id} get action {action} called.")
+        logger.info(f"Task {task_id} get action {action} called.")
 
         task = db_model_Task.get(id=task_id)
         if task is None:
@@ -266,13 +265,12 @@ class TaskActions(TasksBase):
 
     def run(self, task: db_model_Task):
         """ Run this task. """
-        log.info("run task: %s", task)
+        logger.info(f"Action 'run' called for task: {task.to_json()}")
 
         # celery_worker_task = run_task(task.to_json())  # use for debugging
         celery_worker_task = run_task.delay(task.to_json())
         # celery_worker_task = run_task.apply_async(args=[task.to_json()],
         #                                    countdown=20)
-
         task.worker_task_id = celery_worker_task.id
         db.session.commit()
 

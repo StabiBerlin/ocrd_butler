@@ -7,7 +7,7 @@ from ocrd_butler import (
     make_celery,
     config,
 )
-from ocrd_butler.util import log
+from ocrd_butler.util import logger
 
 
 flask_app = factory.create_app(
@@ -17,7 +17,7 @@ flask_app = factory.create_app(
 
 def main():
     """What should I do, when I'm called directly?"""
-    log.info("> Starting development server at http://%s/api/ <<<<<" %
+    logger.info("> Starting development server at http://%s/api/ <<<<<" %
              flask_app.config['SERVER_NAME'])
     flask_app.run(host="0.0.0.0", debug=True)
 

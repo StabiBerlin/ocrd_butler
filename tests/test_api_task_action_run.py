@@ -206,7 +206,7 @@ class ApiTaskActionRunTests(TestCase):
     @responses.activate
     @require_ocrd_processors("ocrd-tesserocr-segment-region")
     def test_task_status_change(self):
-        """ test response codes for API for task status
+        """ Test task status life cycle.
         """
         task_response = self.client.post("/api/tasks", json=dict(
             workflow_id=self.light_workflow(),

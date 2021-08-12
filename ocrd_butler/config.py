@@ -9,7 +9,6 @@ import subprocess
 
 from .util import logger
 
-log = logger('butler')
 DEFAULT_PROFILE = 'DEV'
 
 
@@ -146,7 +145,7 @@ class Config(object):
         try:
             return exec_processor_dump_json(processor)
         except FileNotFoundError:
-            log.error('OCRD processor `%s` not found!', processor)
+            logger.error('OCRD processor `%s` not found!', processor)
             return {}
 
 
@@ -194,7 +193,7 @@ class TestingConfig(Config):
                 specs = json.load(f)
             return specs
         else:
-            log.warn(
+            logger.warn(
                 'file not found: {}'.format(filename)
             )
             return {}
@@ -236,12 +235,12 @@ def profile_config() -> Config:
 
     """
     if 'PROFILE' in os.environ:
-        log.debug(
+        logger.debug(
             'Select config implementation based on PROFILE env var value `%s`',
             os.environ['PROFILE'],
         )
     else:
-        log.warning(
+        logger.warning(
             'Environment variable PROFILE not set. Defaulting to `%s`.',
             DEFAULT_PROFILE,
         )
@@ -252,5 +251,5 @@ def profile_config() -> Config:
     }.get(
         get_profile_var()
     )
-    log.info('Selected config: %s.', config)
+    logger.info('Selected config: %s.', config)
     return config
