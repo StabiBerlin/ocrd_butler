@@ -33,8 +33,6 @@ from wtforms.validators import (
     URL
 )
 
-from ocrd_butler.database.models import Workflow as db_model_Workflow
-from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import host_url, flower_url
 
 
@@ -80,22 +78,9 @@ def current_tasks():
     """
     Collect and prepare the current tasks.
     """
-    results = db_model_Task.get_all()
-
-    cur_tasks = []
-
-    for result in results:
-        workflow = db_model_Workflow.get(id=result.workflow_id)
-        task = {
-            "repr": result.__str__(),
-            "description": result.description,
-            "id": result.id,
-            "uid": result.uid,
-            "src": result.src,
-            "default_file_grp": result.default_file_grp,
-            "workflow": workflow,
-            "parameters": result.parameters,
-            "worker_task_id": result.worker_task_id,
+    results = [
+        {
+            **task,
             "result": {
                 "status": "",
                 "ready": False,
@@ -106,16 +91,24 @@ def current_tasks():
                 "started": "",
                 "succeeded": "",
                 "runtime": ""
-            }
+            },
         }
+        for task in requests.get(f'{host_url(request)}api/tasks').json()
+    ]
 
-        task_info = task_information(result.worker_task_id)
+    cur_tasks = []
 
+    for result in results:
+        task = {**result}
+
+        task_info = task_information(result.get('worker_task_id'))
+
+        uid = result.get('uid')
         if task_info is not None and task_info["ready"]:
             task["result"].update({
-                "page": f"/download/page/{result.uid}",
-                "alto": f"/download/alto/{result.uid}",
-                "txt": f"/download/txt/{result.uid}",
+                "page": f"/download/page/{uid}",
+                "alto": f"/download/alto/{uid}",
+                "txt": f"/download/txt/{uid}",
             })
 
             if task_info["received"] is not None:
@@ -204,8 +197,15 @@ def tasks():
     """Define the page presenting the created tasks."""
     # new_task_form = NewTaskForm(meta={'csrf': False})
     new_task_form = NewTaskForm()
-    workflows = db_model_Workflow.get_all()
-    new_task_form.workflow_id.choices = [(workflow.id, workflow.name) for workflow in workflows]
+    new_task_form.workflow_id.choices = [
+        (
+            workflow.get('id'),
+            workflow.get('name', workflow.get('id'))
+        )
+        for workflow in requests.get(
+            f'{host_url(request)}api/workflows'
+        ).json()
+    ]
 
     return render_template(
         "tasks.html",
@@ -251,7 +251,7 @@ def validate_and_wrap_response(
         payload_field: str,
         **kwargs
 ) -> Response:
-    """ Create a new response based on the given reponse's status.
+    """ Create a new response based on the given response's status.
 
     If it's ok, then a new response is being created from all passed keyword parameters,
     and the value of the given response's member with the name specified

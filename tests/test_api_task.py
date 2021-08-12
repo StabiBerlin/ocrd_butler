@@ -53,7 +53,7 @@ class ApiTaskTests(TestCase):
         assert response.json["results"] == {}
 
     def test_get_all_tasks(self):
-        """ test /api/tasks/ GET response
+        """ test /api/tasks GET response
         """
         self.client.post(
             '/api/tasks',
