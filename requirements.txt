@@ -15,4 +15,5 @@ requests==2.24.0
 Flask-WTF==0.14.3
 flask-restx==0.2.0
 readline==6.2.4.1
+loguru==0.5.3
 ocrd-page-to-alto @ https://github.com/kba/page-to-alto/archive/refs/heads/master.zip
