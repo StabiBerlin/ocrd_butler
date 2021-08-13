@@ -14,6 +14,7 @@ from flask_restx import (
     Resource,
     marshal
 )
+from responses import Response
 from ocrd_validators import ParameterValidator
 
 from ocrd_butler.api.restx import api
@@ -25,9 +26,12 @@ from ocrd_butler.api.processors import (
 )
 from ocrd_butler.database import db
 from ocrd_butler.database.models import Workflow as db_model_Workflow
-from responses import Response
+from .helpers import add_workflow_processor
 
-workflow_namespace = api.namespace("workflows", description="Manage OCR-D processor workflows")
+
+workflow_namespace = api.namespace(
+    "workflows", description="Manage OCR-D processor workflows"
+)
 
 
 class WorkflowBase(Resource):
@@ -135,6 +139,28 @@ def load_workflow(workflow_id: int) -> db_model_Workflow:
     else:
         workflow_namespace.abort(
             404, f"Can't find a workflow with the id \"{workflow_id}\"."
+        )
+
+
+@workflow_namespace.route("/<int:workflow_id>/add")
+class WorkflowAdd(WorkflowBase):
+    @api.doc(
+        responses={
+            201: "Processor added to workflow",
+            404: "Workflow not found",
+            400: "Invalid payload",
+        }
+    )
+    def put(self, workflow_id):
+        """ append processor to workflow.
+        """
+        workflow = load_workflow(workflow_id)
+        processor = self.validate_processor(request.json)
+        return make_response(
+            add_workflow_processor(
+                workflow, processor
+            ).to_json(),
+            201
         )
 
 
