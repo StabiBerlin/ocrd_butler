@@ -95,7 +95,7 @@ class Workflows(WorkflowBase):
         A workflow is a list of OCRD processors. By default every processor is
         used with its default values from its `ocrd-tool.json` or from fixed
         definitions in the butler, e.g. for the folders of the models. It's
-        possible to overwrite these settings directly with given parameters.::
+        possible to overwrite these settings directly with given parameters::
 
             [
                 {
@@ -126,33 +126,37 @@ class Workflows(WorkflowBase):
         return jsonify(results)
 
 
-@workflow_namespace.route("/<string:workflow_id>")
+def load_workflow(workflow_id: int) -> db_model_Workflow:
+    """ returns workflow if it exists, aborts otherwise
+    """
+    workflow = db_model_Workflow.get(id=workflow_id)
+    if workflow is not None:
+        return workflow
+    else:
+        workflow_namespace.abort(
+            404, f"Can't find a workflow with the id \"{workflow_id}\"."
+        )
+
+
+@workflow_namespace.route("/<int:workflow_id>")
 class Workflow(WorkflowBase):
     """Getter, updater and remover for workflows."""
 
     @api.doc(responses={200: "Found", 404: "Not known workflow id."})
     def get(self, workflow_id):
         """ Get the workflow by given id. """
-        workflow = db_model_Workflow.get(id=workflow_id)
-
-        if workflow is None:
-            workflow_namespace.abort(
-                404, f"Can't find a workflow with the id \"{workflow_id}\".")
-        return jsonify(workflow.to_json())
+        return jsonify(
+            load_workflow(workflow_id).to_json()
+        )
 
     @api.doc(responses={201: "Updated", 404: "Unknown workflow."})
     @api.expect(workflow_model)
     def put(self, workflow_id: str) -> Response:
         """ Update a workflow. """
-        workflow = db_model_Workflow.get(id=workflow_id)
-        if workflow is None:
-            workflow_namespace.abort(
-                404, f"Can't find a workflow with the id \"{workflow_id}\".")
-
+        workflow = load_workflow(workflow_id)
         workflow_data = workflow.to_json()
-        fields = workflow_data.keys()
         update_data = request.json
-        for field in fields:
+        for field in workflow_data.keys():
             if field in update_data:
                 if field == 'processors':
                     processors = []
@@ -172,17 +176,13 @@ class Workflow(WorkflowBase):
     @api.doc(responses={200: "Deleted", 404: "Unknown workflow id."})
     def delete(self, workflow_id: str) -> Response:
         """ Delete the workflow by given id. """
-        workflow = db_model_Workflow.get(id=workflow_id)
+        workflow = load_workflow(workflow_id)
 
-        if workflow is None:
-            workflow_namespace.abort(
-                404, f"Can't find a workflow with the id \"{workflow_id}\".")
+        message = f"Delete workflow \"{workflow.name}({workflow.id})\""
+        if db_model_Workflow.delete(id=workflow_id):
+            message = f'{message}: success'
         else:
-            message = f"Delete workflow \"{workflow.name}({workflow.id})\""
-            if db_model_Workflow.delete(id=workflow_id):
-                message = f'{message}: success'
-            else:
-                message = f'{message}: failed!'
+            message = f'{message}: failed!'
 
         return jsonify({
             "message": message
