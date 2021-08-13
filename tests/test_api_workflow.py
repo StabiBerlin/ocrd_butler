@@ -231,6 +231,7 @@ class ApiWorkflowTests(TestCase):
                 "name": "ocrd-tesserocr-segment-word"
             }],
         ))
+        assert response.status_code == 201
         response = self.client.get("/api/workflows/1")
         assert response.status_code == 200
         assert response.json["id"] == 1

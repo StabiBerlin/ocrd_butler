@@ -164,10 +164,10 @@ class Workflow(WorkflowBase):
                     setattr(workflow, field, update_data[field])
         db.session.commit()
 
-        return jsonify({
+        return make_response({
             "message": "Workflow updated.",
             "id": workflow.id,
-        })
+        }, 201)
 
     @api.doc(responses={200: "Deleted", 404: "Unknown workflow id."})
     def delete(self, workflow_id: str) -> Response:
