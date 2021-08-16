@@ -48,7 +48,10 @@ class WorkflowBase(Resource):
             workflow_namespace.abort(
                 400, f'Wrong parameter. Unknown processor "{processor["name"]}".')
 
-        processor.update(PROCESSORS_ACTION[processor["name"]])
+        processor = {
+            **PROCESSORS_ACTION[processor['name']],
+            **processor,
+        }
 
         validator = ParameterValidator(PROCESSORS_CONFIG[processor["name"]])
         if "parameters" not in processor:
