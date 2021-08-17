@@ -189,7 +189,7 @@ existing workflow:
 
 .. code-block:: bash
 
-    ╰─$ http POST :/api/tasks src=https://content.staatsbibliothek-berlin.de/dc/PPN835995658.mets.xml workflow_id=1
+    ╰─$ http POST :/api/tasks src=https://content.staatsbibliothek-berlin.de/dc/PPN718448162.mets.xml workflow_id=1
 
 The response body will contain the ID of the newly created task.
 
