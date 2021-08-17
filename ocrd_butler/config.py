@@ -165,7 +165,7 @@ class Config(object):
         try:
             return exec_processor_dump_json(processor)
         except FileNotFoundError:
-            logger.error('OCRD processor `%s` not found!', processor)
+            logger.error('OCRD processor `%s` not found!' % processor)
             return {}
 
 
@@ -256,13 +256,16 @@ def profile_config() -> Config:
     """
     if 'PROFILE' in os.environ:
         logger.debug(
-            'Select config implementation based on PROFILE env var value `%s`',
-            os.environ['PROFILE'],
+            (
+                'Select config implementation based on PROFILE env var '
+                'value `{}`'
+            ).format(os.environ['PROFILE']),
         )
     else:
         logger.warning(
-            'Environment variable PROFILE not set. Defaulting to `%s`.',
-            DEFAULT_PROFILE,
+            'Environment variable PROFILE not set. Defaulting to `{}`.'.format(
+                DEFAULT_PROFILE
+            ),
         )
     config = {
         "TEST": TestingConfig,
@@ -271,5 +274,5 @@ def profile_config() -> Config:
     }.get(
         get_profile_var()
     )
-    logger.info('Selected config: %s.', config)
+    logger.info('Selected config: %s.' % config)
     return config
