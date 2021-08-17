@@ -135,6 +135,77 @@ Run the tests:
     ╰─$ make test
 
 
+
+Usage
+-----
+
+For API documentation, open the Swagger API user interface at ``/api/``. A complete list of all
+routes mapped by the OCRD Butler application is available under the ``/api/_util/routes`` endpoint.
+
+Creating a workflow
+...................
+
+A Butler *workflow* consists of a name and one or more OCRD processor executions.
+Use the ``/api/workflows`` POST endpoint to create a new workflow (all examples
+given using HTTPie_):
+
+.. code-block:: bash
+
+    ╰─$ http POST :/api/workflows < workflow.json
+
+...where the content of ``workflow.json`` looks something like this::
+
+   {
+     "name": "binarize && segment to regions",
+     "processors": [
+       {
+         "name": "ocrd-olena-binarize",
+         "input_file_grp": "OCR-D-IMG",
+         "output_file_grp": "OCR-D-IMG-BIN"
+       },
+       {
+         "name": "ocrd-tesserocr-segment-region",
+         "input_file_grp": "OCR-D-IMG-BIN",
+         "output_file_grp": "OCR-D-SEG-REGION"
+       }
+     ]
+   }
+
+The response body will contain the ID of the newly created workflow. Use this ID
+for retrieval of the newly created workflow:
+
+.. code-block:: bash
+
+    ╰─$ http :/api/workflows/1  # or whatever ID obtained in previous step
+
+
+Creating a task
+...............
+
+A Butler *task* is an invocation of a workflow with a specific METS file as
+its input. A task consists of at least such a METS source file location, and a
+workflow ID. Use the ``/api/tasks`` POST endpoint to create a new task using an
+existing workflow:
+
+.. code-block:: bash
+
+    ╰─$ http POST :/api/tasks src=https://content.staatsbibliothek-berlin.de/dc/PPN835995658.mets.xml workflow_id=1
+
+The response body will contain the ID of the newly created task.
+
+
+Running a task
+..............
+
+In order to execute an existing Butler task, call the ``/api/tasks/{id}/run``
+endpoint, with the placeholder replaced by the actual task ID obtained in the
+previous step:
+
+.. code-block:: bash
+
+    ╰─$ http POST :/api/tasks/1/run
+
+
 Known problems
 --------------
 
@@ -172,3 +243,4 @@ This package was created with Cookiecutter_ and the `elgertam/cookiecutter-pipen
 .. _`Qurator Data`: https://qurator-data.de/
 .. _`OCR-D ecosystem`: https://github.com/topics/ocr-d
 .. _tesseract-ocr-deu debian: https://packages.debian.org/de/sid/tesseract-ocr-deu
+.. _HTTPie: https://httpie.io/

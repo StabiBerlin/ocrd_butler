@@ -26,7 +26,6 @@ from ocrd_butler.api.processors import (
 )
 from ocrd_butler.database import db
 from ocrd_butler.database.models import Workflow as db_model_Workflow
-from .helpers import add_workflow_processor
 
 
 workflow_namespace = api.namespace(
@@ -143,6 +142,13 @@ def load_workflow(workflow_id: int) -> db_model_Workflow:
         workflow_namespace.abort(
             404, f"Can't find a workflow with the id \"{workflow_id}\"."
         )
+
+def add_workflow_processor(workflow: db_model_Workflow, processor: dict):
+    """ add new processor to a workflow's processor list, and save and return
+    workflow.
+    """
+    workflow.processors = workflow.processors + [processor]
+    return workflow.save()
 
 
 @workflow_namespace.route("/<int:workflow_id>/add")
