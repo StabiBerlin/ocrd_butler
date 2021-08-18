@@ -4,6 +4,7 @@
 """ Workflow api implementation.
 """
 
+
 from collections import Mapping
 from flask import (
     make_response,
@@ -47,6 +48,8 @@ class WorkflowBase(Resource):
             workflow_namespace.abort(
                 400, f'Wrong parameter. Unknown processor "{processor["name"]}".')
 
+        # TODO: we need to merge these two properly (recursively) because of
+        # TODO: default processor parameters in ocrd_butler.config!!!
         processor = {
             **PROCESSORS_ACTION[processor['name']],
             **processor,
@@ -68,7 +71,7 @@ class WorkflowBase(Resource):
 
         return processor
 
-    def workflow_data(self, json_data):
+    def workflow_data(self, json_data) -> dict:
         """ Validate and prepare workflow database input. """
         data = marshal(data=json_data, fields=workflow_model, skip_none=False)
 
@@ -117,7 +120,13 @@ class Workflows(WorkflowBase):
         """
 
         data = self.workflow_data(request.json)
-        workflow = db_model_Workflow.add(**data)
+        processors = data.pop('processors')
+        workflow = db_model_Workflow.create(
+            **data, processors=[]
+        )
+        for processor in processors:
+            add_workflow_processor(workflow, processor)
+        workflow.save()
         return make_response({
             "message": "Workflow created.",
             "uid": workflow.uid,
@@ -143,12 +152,21 @@ def load_workflow(workflow_id: int) -> db_model_Workflow:
             404, f"Can't find a workflow with the id \"{workflow_id}\"."
         )
 
-def add_workflow_processor(workflow: db_model_Workflow, processor: dict):
-    """ add new processor to a workflow's processor list, and save and return
-    workflow.
+
+def add_workflow_processor(
+    workflow: db_model_Workflow, processor: dict
+) -> db_model_Workflow:
+    """ add new processor to a workflow's processor list, and return
+    workflow. Generates a value for the processor's ``output_file_grp`` field
+    unique to this workflow if none has been set.
     """
+    if not processor.get('output_file_grp'):
+        position = len(workflow.processors) + 1
+        processor['output_file_grp'] = '{:02}-{}-OUTPUT'.format(
+            position, processor['name'].upper()
+        )
     workflow.processors = workflow.processors + [processor]
-    return workflow.save()
+    return workflow
 
 
 @workflow_namespace.route("/<int:workflow_id>/add")
@@ -168,7 +186,7 @@ class WorkflowAdd(WorkflowBase):
         return make_response(
             add_workflow_processor(
                 workflow, processor
-            ).to_json(),
+            ).save().to_json(),
             201
         )
 
@@ -194,14 +212,13 @@ class Workflow(WorkflowBase):
         for field in workflow_data.keys():
             if field in update_data:
                 if field == 'processors':
-                    processors = []
+                    workflow.processors = []
                     for processor in update_data["processors"]:
                         self.validate_processor(processor)
-                        processors.append(processor)
-                    setattr(workflow, field, processors)
+                        add_workflow_processor(workflow, processor)
                 else:
                     setattr(workflow, field, update_data[field])
-        db.session.commit()
+        workflow.save()
 
         return make_response({
             "message": "Workflow updated.",

@@ -238,6 +238,9 @@ class ApiWorkflowTests(TestCase):
         assert response.json["name"] == "Updated Workflow"
         assert response.json["description"] == "Some barfoo workflow."
         assert response.json["processors"][0]["name"] == "ocrd-tesserocr-segment-word"
+        assert response.json['processors'][-1]['output_file_grp'] == (
+            '01-OCRD-TESSEROCR-SEGMENT-WORD-OUTPUT'
+        )
 
     def test_amend_workflow(self):
         """ add another processor to existing workflow
@@ -257,19 +260,14 @@ class ApiWorkflowTests(TestCase):
             '/api/workflows/1/add',
             json={
                 'name': 'ocrd-tesserocr-segment-region',
-                'input_file_grp': 'OCR-D-IMG-BIN',
+                'output_file_grp': 'OCR-D-SEG-BLOCK',
             }
         )
         assert response.status_code == 201
         w = self.client.get('/api/workflows/1').json
         assert len(w['processors']) == 2
-        # assert {
-        #     key: w.get('processors')[-1][key]
-        #     for key in ['name', 'input_file_grp']
-        # } == {
-        #     'name': 'ocrd-tesserocr-segment-region',
-        #     'input_file_grp': 'OCR-D-IMG-BIN',
-        # }
+        assert w['processors'][0]['input_file_grp'] == 'OCR-D-IMG'
+        assert w['processors'][-1]['output_file_grp'] == 'OCR-D-SEG-BLOCK'
 
     def test_workflow_model(self):
         assert "name" in workflow_model

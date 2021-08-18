@@ -145,7 +145,7 @@ routes mapped by the OCRD Butler application is available under the ``/api/_util
 Creating a workflow
 ...................
 
-A Butler *workflow* consists of a name and one or more OCRD processor executions.
+A Butler *workflow* consists of a name and one or more OCRD processor invocations.
 Use the ``/api/workflows`` POST endpoint to create a new workflow (all examples
 given using HTTPie_):
 
@@ -160,7 +160,7 @@ given using HTTPie_):
      "processors": [
        {
          "name": "ocrd-olena-binarize",
-         "input_file_grp": "OCR-D-IMG",
+         "input_file_grp": "DEFAULT",
          "output_file_grp": "OCR-D-IMG-BIN"
        },
        {

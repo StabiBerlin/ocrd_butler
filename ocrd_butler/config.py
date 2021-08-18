@@ -142,16 +142,19 @@ class Config(object):
             }
         },
         "ocrd-olena-binarize": {
-            "output_file_grp": ["OCR-D-IMG-BINPAGE"]
+            "output_file_grp": "OCR-D-IMG-BINPAGE"
         },
         "ocrd-sbb-binarize": {
-            "output_file_grp": ["OCR-D-IMG-BINPAGE"],
+            "output_file_grp": "OCR-D-IMG-BINPAGE",
             "parameters": {
                 "model": "/data/ocrd-resources/ocrd-sbb-binarize/default",
             }
         },
         "ocrd-fileformat-transform": {
-            "output_file_grp": ["OCR-D-OCR-ALTO"]
+            "output_file_grp": "OCR-D-OCR-ALTO"
+        },
+        "ocrd-calamari-recognize": {
+            "output_file_grp": "OCR-D-OCR-CALAMARI",
         },
     }
 
