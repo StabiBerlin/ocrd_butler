@@ -282,11 +282,16 @@ class TaskActions(TasksBase):
         celery_worker_task = run_task.delay(task.to_json())
         # celery_worker_task = run_task.apply_async(args=[task.to_json()],
         #                                    countdown=20)
-        task.worker_task_id = celery_worker_task.id
+        # if '__dict__' in dir(celery_worker_task):
+        #     # async task result
+        #     celery_worker_task = celery_worker_task.__dict__
+
+        task.worker_task_id = celery_worker_task.task_id
+        task.status = celery_worker_task.status
         db.session.commit()
 
         result = {
-            "worker_task_id": celery_worker_task.id,
+            "worker_task_id": celery_worker_task.task_id,
             "status": celery_worker_task.status,
             "traceback": celery_worker_task.traceback,
         }

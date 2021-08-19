@@ -42,63 +42,68 @@ from ocrd_butler.util import (
     host_url
 )
 
-from celery.utils.log import get_task_logger
-from celery.signals import (
-    setup_logging,
-    after_setup_logger,
-    after_setup_task_logger
-)
 from celery.contrib import rdb
 
-# butler_tasks = logger('butler_tasks')
-# logger = logging.getLogger(__name__)
-task_logger = get_task_logger(__name__)
+def get_task_state(task_id: str) -> str:
+    """ Get the current status of the task.
+    """
+    return celery.backend.get_status(task_id)
 
-@setup_logging.connect
-def setup_log(logger, *args, **kwargs):
-    pass
-
-@after_setup_task_logger.connect
-def after_setup_task_log(logger, *args, **kwargs):
-    pass
-
-@after_setup_logger.connect
-def after_setup_log(logger, *args, **kwargs):
-    pass
 
 @task_prerun.connect
-def task_prerun_handler(sender, result, *args, **kwargs):
-    task = db_model_Task.query.filter_by(uid=result["task_uid"]).first()
-    task.status = "STARTED"
-    db.session.commit()
+def task_prerun_handler(task_id, task, *args, **kwargs):
+    logger.debug(f"task_prerun_handler -> task: {task_id}, task: {task}, "
+                 f"args: {args}, kwargs: {kwargs}")
+    try:
+        uid = kwargs.get('args')[0].get('uid')
+        task = db_model_Task.query.filter_by(uid=uid).first()
+        task.status = "STARTED"
+        db.session.commit()
+    except Exception as exc:
+        logger.error(f"task_prerun_handler -> Can't set status for "
+                    f"task: {task_id}; exc: {exc}")
     logger.info("Start processing task '{task.uid}'.")
 
 
 @task_postrun.connect
-def task_postrun_handler(sender, *args, **kwargs):
-    # task = db_model_Task.query.filter_by(uid=result["task_uid"]).first()
-    # task.status = "FINISHED"
-    # db.session.commit()
-    # logger.info("Finished processing task '{task.uid}'.")
-    pass
+def task_postrun_handler(task_id, task, retval, state, *args, **kwargs):
+    logger.debug(f"task_postrun_handler -> task: {task_id}, task: {task}, "
+                 f"args: {args}, kwargs: {kwargs}")
+    task = db_model_Task.query.filter_by(uid=retval.get('uid')).first()
+    task.status = state
+    db.session.commit()
+    logger.info("Start processing task '{task.uid}'.")
 
 
 @task_success.connect
-def task_success_handler(sender, result, **kwargs):
-    task = db_model_Task.query.filter_by(uid=result["task_uid"]).first()
-    task.status = "SUCCESS"
-    task.results = result
-    db.session.commit()
-    logger.info(f"Success on task uid: {task.uid}, "
-                f"worker task id: {task.worker_task_id}.")
+def task_success_handler(result, *args, **kwargs):
+    logger.debug(f"task_success_handler -> result: {result}, "
+                 f"args: {args}, kwargs: {kwargs}")
+    try:
+        task = db_model_Task.query.filter_by(uid=result.get("uid")).first()
+        task.status = "SUCCESS"
+        task.results = result
+        db.session.commit()
+    except Exception as exc:
+        logger.error(f"task_success_handler -> Can't set status and results for "
+                    f"task: {result.get('uid')}; exc: {exc}")
+    logger.info(f"Success on task {result.get('uid')}")
 
 
 @task_failure.connect
-def task_failure_handler(sender, **kwargs):
-    logger.error(f'handle task failure. sender={sender}, kwargs={kwargs}.')
-    # task = db_model_Task.query.filter_by(id=result["task_id"]).first()
-    # task.status = "FAILURE"
-    # db.session.commit()
+def task_failure_handler(task_id, exception, traceback, einfo, *args, **kwargs):
+    logger.debug(f"task_failure_handler -> task: {task_id}, exception: {exception}, "
+                 f"traceback: {traceback}, einfo: {einfo}, args: {args}, kwargs: {kwargs}")
+    try:
+        uid = kwargs.get('args')[0].get('uid')
+        task = db_model_Task.query.filter_by(uid=uid).first()
+        task.status = "FAILURE"
+        db.session.commit()
+    except Exception as exc:
+        logger.error(f"task_failure_handler -> Can't set status for "
+                    f"task: {task_id}; exc: {exc}")
+    logger.error(f"Task {task_id} failed, "
+                 f"exception: {exception}, traceback: {traceback}.")
 
 
 def add_max_file_to_workspace(workspace: Workspace, file_name: OcrdFile) -> OcrdFile:
@@ -157,23 +162,18 @@ def prepare_workspace(task: dict, resolver: Resolver, dst_dir: str) -> Workspace
 
     return workspace
 
-
 @celery.task(bind=True)
 def run_task(self, task: models.Task) -> dict:
     """ Create a task an run the given workflow. """
-
-    # task_logger.info(f"task_logger -> Prepared workspace for task '{task['uid']}'.")
     # logger.remove()
     logger.add(f"/data/log/task-{task['uid']}.log")
-    logger.info(f"Prepare workspace for task '{task['uid']}'.")
 
     # Create workspace
     dst_dir = "{}/{}".format(current_app.config["OCRD_BUTLER_RESULTS"],
                              task["uid"])
     resolver = Resolver()
     workspace = prepare_workspace(task, resolver, dst_dir)
-    # current_app.logger.info(f"Prepared workspace for task '{task['uid']}'.")
-    logger.info(f"Prepared workspace.")
+    logger.info(f"Prepare workspace for task '{task['uid']}'.")
 
     task_processors = task["workflow"]["processors"]
 
@@ -196,7 +196,7 @@ def run_task(self, task: models.Task) -> dict:
             kwargs["parameter"].update(task["parameters"][processor["name"]])
         parameter = json.dumps(kwargs["parameter"])
 
-        logger.info(f'Prepared processor {processor["name"]}. {json.dumps(processor)}.')
+        logger.info(f'Start processor {processor["name"]}. {json.dumps(processor)}.')
 
         mets_url = "{}/mets.xml".format(dst_dir)
         logger.info(f'Run processor {processor["name"]}.')
@@ -211,10 +211,7 @@ def run_task(self, task: models.Task) -> dict:
             input_file_grp=input_file_grp,
             output_file_grp=processor["output_file_grp"],
             parameter=parameter,
-            # capture_output=True,
-            stdout=sys.stdout,
-            stderr=sys.stderr
-            )
+        )
 
         # reload mets
         workspace.reload_mets()
@@ -222,15 +219,18 @@ def run_task(self, task: models.Task) -> dict:
         logger.info(f'Finished processor {processor["name"]} for task {task["uid"]}.')
 
     # if there are produced page xml results, convert it also to alto
-    response = requests.post(f"{host_url(request)}api/tasks/{task['uid']}/page_to_alto")
-    if response.json().get('status') == 'SUCCESS':
-        logger.info(f'Finished creating alto from page for task {task["uid"]}.')
+    try:
+        response = requests.post(f"{host_url(request)}api/tasks/{task['uid']}/page_to_alto")
+        if response.json().get('status') == 'SUCCESS':
+            logger.info(f"Finished creating alto from page for task {task['uid']}.")
+    except RuntimeError as exc:
+            logger.info(f"Failed to create alto from page for task {task['uid']}."
+                        f"Reason: {exc}")
 
     logger.info(f'Finished processing task {task["uid"]}.')
 
     return {
-        "task_id": task["id"],
-        "task_uid": task["uid"],
-        "result_dir": dst_dir,
-        "status": "SUCCESS"
+        "id": task["id"],
+        "uid": task["uid"],
+        "result_dir": dst_dir
     }

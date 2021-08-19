@@ -51,7 +51,6 @@ class StreamToLogger(object):
         self.log_level = log_level
 
     def write(self, buf):
-        import ipdb; ipdb.set_trace()
         for line in buf.rstrip().splitlines():
             loguru.logger.log(self.log_level, line.rstrip())
 

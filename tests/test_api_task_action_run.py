@@ -12,6 +12,7 @@ from unittest import mock
 
 from flask_testing import TestCase
 
+from ocrd_butler import celery
 from ocrd_butler.config import TestingConfig
 from ocrd_butler.database import models as db_model
 from ocrd_butler.factory import create_app, db
@@ -22,27 +23,6 @@ from . import require_ocrd_processors
 CURRENT_DIR = os.path.dirname(__file__)
 
 
-@pytest.fixture(scope='session')
-def celery_config():
-    return {
-        'broker_url': 'amqp://',
-        'result_backend': 'redis://'
-    }
-
-
-@pytest.fixture(scope='session')
-def celery_enable_logging():
-    return True
-
-
-@pytest.fixture(scope='session')
-def celery_includes():
-    return [
-        'ocrd_butler.execution.tasks',
-        # 'proj.tests.celery_signal_handlers',
-    ]
-
-
 # https://medium.com/@scythargon/how-to-use-celery-pytest-fixtures-for-celery-intergration-testing-6d61c91775d9
 # # @pytest.mark.usefixtures("config")
 # @pytest.mark.usefixtures('celery_session_app')
@@ -51,8 +31,6 @@ class ApiTaskActionRunTests(TestCase):
     """Test our api actions."""
 
     def setUp(self):
-
-        from ocrd_butler import celery
         celery.conf.task_always_eager = True
 
         db.create_all()
@@ -221,9 +199,9 @@ class ApiTaskActionRunTests(TestCase):
         assert response.data == b'{\n  "status": "CREATED"\n}\n'
 
         response = self.client.post("/api/tasks/1/run")
-
         response = self.client.get(f"/api/tasks/{task_response.json['uid']}/status")
         assert response.status_code == 200
+        # assert response.data == b'{\n  "status": "PENDING"\n}\n'
         assert response.data == b'{\n  "status": "SUCCESS"\n}\n'
 
 
@@ -253,7 +231,7 @@ class ApiTaskActionRunTests(TestCase):
 
         response = self.client.get("/api/tasks/1/results")
         ocr_results = os.path.join(response.json["result_dir"],
-                                   "OCR-D-SEG-REGION")
+                                   "OCR-D-SEG-WORD")
         result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[2])) as result_file:
             text = result_file.read()
