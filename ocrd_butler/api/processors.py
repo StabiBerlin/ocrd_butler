@@ -33,20 +33,16 @@ PROCESSOR_NAMES = PROCESSORS_CONFIG.keys()
 # We prepare usable action configurations from the config itself.
 PROCESSORS_ACTION = copy.deepcopy(PROCESSORS_CONFIG)
 
+for name, config in PROCESSORS_ACTION.items():
+    for key in ['package', 'parameters', 'input_file_grp', 'output_file_grp']:
+        config.pop(key, None)
+
 # We override some base settings of the processors.
 for processor, settings in ocrd_config.PROCESSOR_SETTINGS.items():
     for key, value in settings.items():
         PROCESSORS_ACTION.get(
             processor, {}
         )[key] = value
-
-for name, config in PROCESSORS_ACTION.items():
-    for key in ['package', 'parameters', 'input_file_grp']:
-        config.pop(key, None)
-    for key in ['output_file_grp']:
-        file_grps = config.get(key, [])
-        if type(file_grps) != str:
-            config.pop(key, None)
 
     # parameters = {}
     # if "parameters" in config:
