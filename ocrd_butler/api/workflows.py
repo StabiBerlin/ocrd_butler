@@ -25,7 +25,7 @@ from ocrd_butler.api.processors import (
     PROCESSOR_NAMES,
     PROCESSORS_CONFIG
 )
-from ocrd_butler.database import db
+from ocrd_butler.api.utils import merge_dicts
 from ocrd_butler.database.models import Workflow as db_model_Workflow
 
 
@@ -48,12 +48,9 @@ class WorkflowBase(Resource):
             workflow_namespace.abort(
                 400, f'Wrong parameter. Unknown processor "{processor["name"]}".')
 
-        # TODO: we need to merge these two properly (recursively) because of
-        # TODO: default processor parameters in ocrd_butler.config!!!
-        processor = {
-            **PROCESSORS_ACTION[processor['name']],
-            **processor,
-        }
+        processor = merge_dicts(
+            PROCESSORS_ACTION[processor['name']], processor
+        )
 
         validator = ParameterValidator(PROCESSORS_CONFIG[processor["name"]])
         if "parameters" not in processor:

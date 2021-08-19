@@ -129,11 +129,12 @@ class Config(object):
                 "checkpoint_dir": (
                     "/data/ocrd-resources/ocrd-calamari-recognize/qurator-gt4histocr-1.0"
                 ),
-            }
+            },
+            "output_file_grp": "OCR-D-OCR-CALAMARI",
         },
         "ocrd-sbb-textline-detector": {
             "parameters": {
-                "model": "/data/ocrd-resources/ocrd-sbb-textline-detector/default",
+                # "model": "/data/ocrd-resources/ocrd-sbb-textline-detector/default",
             }
         },
         "ocrd-tesserocr-recognize": {
@@ -152,9 +153,6 @@ class Config(object):
         },
         "ocrd-fileformat-transform": {
             "output_file_grp": "OCR-D-OCR-ALTO"
-        },
-        "ocrd-calamari-recognize": {
-            "output_file_grp": "OCR-D-OCR-CALAMARI",
         },
     }
 

@@ -126,6 +126,23 @@ class ApiWorkflowTests(TestCase):
         assert response.json["message"].startswith(
             "Wrong parameter. Error(s) while validating parameters \"{\'impl\': \'foobar\',")
 
+    def test_create_workflow_global_default_parameters(self):
+        """ check if parameter defaults from ocrd_butler.config end up in
+        newly created workflow processor.
+        """
+        wid = self.get_workflow(
+            processors=[
+                {
+                    'name': 'ocrd-tesserocr-recognize',
+                    'parameters': {}
+                }
+            ]
+        ).json['id']
+        w = self.client.get(f'/api/workflows/{wid}').json
+        params = w['processors'][0]['parameters']
+        assert 'model' in params
+        assert params['model'] == "Fraktur_GT4HistOCR"
+
     def test_create_workflow_with_reused_processors(self):
         """Check if a workflow with processors that are used multiple is created."""
         foor = self.get_workflow(processors=[

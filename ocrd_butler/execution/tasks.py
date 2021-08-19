@@ -28,10 +28,7 @@ from ocrd.processor.base import run_cli
 from ocrd.workspace import Workspace
 
 from ocrd_butler import celery
-from ocrd_butler.database import (
-    db,
-    models,
-)
+from ocrd_butler.database import db
 from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import (
     logger,
