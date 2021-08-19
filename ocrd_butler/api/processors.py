@@ -78,3 +78,14 @@ class Processors(Resource):
     def get(self):
         """Returns the processor informations as JSON data."""
         return jsonify(PROCESSORS_VIEW)
+
+
+@processors_namespace.route("/<string:name>")
+class Processor(Resource):
+
+    def get(self, name: str):
+        """ Returns specifications for a single processor.
+        """
+        return jsonify(
+            PROCESSORS_CONFIG.get(name, {})
+        )

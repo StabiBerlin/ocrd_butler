@@ -6,7 +6,6 @@ from flask_testing import TestCase
 
 from ocrd_butler.factory import create_app
 from ocrd_butler.api.processors import PROCESSORS_CONFIG
-from ocrd_butler.api.processors import PROCESSORS_ACTION
 from ocrd_butler.api.processors import PROCESSOR_NAMES
 from ocrd_butler.config import TestingConfig
 
@@ -76,3 +75,11 @@ class ProcessorsTests(TestCase):
         self.assert200(response)
         self.assert_template_used("processors.html")
         assert b"ocrd-calamari-recognize" in response.data
+
+    def test_proc_api_single_item(self):
+        """ check if calamari processor specifications can be retrieved from
+        API individually.
+        """
+        assert len(
+            self.client.get('/api/processors/ocrd-calamari-recognize').json
+        ) > 0
