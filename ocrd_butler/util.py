@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Utils module."""
+
 from typing import Dict, List, Union
 
 import os
@@ -69,13 +70,18 @@ class StreamToLogger(object):
 # we start logging our stuff.
 initLogging()
 
+
 # Configure logging to grep logging from other modules.
 logging.basicConfig(handlers=[InterceptHandler()], level=0)
 logging.getLogger().handlers = [InterceptHandler()]
 logging.getLogger(None).setLevel("DEBUG")
 
 # Initialize our logging via loguru.
-loguru.logger.add(f"{config.LOGGER_PATH}/ocrd-butler.log")
+loguru.logger.add(
+    f"{config.LOGGER_PATH}/ocrd-butler.log",
+    rotation="06:00",
+    retention="20 days",
+    compression="gz")
 logger = loguru.logger
 
 
