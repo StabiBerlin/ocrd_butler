@@ -6,8 +6,7 @@ https://flask.palletsprojects.com/en/1.1.x/config/
 import os
 import json
 import subprocess
-
-from .util import logger
+from loguru import logger
 
 DEFAULT_PROFILE = 'DEV'
 
@@ -37,6 +36,8 @@ class Config(object):
     SBB_CONTENT_SERVER_HOST = "content.staatsbibliothek-berlin.de"
     SBB_IIIF_FULL_TIF_URL = "https://content.staatsbibliothek-berlin.de/dc/"\
                             "{0}-{1}/full/full/0/default.tif"
+    LOGGER_PATH = "/data/log"
+
     PROCESSORS = [
         "ocrd-calamari-recognize",
 
@@ -184,7 +185,6 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///./development.db'
 
-
 class TestingConfig(Config):
     """
     Uses in memory database for testing.
@@ -193,6 +193,7 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     OCRD_BUTLER_RESULTS = "/tmp/ocrd_butler_results_testing"
     SBB_CONTENT_SERVER_HOST = "foo.bar"
+    LOGGER_PATH = "/tmp"
 
     @classmethod
     def processor_specs(cls, processor: str) -> dict:

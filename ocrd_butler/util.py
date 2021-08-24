@@ -9,12 +9,13 @@ import glob
 import pathlib
 import re
 import logging
-import logging.config
 import loguru
 import xml.etree.ElementTree as ET
 import yaml
 
 from ocrd_utils.logging import initLogging
+
+from . import config
 
 
 page_xml_namespaces = {
@@ -30,6 +31,9 @@ page_xml_namespaces = {
 
 
 class InterceptHandler(logging.Handler):
+    """ Handler can be added to existing logging configuration
+        of other modules to get its logging messages.
+    """
     def emit(self, record):
         # Get corresponding Loguru level if it exists
         try:
@@ -43,10 +47,14 @@ class InterceptHandler(logging.Handler):
             frame = frame.f_back
             depth += 1
 
-        loguru.logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+        loguru.logger.opt(depth=depth, exception=record.exc_info)\
+                     .log(level, record.getMessage())
 
 
 class StreamToLogger(object):
+    """ Fake input and output streams for other processes to
+        get the logging messagesself.
+    """
     def __init__(self, log_level="INFO"):
         self.log_level = log_level
 
@@ -57,36 +65,18 @@ class StreamToLogger(object):
     def flush(self):
         pass
 
-# initialize ocrd logging
+# Initialize ocrd logging because we want to have this before
+# we start logging our stuff.
 initLogging()
 
-# configure logging to grep logging from other modules
+# Configure logging to grep logging from other modules.
 logging.basicConfig(handlers=[InterceptHandler()], level=0)
 logging.getLogger().handlers = [InterceptHandler()]
 logging.getLogger(None).setLevel("DEBUG")
 
-# initialize our logging via loguru
-# system_conf = '/data/ocrd-butler/logging.conf'
-# local_conf = f'{os.getcwd()}/logging.yaml'
-# for conf in (system_conf, local_conf):
-#     if(os.path.exists(conf)):
-#         conf_path = os.path.normpath(os.path.join(os.path.dirname(__file__), conf))
-#         with open(conf_path, 'rt') as f:
-#             config = yaml.safe_load(f.read())
-#             logging.config.dictConfig(config)
-#             break
-loguru.logger.add(f"/data/log/ocrd-butler.log")
+# Initialize our logging via loguru.
+loguru.logger.add(f"{config.LOGGER_PATH}/ocrd-butler.log")
 logger = loguru.logger
-
-# def logger(name: str) -> logging.Logger:
-#     """ returns logger instance for given identifier.
-
-#     >>> l=logger(__name__); l.setLevel('WARN'); l
-#     <Logger ocrd_butler.util (WARNING)>
-
-#     """
-#     return loguru.logger
-#     # return logging.getLogger(name)
 
 
 def camel_case_split(identifier):
