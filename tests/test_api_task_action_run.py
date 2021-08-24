@@ -2,7 +2,6 @@
 
 """Testing the api for `ocrd_butler` package."""
 
-import pytest
 import os
 import json
 import glob
@@ -14,8 +13,8 @@ from flask_testing import TestCase
 
 from ocrd_butler import celery
 from ocrd_butler.config import TestingConfig
-from ocrd_butler.database import models as db_model
-from ocrd_butler.factory import create_app, db
+from ocrd_butler.factory import db
+from ocrd_butler.app import flask_app
 
 from . import require_ocrd_processors
 
@@ -88,7 +87,7 @@ class ApiTaskActionRunTests(TestCase):
             shutil.rmtree(test_dir, ignore_errors=True)
 
     def create_app(self):
-        return create_app(config=TestingConfig)
+        return flask_app
 
     def t_workflow(self):
         """Creates a workflow with tesseract processors."""
@@ -155,7 +154,7 @@ class ApiTaskActionRunTests(TestCase):
             ),
             body=json.dumps({
                 "status": "SUCCESS",
-                "msg": f"works"
+                "msg": "works"
             }).encode('utf-8'),
             status=200,
             content_type="application/json"
@@ -201,9 +200,7 @@ class ApiTaskActionRunTests(TestCase):
         response = self.client.post("/api/tasks/1/run")
         response = self.client.get(f"/api/tasks/{task_response.json['uid']}/status")
         assert response.status_code == 200
-        # assert response.data == b'{\n  "status": "PENDING"\n}\n'
         assert response.data == b'{\n  "status": "SUCCESS"\n}\n'
-
 
     @mock.patch("ocrd_butler.execution.tasks.run_task")
     @responses.activate
