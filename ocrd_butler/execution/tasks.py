@@ -2,16 +2,13 @@
 
 """Celery tasks definitions."""
 
-import contextlib
 import json
-import logging
 from pathlib import PurePosixPath
 import requests
 from urllib.parse import (
     urlparse,
     unquote
 )
-import sys
 
 from celery.signals import (
     task_failure,
@@ -38,11 +35,9 @@ from ocrd_butler.database import (
 from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import (
     logger,
-    StreamToLogger,
     host_url
 )
 
-from celery.contrib import rdb
 
 def get_task_state(task_id: str) -> str:
     """ Get the current status of the task.
@@ -54,25 +49,31 @@ def get_task_state(task_id: str) -> str:
 def task_prerun_handler(task_id, task, *args, **kwargs):
     logger.debug(f"task_prerun_handler -> task: {task_id}, task: {task}, "
                  f"args: {args}, kwargs: {kwargs}")
+    uid = kwargs.get('args')[0].get('uid')
     try:
-        uid = kwargs.get('args')[0].get('uid')
-        task = db_model_Task.query.filter_by(uid=uid).first()
-        task.status = "STARTED"
-        db.session.commit()
+        from ocrd_butler.app import flask_app
+        with flask_app.app_context():
+            task = db_model_Task.get(uid=uid)
+            task.status = "STARTED"
+            db.session.commit()
     except Exception as exc:
         logger.error(f"task_prerun_handler -> Can't set status for "
-                    f"task: {task_id}; exc: {exc}")
-    logger.info("Start processing task '{task.uid}'.")
+                     f"task: {task_id}; exc: {exc}")
+    logger.info(f"Start processing task '{uid}'.")
 
 
 @task_postrun.connect
 def task_postrun_handler(task_id, task, retval, state, *args, **kwargs):
     logger.debug(f"task_postrun_handler -> task: {task_id}, task: {task}, "
                  f"args: {args}, kwargs: {kwargs}")
-    task = db_model_Task.query.filter_by(uid=retval.get('uid')).first()
-    task.status = state
-    db.session.commit()
-    logger.info("Start processing task '{task.uid}'.")
+    from ocrd_butler.app import flask_app
+    with flask_app.app_context():
+        uid = kwargs.get('args')[-1].get('uid')
+        logger.debug(f'return value UID: {uid}')
+        task = db_model_Task.get(uid=uid)
+        task.status = state
+        db.session.commit()
+        logger.info(f"Start processing task '{task.uid}'.")
 
 
 @task_success.connect
@@ -80,28 +81,39 @@ def task_success_handler(result, *args, **kwargs):
     logger.debug(f"task_success_handler -> result: {result}, "
                  f"args: {args}, kwargs: {kwargs}")
     try:
-        task = db_model_Task.query.filter_by(uid=result.get("uid")).first()
-        task.status = "SUCCESS"
-        task.results = result
-        db.session.commit()
+        from ocrd_butler.app import flask_app
+        with flask_app.app_context():
+            task = db_model_Task.get(uid=result.get("uid"))
+            task.status = "SUCCESS"
+            task.results = result
+            db.session.commit()
     except Exception as exc:
-        logger.error(f"task_success_handler -> Can't set status and results for "
-                    f"task: {result.get('uid')}; exc: {exc}")
+        logger.error(
+            f"task_success_handler -> Can't set status and results for "
+            f"task: {result.get('uid')}; exc: {exc}"
+        )
     logger.info(f"Success on task {result.get('uid')}")
 
 
 @task_failure.connect
 def task_failure_handler(task_id, exception, traceback, einfo, *args, **kwargs):
-    logger.debug(f"task_failure_handler -> task: {task_id}, exception: {exception}, "
-                 f"traceback: {traceback}, einfo: {einfo}, args: {args}, kwargs: {kwargs}")
+    logger.debug(
+        f"task_failure_handler -> task: {task_id}, exception: {exception}, "
+        f"traceback: {traceback}, einfo: {einfo}, args: {args}, "
+        f"kwargs: {kwargs}"
+    )
     try:
-        uid = kwargs.get('args')[0].get('uid')
-        task = db_model_Task.query.filter_by(uid=uid).first()
-        task.status = "FAILURE"
-        db.session.commit()
+        from ocrd_butler.app import flask_app
+        with flask_app.app_context():
+            uid = kwargs.get('args')[0].get('uid')
+            task = db_model_Task.get(uid=uid)
+            task.status = "FAILURE"
+            db.session.commit()
     except Exception as exc:
-        logger.error(f"task_failure_handler -> Can't set status for "
-                    f"task: {task_id}; exc: {exc}")
+        logger.error(
+            f"task_failure_handler -> Can't set status for "
+            f"task: {task_id}; exc: {exc}"
+        )
     logger.error(f"Task {task_id} failed, "
                  f"exception: {exception}, traceback: {traceback}.")
 
@@ -169,11 +181,14 @@ def run_task(self, task: models.Task) -> dict:
     logger.add(f"/data/log/task-{task['uid']}.log")
 
     # Create workspace
-    dst_dir = "{}/{}".format(current_app.config["OCRD_BUTLER_RESULTS"],
-                             task["uid"])
-    resolver = Resolver()
-    workspace = prepare_workspace(task, resolver, dst_dir)
-    logger.info(f"Prepare workspace for task '{task['uid']}'.")
+    from ocrd_butler.app import flask_app
+    with flask_app.app_context():
+        dst_dir = "{}/{}".format(
+            current_app.config["OCRD_BUTLER_RESULTS"], task["uid"]
+        )
+        resolver = Resolver()
+        workspace = prepare_workspace(task, resolver, dst_dir)
+        logger.info(f"Prepare workspace for task '{task['uid']}'.")
 
     task_processors = task["workflow"]["processors"]
 
