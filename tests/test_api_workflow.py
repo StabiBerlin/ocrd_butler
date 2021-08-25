@@ -126,6 +126,23 @@ class ApiWorkflowTests(TestCase):
         assert response.json["message"].startswith(
             "Wrong parameter. Error(s) while validating parameters \"{\'impl\': \'foobar\',")
 
+    def test_create_workflow_global_default_parameters(self):
+        """ check if parameter defaults from ocrd_butler.config end up in
+        newly created workflow processor.
+        """
+        wid = self.get_workflow(
+            processors=[
+                {
+                    'name': 'ocrd-tesserocr-recognize',
+                    'parameters': {}
+                }
+            ]
+        ).json['id']
+        w = self.client.get(f'/api/workflows/{wid}').json
+        params = w['processors'][0]['parameters']
+        assert 'model' in params
+        assert params['model'] == "Fraktur_GT4HistOCR"
+
     def test_create_workflow_with_reused_processors(self):
         """Check if a workflow with processors that are used multiple is created."""
         foor = self.get_workflow(processors=[
@@ -231,12 +248,43 @@ class ApiWorkflowTests(TestCase):
                 "name": "ocrd-tesserocr-segment-word"
             }],
         ))
+        assert response.status_code == 201
         response = self.client.get("/api/workflows/1")
         assert response.status_code == 200
         assert response.json["id"] == 1
         assert response.json["name"] == "Updated Workflow"
         assert response.json["description"] == "Some barfoo workflow."
         assert response.json["processors"][0]["name"] == "ocrd-tesserocr-segment-word"
+        assert response.json['processors'][-1]['output_file_grp'] == (
+            '01-OCRD-TESSEROCR-SEGMENT-WORD-OUTPUT'
+        )
+
+    def test_amend_workflow(self):
+        """ add another processor to existing workflow
+        """
+        workflow_id = self.get_workflow(
+            name='olena',
+            processors=[
+                {
+                    'name': 'ocrd-olena-binarize',
+                    'input_file_grp': 'OCR-D-IMG',
+                    'output_file_grp': 'OCR-D-IMG-BIN',
+                },
+            ]
+        ).json.get('id')
+        assert workflow_id == 1
+        response = self.client.put(
+            '/api/workflows/1/add',
+            json={
+                'name': 'ocrd-tesserocr-segment-region',
+                'output_file_grp': 'OCR-D-SEG-BLOCK',
+            }
+        )
+        assert response.status_code == 201
+        w = self.client.get('/api/workflows/1').json
+        assert len(w['processors']) == 2
+        assert w['processors'][0]['input_file_grp'] == 'OCR-D-IMG'
+        assert w['processors'][-1]['output_file_grp'] == 'OCR-D-SEG-BLOCK'
 
     def test_workflow_model(self):
         assert "name" in workflow_model
