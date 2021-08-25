@@ -1,59 +1,8 @@
 ---
-version: 1
-disable_existing_loggers: False
-formatters:
-  simple:
-    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    datefmt: "%Y-%m-%d %H:%M:%S"
-
-handlers:
-  console:
-    class: logging.StreamHandler
-    level: DEBUG
-    formatter: simple
-    stream: ext://sys.stdout
-
-  info_file_handler:
-    class: logging.handlers.RotatingFileHandler
-    level: INFO
-    formatter: simple
-    filename: /data/log/ocrd-butler.log
-    maxBytes: 10485760 # 10MB
-    backupCount: 20
-    encoding: utf8
-
-  error_file_handler:
-    class: logging.handlers.RotatingFileHandler
-    level: ERROR
-    formatter: simple
-    filename: /data/log/ocrd-butler-errors.log
-    maxBytes: 10485760 # 10MB
-    backupCount: 20
-    encoding: utf8
-
-  tasks_file_handler:
-    class: logging.handlers.RotatingFileHandler
-    level: INFO
-    formatter: simple
-    filename: /data/log/ocrd-butler-tasks.log
-    maxBytes: 10485760 # 10MB
-    backupCount: 20
-    encoding: utf8
-
-loggers:
-  butler:
-    level: INFO
-    handlers: [console, info_file_handler, error_file_handler]
-    propagate: False
-  butler_tasks:
-    level: INFO
-    handlers: [console, tasks_file_handler, error_file_handler]
-    propagate: False
-  __main__:
-    level: DEBUG
-    handlers: [console, tasks_file_handler, error_file_handler]
-    propagate: False
-
-root:
-  level: INFO
-  handlers: [console, info_file_handler, error_file_handler]
+## This is currently just an example, not implemented yet.
+format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+datefmt: "%Y-%m-%d %H:%M:%S"
+logger_path: /data/log/ocrd-butler.log
+rotation: "06:00"
+backupCount: 20
+encoding: utf8
