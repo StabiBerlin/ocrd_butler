@@ -28,10 +28,7 @@ from ocrd.processor.base import run_cli
 from ocrd.workspace import Workspace
 
 from ocrd_butler import celery
-from ocrd_butler.database import (
-    db,
-    models,
-)
+from ocrd_butler.database import db
 from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import (
     logger,
@@ -134,8 +131,40 @@ def prepare_workspace(task: dict, resolver: Resolver, dst_dir: str) -> Workspace
     return workspace
 
 
+def determine_input_file_grp(
+    task: dict, processor: dict, previous_processor: dict
+) -> str:
+    """ determine ``input_file_grp`` to be used for given processor, based
+    on its own configuration, the previous processor's ``output_file_grp``,
+    or the task's ``default_file_grp`` parameter, respectively.
+
+    >>> task = {'default_file_grp': 'DEFAULT'}
+    >>> prev = {'output_file_grp': 'OCR-D-IMG-BIN'}
+    >>> proc = {'input_file_grp': 'OCR-D-IMG-FOO'}
+
+    >>> determine_input_file_grp(task, proc, prev)
+    'OCR-D-IMG-FOO'
+
+    >>> determine_input_file_grp(task, {}, prev)
+    'OCR-D-IMG-BIN'
+
+    >>> determine_input_file_grp(task, {}, {})
+    'DEFAULT'
+
+    """
+    return processor.get(
+        'input_file_grp',
+        (
+            previous_processor or {}
+        ).get(
+            'output_file_grp',
+            task['default_file_grp']
+        )
+    )
+
+
 @celery.task(bind=True)
-def run_task(self, task: models.Task) -> dict:
+def run_task(self, task: dict) -> dict:
     """ Create a task an run the given workflow. """
 
     # Create workspace
@@ -150,10 +179,9 @@ def run_task(self, task: models.Task) -> dict:
     previous_processor = None
 
     for processor in task_processors:
-        if previous_processor is None:
-            input_file_grp = task["default_file_grp"]
-        else:
-            input_file_grp = previous_processor["output_file_grp"]
+        input_file_grp = determine_input_file_grp(
+            task, processor, previous_processor
+        )
         previous_processor = processor
 
         # Its possible to override the parameters of the processor in the task.

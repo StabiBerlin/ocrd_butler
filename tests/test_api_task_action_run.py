@@ -125,7 +125,8 @@ class ApiTaskActionRunTests(TestCase):
                     "name": "ocrd-tesserocr-recognize",
                     "parameters": {
                         "model": "deu"
-                    }
+                    },
+                    "output_file_grp": "OCR-D-SEG-REGION",
                 },
             ],
         ))
