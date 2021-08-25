@@ -16,8 +16,6 @@ from ocrd_butler.database.models import (
 )
 
 
-log = logger(__name__)
-
 
 def load_mock_db_model(
     model_class: Type[db.Model], root_node: str, filename: str
@@ -52,7 +50,7 @@ def ocrd_processor_available(processor: str) -> bool:
                 ['which', processor]
             ) is not None
         except Exception:
-            log.error(
+            logger.error(
                 'No executable found for processor `%s`', processor
             )
             return False

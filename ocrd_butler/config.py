@@ -6,10 +6,8 @@ https://flask.palletsprojects.com/en/1.1.x/config/
 import os
 import json
 import subprocess
+from loguru import logger
 
-from .util import logger
-
-log = logger(__name__)
 DEFAULT_PROFILE = 'DEV'
 
 
@@ -38,6 +36,8 @@ class Config(object):
     SBB_CONTENT_SERVER_HOST = "content.staatsbibliothek-berlin.de"
     SBB_IIIF_FULL_TIF_URL = "https://content.staatsbibliothek-berlin.de/dc/"\
                             "{0}-{1}/full/full/0/default.tif"
+    LOGGER_PATH = "/data/log"
+
     PROCESSORS = [
         "ocrd-calamari-recognize",
 
@@ -167,7 +167,7 @@ class Config(object):
         try:
             return exec_processor_dump_json(processor)
         except FileNotFoundError:
-            log.error('OCRD processor `%s` not found!', processor)
+            logger.error('OCRD processor `%s` not found!' % processor)
             return {}
 
 
@@ -186,7 +186,6 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///./development.db'
 
-
 class TestingConfig(Config):
     """
     Uses in memory database for testing.
@@ -195,6 +194,7 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     OCRD_BUTLER_RESULTS = "/tmp/ocrd_butler_results_testing"
     SBB_CONTENT_SERVER_HOST = "foo.bar"
+    LOGGER_PATH = "/tmp"
 
     @classmethod
     def processor_specs(cls, processor: str) -> dict:
@@ -215,7 +215,7 @@ class TestingConfig(Config):
                 specs = json.load(f)
             return specs
         else:
-            log.warn(
+            logger.warn(
                 'file not found: {}'.format(filename)
             )
             return {}
@@ -257,14 +257,17 @@ def profile_config() -> Config:
 
     """
     if 'PROFILE' in os.environ:
-        log.debug(
-            'Select config implementation based on PROFILE env var value `%s`',
-            os.environ['PROFILE'],
+        logger.debug(
+            (
+                'Select config implementation based on PROFILE env var '
+                'value `{}`'
+            ).format(os.environ['PROFILE']),
         )
     else:
-        log.warning(
-            'Environment variable PROFILE not set. Defaulting to `%s`.',
-            DEFAULT_PROFILE,
+        logger.warning(
+            'Environment variable PROFILE not set. Defaulting to `{}`.'.format(
+                DEFAULT_PROFILE
+            ),
         )
     config = {
         "TEST": TestingConfig,
@@ -273,5 +276,5 @@ def profile_config() -> Config:
     }.get(
         get_profile_var()
     )
-    log.info('Selected config: %s.', config)
+    logger.info('Selected config: %s.' % config)
     return config

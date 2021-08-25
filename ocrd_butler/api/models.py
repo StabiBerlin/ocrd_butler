@@ -9,7 +9,10 @@ task_model = api.model("Task Model", {
     "src": fields.String(
         title="Source",
         required=True,
-        description="URL to a METS file or filename of an image or an archive with images.",
+        description=(
+            "URL to a METS file or filename of an image or an archive with "
+            "images."
+        ),
         help="A source is required."),
     "workflow_id": fields.String(
         title="Processor workflow",
@@ -27,13 +30,20 @@ task_model = api.model("Task Model", {
     "default_file_grp": fields.String(
         title="Default file group",
         required=False,
-        description="The default file group in the METS file to start the processor workflow with.",
+        description=(
+            "The default file group in the METS file to start the processor "
+            "workflow with."
+        ),
         help="Defaults to 'DEFAULT'.",
         default="DEFAULT"),
     "worker_task_id": fields.String(
         title="Worker Task ID",
         required=False,
-        description="ID of the worker task, used to get state and result for the async task."),
+        description=(
+            "ID of the worker task, used to get state and result for the "
+            "async task."
+        ),
+    ),
     "status": fields.String(
         title="Status",
         required=False,
@@ -46,26 +56,27 @@ task_model = api.model("Task Model", {
         default={}),
 })
 
+
 class WorkflowProcessors(fields.Raw):
     __schema_type__ = 'array'
     __schema_format__ = 'JSON'
-    __schema_example__ = '''[
-            {
-                'name': 'ocrd-processor-0',
-                'parameters': {}
-            },
-            {
-                'name': 'ocrd-processor-n',
-                'parameters': {
-                    'parameter-name-0': 'parameter-value-0',
-                    'parameter-name-n': 'parameter-value-n',
-                }
+    __schema_example__ = [
+        {
+            'name': 'ocrd-processor-0',
+            'parameters': {}
+        },
+        {
+            'name': 'ocrd-processor-n',
+            'parameters': {
+                'parameter-name-0': 'parameter-value-0',
+                'parameter-name-n': 'parameter-value-n',
             }
-        ]
-    '''
+        }
+    ]
 
     def format(self, value):
         return value
+
 
 workflow_model = api.model("Workflow Model", {
     "name": fields.String(
@@ -84,5 +95,10 @@ workflow_model = api.model("Workflow Model", {
         min_items=1,
         unique=False,
         description="The processors to be used in the workflow.",
-        help="The processors will be executed in the given order. The parameters will be filled up with the defaults. Can be overwritten in a task."),
+        help=(
+            "The processors will be executed in the given order. "
+            "The parameters will be filled up with the defaults. "
+            "Can be overwritten in a task."
+        ),
+    ),
 })

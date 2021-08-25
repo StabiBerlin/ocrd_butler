@@ -2,13 +2,21 @@
 
 """Utils module."""
 
+from typing import Dict, List, Union
+
 import os
 import json
 import glob
 import pathlib
 import re
-import logging.config
+import logging
+import loguru
 import xml.etree.ElementTree as ET
+import yaml
+
+from ocrd_utils.logging import initLogging
+
+from . import config
 
 
 page_xml_namespaces = {
@@ -23,31 +31,58 @@ page_xml_namespaces = {
 }
 
 
-system_conf = '/data/ocrd-butler/logging.conf'
-local_conf = f'{os.getcwd()}/logging.conf'
-
-for conf in (system_conf, local_conf):
-    if(os.path.exists(conf)):
-        conf_path = os.path.normpath(os.path.join(os.path.dirname(__file__), conf))
-        logging.config.fileConfig(conf_path)
-        break
-log = logging.getLogger(__name__)
-
-
-def logger(name: str) -> logging.Logger:
-    """ returns logger instance for given identifier.
-
-    >>> l=logger(__name__); l.setLevel('WARN'); l
-    <Logger ocrd_butler.util (WARNING)>
-
+class InterceptHandler(logging.Handler):
+    """ Handler can be added to existing logging configuration
+        of other modules to get its logging messages.
     """
-    return logging.getLogger(name)
+    def emit(self, record):
+        # Get corresponding Loguru level if it exists
+        try:
+            level = loguru.logger.level(record.levelname).name
+        except ValueError:
+            level = record.levelno
+
+        # Find caller from where originated the logged message
+        frame, depth = logging.currentframe(), 2
+        while frame.f_code.co_filename == logging.__file__:
+            frame = frame.f_back
+            depth += 1
+
+        loguru.logger.opt(depth=depth, exception=record.exc_info)\
+                     .log(level, record.getMessage())
 
 
-logging_conf_path = os.path.normpath(os.path.join(
-    os.path.dirname(__file__), '../logging.conf'))
-logging.config.fileConfig(logging_conf_path)
-log = logging.getLogger(__name__)
+class StreamToLogger(object):
+    """ Fake input and output streams for other processes to
+        get the logging messagesself.
+    """
+    def __init__(self, log_level="INFO"):
+        self.log_level = log_level
+
+    def write(self, buf):
+        for line in buf.rstrip().splitlines():
+            loguru.logger.log(self.log_level, line.rstrip())
+
+    def flush(self):
+        pass
+
+# Initialize ocrd logging because we want to have this before
+# we start logging our stuff.
+initLogging()
+
+
+# Configure logging to grep logging from other modules.
+logging.basicConfig(handlers=[InterceptHandler()], level=0)
+logging.getLogger().handlers = [InterceptHandler()]
+logging.getLogger(None).setLevel("DEBUG")
+
+# Initialize our logging via loguru.
+loguru.logger.add(
+    f"{config.LOGGER_PATH}/ocrd-butler.log",
+    rotation="06:00",
+    retention="20 days",
+    compression="gz")
+logger = loguru.logger
 
 
 def camel_case_split(identifier):
@@ -81,7 +116,10 @@ def flower_url(request):
     return f"{request.host_url}/flower"
 
 
-def to_json(data):
+def to_json(data: str) -> Union[Dict, List]:
+    """ deserialize string, after replacing all occurrences of single quotes
+    with double quotes. If input is not a string, it is being returned as-is.
+    """
     if isinstance(data, str):
         data = data.replace("'", '"')
         data = json.loads(data)

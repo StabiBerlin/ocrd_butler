@@ -45,13 +45,11 @@ from ocrd_butler.util import (
     page_xml_namespaces,
 )
 
-log = logger(__name__)
 
 task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 
 
 # get the status of a task
-# get the results of a task - this collect links to the resources like mets files, images, etc.
 # stop a running task
 # delete a task
 # archive a task
@@ -207,7 +205,7 @@ class TaskActions(TasksBase):
 
         TODO: Return the actions as OPTIONS.
         """
-        log.info(f"Task {task_id} post action {action} called.")
+        logger.info(f"Task {task_id} post action {action} called.")
 
         task = db_model_Task.get(id=task_id)
         if task is None:
@@ -249,7 +247,7 @@ class TaskActions(TasksBase):
 
         TODO: Return the actions as OPTIONS.
         """
-        log.info(f"Task {task_id} get action {action} called.")
+        logger.info(f"Task {task_id} get action {action} called.")
 
         task = db_model_Task.get(id=task_id)
         if task is None:
@@ -278,18 +276,22 @@ class TaskActions(TasksBase):
 
     def run(self, task: db_model_Task):
         """ Run this task. """
-        log.info("run task: %s", task)
+        logger.info(f"Action 'run' called for task: {task.to_json()}")
 
-        # run_task(task.to_json())  # use for debugging
+        # celery_worker_task = run_task(task.to_json())  # use for debugging
         celery_worker_task = run_task.delay(task.to_json())
         # celery_worker_task = run_task.apply_async(args=[task.to_json()],
         #                                    countdown=20)
+        # if '__dict__' in dir(celery_worker_task):
+        #     # async task result
+        #     celery_worker_task = celery_worker_task.__dict__
 
-        task.worker_task_id = celery_worker_task.id
+        task.worker_task_id = celery_worker_task.task_id
+        task.status = celery_worker_task.status
         db.session.commit()
 
         result = {
-            "worker_task_id": celery_worker_task.id,
+            "worker_task_id": celery_worker_task.task_id,
             "status": celery_worker_task.status,
             "traceback": celery_worker_task.traceback,
         }
