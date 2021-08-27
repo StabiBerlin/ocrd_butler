@@ -103,7 +103,7 @@ class ApiTaskActionRunTests(TestCase):
                     "parameters": {
                         "model": "deu"
                     },
-                    "output_file_grp": "OCR-D-SEG-REGION",
+                    "output_file_grp": "OCR-D-SEG-WORD",
                 },
             ],
         ))
