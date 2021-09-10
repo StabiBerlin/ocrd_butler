@@ -322,7 +322,7 @@ class TaskActions(TasksBase):
         if page_result_path is None:
             return jsonify({
                 "status": "ERROR",
-                "msg": f"Can't find page results for task {task_info['result']['task_id']}"
+                "msg": f"Can't find page results for task {task_info['result']['uid']}"
             })
 
         for file_path in page_result_path.iterdir():
@@ -355,7 +355,7 @@ class TaskActions(TasksBase):
         if page_result_path is None:
             return jsonify({
                 "status": "ERROR",
-                "msg": f"Can't find page results for task {task_info['result']['task_id']}"
+                "msg": f"Can't find page results for task {task_info['result']['uid']}"
             })
 
         img_dir = os.path.join(f"{task_info['result']['result_dir']}/{task.default_file_grp}")
@@ -376,7 +376,7 @@ class TaskActions(TasksBase):
             data,
             mimetype="application/zip",
             as_attachment=True,
-            attachment_filename=f"ocr_page_xml_{task_info['result']['task_id']}.zip"
+            attachment_filename=f"ocr_page_xml_{task_info['result']['uid']}.zip"
         )
 
     def download_alto(self, task):
@@ -384,9 +384,12 @@ class TaskActions(TasksBase):
         task_info = task_information(task.worker_task_id)
         alto_xml_dir = os.path.join(task_info["result"]["result_dir"], "OCR-D-OCR-ALTO")
         if not os.path.exists(alto_xml_dir):
+            response = self.page_to_alto(task)
+            logger.info(f'(Re)convert page2alto, result: {response.json}')
+        if not os.path.exists(alto_xml_dir):
             return jsonify({
                 "status": "ERROR",
-                "msg": f"Can't find alto results for task {task_info['result']['task_id']}"
+                "msg": f"Can't find alto results for task {task_info['result']['uid']}"
             })
 
         img_dir = os.path.join(f"{task_info['result']['result_dir']}/{task.default_file_grp}")
@@ -407,7 +410,7 @@ class TaskActions(TasksBase):
             data,
             mimetype="application/zip",
             as_attachment=True,
-            attachment_filename="ocr_alto_xml_%s.zip" % task_info["result"]["task_id"]
+            attachment_filename="ocr_alto_xml_%s.zip" % task_info["result"]["uid"]
         )
 
     def download_txt(self, task):
@@ -419,7 +422,7 @@ class TaskActions(TasksBase):
         if page_result_path is None:
             return jsonify({
                 "status": "ERROR",
-                "msg": f"Can't find page results for task {task_info['result']['task_id']}"
+                "msg": f"Can't find page results for task {task_info['result']['uid']}"
             })
 
         fulltext = ""
@@ -441,7 +444,7 @@ class TaskActions(TasksBase):
         response.mimetype = "text/txt"
         response.headers.extend({
             "Content-Disposition":
-            "attachment;filename=fulltext_%s.txt" % task_info["result"]["task_id"]
+            "attachment;filename=fulltext_%s.txt" % task_info["result"]["uid"]
         })
         return response
 
