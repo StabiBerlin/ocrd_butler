@@ -39,6 +39,8 @@ class Config(object):
     LOGGER_PATH = "/data/log"
 
     PROCESSORS = [
+        "ocrd-eynollah-segment",
+
         "ocrd-calamari-recognize",
 
         "ocrd-olena-binarize",
