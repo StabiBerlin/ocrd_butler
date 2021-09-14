@@ -1,6 +1,32 @@
 {
     "workflows": [
         {
+            "name": "SBB - eynollah - binarize - tesserocr-recognize",
+            "description": "Workflow with eynollah segmentation, olena binarization and tesserocr recognize.",
+            "processors": [
+                {
+                    "name": "ocrd-eynollah-segment",
+                    "parameters": {
+                        "models": "/data/default"
+                    }
+                },
+                {
+                    "name": "ocrd-sbb-binarize",
+                    "parameters": {
+                        "model": "/data/sbb_binarization/models",
+                        "operation_level": "page"
+                    }
+                },
+                {
+                    "name": "ocrd-tesserocr-recognize",
+                    "parameters": {
+                        "model": "deu+pol+ces"
+                    }
+                }
+            ]
+        }
+        ,
+        {
             "name": "SBB - binarize - textline - calamari",
             "description": "Workflow with olena binarization and calamari recognize.",
             "processors": [
