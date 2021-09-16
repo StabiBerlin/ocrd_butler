@@ -126,3 +126,7 @@ textline-detector-model: ## install trained model for sbb textline detector
 sbb-binarize-model: ## install trained model for the sbb binarization processor
 	mkdir -p /data && cd /data; \
 	ocrd resmgr download ocrd-sbb-binarize default -al cwd
+
+eynollah-segment-model: ## install trained model for the ocrd-eynollah-segment processor
+	mkdir -p /data && cd /data; \
+	ocrd resmgr download ocrd-eynollah-segment '*' -al cwd
