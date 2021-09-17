@@ -92,7 +92,7 @@ def camel_case_split(identifier):
     return [m.group(0) for m in matches]
 
 
-def ocr_result_path(result_dir: str, path_part: str = "OCR-D-OCR") -> pathlib.Path:
+def ocr_result_path(result_dir: str, path_part: str = "OCR") -> pathlib.Path:
     """ Get base path to the page xml results of the task. """
     result_xml_files = glob.glob(f"{result_dir}/*/*.xml")
     for file in result_xml_files:
