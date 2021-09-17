@@ -12,7 +12,6 @@ import re
 import logging
 import loguru
 import xml.etree.ElementTree as ET
-import yaml
 
 from ocrd_utils.logging import initLogging
 
@@ -54,7 +53,7 @@ class InterceptHandler(logging.Handler):
 
 class StreamToLogger(object):
     """ Fake input and output streams for other processes to
-        get the logging messagesself.
+        get the logging messages.
     """
     def __init__(self, log_level="INFO"):
         self.log_level = log_level

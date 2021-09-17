@@ -97,7 +97,7 @@ def task_failure_handler(task_id, exception, traceback, einfo, *args, **kwargs):
         f"kwargs: {kwargs}"
     )
     uid = kwargs.get('args')[0].get('uid')
-    update_task(uid, 'FAILED')
+    update_task(uid, 'FAILURE')
     logger.error(f"Task {task_id} failed, "
                  f"exception: {exception}, traceback: {traceback}.")
 
@@ -234,7 +234,7 @@ def run_task(self, task: dict) -> dict:
         logger.info(f'Run processor {processor["name"]}.')
         # stream = StreamToLogger()
         # with contextlib.redirect_stdout(stream):
-        run_cli(
+        exit_code = run_cli(
             processor["executable"],
             mets_url=mets_url,
             resolver=resolver,
@@ -244,6 +244,9 @@ def run_task(self, task: dict) -> dict:
             output_file_grp=processor["output_file_grp"],
             parameter=parameter,
         )
+
+        if exit_code != 0:
+            raise Exception(f"Processor {processor['name']} failed with exit code {exit_code}.")
 
         # reload mets
         workspace.reload_mets()

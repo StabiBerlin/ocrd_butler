@@ -229,7 +229,7 @@ class ApiTaskActionRunTests(TestCase):
 
         response = self.client.get("/api/tasks/1/results")
         ocr_results = os.path.join(response.json["result_dir"],
-                                   "OCR-D-SEG-WORD")
+                                   "03-OCRD-TESSEROCR-SEGMENT-WORD-OUTPUT")
         result_files = os.listdir(ocr_results)
         with open(os.path.join(ocr_results, result_files[2])) as result_file:
             text = result_file.read()
@@ -362,3 +362,49 @@ class ApiTaskActionRunTests(TestCase):
             text = result_file.read()
             assert text.startswith('<?xml version="1.0" encoding="UTF-8"?>')
             assert "<pc:Unicode>" in text
+
+
+    @mock.patch("ocrd_butler.execution.tasks.run_task")
+    @responses.activate
+    @require_ocrd_processors(
+        'ocrd-calamari-recognize'
+    )
+    def test_task_failed(self, mock_run_task):
+        """Lets fail a processor and expect that the task fail as well.
+        """
+
+        workflow_response = self.client.post("/api/workflows", json=dict(
+            name="Calamari Recognize",
+            description="Calamari recognize only",
+            processors=[
+                { "name": "ocrd-calamari-recognize" }
+            ]
+        ))
+
+        assert workflow_response.json["uid"] is not None
+        assert workflow_response.json["message"] == "Workflow created."
+
+        task_response = self.client.post("/api/tasks", json=dict(
+            workflow_id=workflow_response.json["id"],
+            src="http://foo.bar/mets.xml",
+            description="Calamari recognize task to fail.",
+            parameters={
+                "ocrd-calamari-recognize": {
+                    "checkpoint": "/foobar/*.ckpt.json"
+                }
+            }
+        ))
+
+        assert task_response.status_code == 201
+        assert len(task_response.json["uid"]) == 36
+        assert task_response.json["message"] == "Task created."
+
+        self.add_response_action(task_response.json['uid'])
+
+        response = self.client.post(
+            "/api/tasks/{0}/run".format(task_response.json["id"])
+        )
+
+        assert response.status_code == 200
+        assert response.json["status"] == "FAILURE"
+        assert "Processor ocrd-calamari-recognize failed with exit code 1." in response.json["traceback"]
