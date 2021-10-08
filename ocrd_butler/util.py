@@ -55,12 +55,13 @@ class StreamToLogger(object):
     """ Fake input and output streams for other processes to
         get the logging messages.
     """
-    def __init__(self, log_level="INFO"):
-        self.log_level = log_level
+    def __init__(self, level="INFO"):
+        self.level = level
+        self.linebuf = ''
 
     def write(self, buf):
         for line in buf.rstrip().splitlines():
-            loguru.logger.log(self.log_level, line.rstrip())
+            loguru.logger.log(self.level, line.rstrip())
 
     def flush(self):
         pass
@@ -81,6 +82,11 @@ loguru.logger.add(
     rotation="06:00",
     retention="20 days",
     compression="gz")
+# If we start as service allow logging for other users.
+try:
+    os.chmod(f"{config.LOGGER_PATH}/ocrd-butler.log", 0o766)
+except PermissionError:
+    pass
 logger = loguru.logger
 
 
