@@ -83,8 +83,15 @@
                     </td>
                     <td><a href="{{ task.src }}">XML</a></td>
                     <td>{{ task.default_file_grp }}</td>
-                    <td>{{ task.workflow }}</td>
-                    <td>{{ task.parameters }}</td>
+                    <td>
+                        <div class="task-info">
+                            {{ task.workflow }}
+                        </div>
+                    <td>
+                        <div class="task-info">
+                            {{ task.parameters }}
+                        </div>
+                    </td>
                     <td><a href="/task/run/{{ task.id }}">Run</a></td>
                     <td><a href="{{ task.flower_url }}"
                            target="_blank">{{ task.worker_task_id }}</a>
