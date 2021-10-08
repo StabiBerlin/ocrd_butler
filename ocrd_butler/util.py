@@ -107,7 +107,8 @@ def ocr_result_path(result_dir: str, path_part: str = "OCR") -> pathlib.Path:
         tree = ET.parse(file)
         xmlns = tree.getroot().tag.split("}")[0].strip("{")
         if xmlns in page_xml_namespaces.values():
-            return pathlib.Path(os.path.dirname(file))
+            if tree.findall(".//pc:Unicode", {"pc": xmlns}):
+                return pathlib.Path(os.path.dirname(file))
 
 
 def host_url(request):
