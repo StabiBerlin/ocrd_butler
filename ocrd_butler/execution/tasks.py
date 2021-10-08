@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """Celery tasks definitions."""
+from __future__ import print_function
 
 import json
-from pathlib import PurePosixPath
+from pathlib import (
+    Path,
+    PurePosixPath
+)
 import requests
 from urllib.parse import (
     urlparse,
@@ -27,12 +31,14 @@ from ocrd_models import OcrdFile
 from ocrd.resolver import Resolver
 from ocrd.processor.base import run_cli
 from ocrd.workspace import Workspace
+from ocrd_utils import getLogger
 
 from ocrd_butler import celery
 from ocrd_butler.database import db
 from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import (
     logger,
+    StreamToLogger,
     host_url
 )
 
@@ -68,7 +74,7 @@ def task_prerun_handler(task_id, task, *args, **kwargs):
                  f"args: {args}, kwargs: {kwargs}")
     uid = kwargs.get('args')[0].get('uid')
     update_task(uid, 'STARTED')
-    logger.info(f"Start processing task '{uid}'.")
+    logger.info(f"Start processing task {uid}.")
 
 
 @task_postrun.connect
@@ -77,7 +83,7 @@ def task_postrun_handler(task_id, task, retval, state, *args, **kwargs):
                  f"args: {args}, kwargs: {kwargs}")
     uid = kwargs.get('args')[-1].get('uid')
     update_task(uid, state)
-    logger.info(f"Finished processing task '{uid}'.")
+    logger.info(f"Finished processing task {uid}.")
 
 
 @task_success.connect
@@ -190,13 +196,14 @@ def determine_input_file_grp(
         )
     )
 
-
 @celery.task(bind=True)
 def run_task(self, task: dict) -> dict:
     """ Create a task an run the given workflow. """
-    # logger.remove()
     logger_path = current_app.config["LOGGER_PATH"]
-    task_log_handler = logger.add(f"{logger_path}/task-{task['uid']}.log")
+    log_file = f"{logger_path}/task-{task['uid']}.log"
+    task_log_handler = logger.add(log_file)
+
+    logger.info(f'Start processing task {task["uid"]}.')
 
     # Create workspace
     from ocrd_butler.app import flask_app
@@ -232,8 +239,6 @@ def run_task(self, task: dict) -> dict:
 
         mets_url = "{}/mets.xml".format(dst_dir)
         logger.info(f'Run processor {processor["name"]}.')
-        # stream = StreamToLogger()
-        # with contextlib.redirect_stdout(stream):
         exit_code = run_cli(
             processor["executable"],
             mets_url=mets_url,
@@ -263,6 +268,24 @@ def run_task(self, task: dict) -> dict:
                         f"Reason: {exc}")
 
     logger.info(f'Finished processing task {task["uid"]}.')
+    logger.remove(task_log_handler)
+    task_log_handler = logger.add(log_file, format='{message}', mode='a')
+    service_debug_log = f"{logger_path}/celery/ocrd-butler.celery.service.stderr.log"
+    if Path(service_debug_log).is_file():
+        lines = []
+        start = f'Start processing task {task["uid"]}'
+        end = f'Finished processing task {task["uid"]}'
+        record = False
+        with open(service_debug_log, 'r') as log:
+            for line in log:
+                if start in line:
+                    record = True
+                if end in line:
+                    break
+                if record:
+                    lines.append(line.rstrip())
+        for line in lines:
+            logger.info(line)
     logger.remove(task_log_handler)
 
     return {
