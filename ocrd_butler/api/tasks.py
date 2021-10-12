@@ -112,6 +112,7 @@ class TasksBase(Resource):
             "download_txt",
             "download_page",
             "download_alto",
+            "download_log",
         )
         self.post_actions = (
             "run",
@@ -244,6 +245,7 @@ class TaskActions(TasksBase):
         * download_txt
         * download_page
         * download_alto
+        * download_log
 
         TODO: Return the actions as OPTIONS.
         """
@@ -448,6 +450,34 @@ class TaskActions(TasksBase):
         })
         return response
 
+
+    def download_log(self, task):
+        """ Download the log file of the task. """
+        log_file_path = pathlib.Path(
+            f"{current_app.config['LOGGER_PATH']}/task-{task.uid}.log"
+        )
+        if log_file_path is None:
+            return jsonify({
+                "status": "ERROR",
+                "msg": f"Can't find log file for task {task.uid}"
+            })
+        if not os.path.exists(log_file_path):
+            return jsonify({
+                "status": "ERROR",
+                "msg": f"Can't find log file for task {task.uid}"
+            })
+
+        with open(log_file_path, 'r') as fh:
+            data = fh.read()
+            fh.close()
+
+        response = make_response(str(data), 200)
+        response.mimetype = "text/txt"
+        response.headers.extend({
+            "Content-Disposition":
+            "attachment;filename=fulltext_%s.txt" % task.uid
+        })
+        return response
 
 @task_namespace.route("/<string:task_id>")
 class Task(TasksBase):

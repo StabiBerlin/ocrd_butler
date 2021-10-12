@@ -21,6 +21,7 @@ from flask import (
 )
 
 from flask_wtf import FlaskForm
+from six import iterbytes
 from wtforms import (
     StringField,
     SubmitField,
@@ -118,7 +119,8 @@ def current_tasks():
 
             if task_info["started"] is not None:
                 task["result"].update({
-                    "started": datetime.fromtimestamp(task_info["started"])
+                    "started": datetime.fromtimestamp(task_info["started"]),
+                    "log": f"/download/log/{uid}",
                 })
 
             if task_info["succeeded"] is not None:
@@ -317,5 +319,18 @@ def download_alto_zip(task_id):
         headers={
             "Content-Disposition":
             f"attachment;filename=ocr_alto_{task_id}.zip"
+        }
+    )
+
+@tasks_blueprint.route("/download/log/<string:task_id>")
+def download_log(task_id):
+    """Define route to download the results as text."""
+    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_log")
+    return validate_and_wrap_response(
+        response, 'text',
+        mimetype="text/txt",
+        headers={
+            "Content-Disposition":
+            f"attachment;filename=task-{task_id}.log"
         }
     )

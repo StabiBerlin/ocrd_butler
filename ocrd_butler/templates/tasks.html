@@ -88,6 +88,7 @@
                         <div class="task-info">
                             {{ task.workflow }}
                         </div>
+                    </td>
                     <td>
                         <div class="task-info">
                             {{ task.parameters }}
@@ -122,6 +123,10 @@
                             <a href="{{ task.result.alto }}">ALTO</a>
                             <br />
                             <a href="{{ task.result.txt }}">TXT</a>
+                        {% endif %}
+                        <br />
+                        {% if task.result.started %}
+                            <a href="{{ task.result.log }}">LOG</a>
                         {% endif %}
                     </td>
                     <td><a class="delete-task" href="/task/delete/{{ task.id }}">x</a></td>
