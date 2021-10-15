@@ -8,7 +8,6 @@ from pathlib import (
     Path,
     PurePosixPath
 )
-import requests
 from urllib.parse import (
     urlparse,
     unquote
@@ -22,10 +21,7 @@ from celery.signals import (
     task_success,
 )
 
-from flask import (
-    current_app,
-    request
-)
+from flask import current_app
 
 from ocrd_models import OcrdFile
 from ocrd.resolver import Resolver
@@ -38,8 +34,7 @@ from ocrd_butler.database import db
 from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import (
     logger,
-    StreamToLogger,
-    host_url
+    page_to_alto
 )
 
 
@@ -196,6 +191,7 @@ def determine_input_file_grp(
         )
     )
 
+
 @celery.task(bind=True)
 def run_task(self, task: dict) -> dict:
     """ Create a task an run the given workflow. """
@@ -259,13 +255,7 @@ def run_task(self, task: dict) -> dict:
         logger.info(f'Finished processor {processor["name"]} for task {task["uid"]}.')
 
     # if there are produced page xml results, convert it also to alto
-    try:
-        response = requests.post(f"{host_url(request)}api/tasks/{task['uid']}/page_to_alto")
-        if response.json().get('status') == 'SUCCESS':
-            logger.info(f"Finished creating alto from page for task {task['uid']}.")
-    except RuntimeError as exc:
-            logger.info(f"Failed to create alto from page for task {task['uid']}."
-                        f"Reason: {exc}")
+    page_to_alto(task["uid"], dst_dir)
 
     logger.info(f'Finished processing task {task["uid"]}.')
     logger.remove(task_log_handler)

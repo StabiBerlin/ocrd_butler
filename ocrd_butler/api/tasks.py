@@ -42,6 +42,8 @@ from ocrd_butler.util import (
     host_url,
     flower_url,
     ocr_result_path,
+    alto_result_path,
+    page_to_alto as page_to_alto_util,
     page_xml_namespaces,
 )
 
@@ -318,34 +320,12 @@ class TaskActions(TasksBase):
     def page_to_alto(self, task):
         """ Convert page files to alto. """
         task_info = task_information(task.worker_task_id)
-        page_result_path = ocr_result_path(task_info['result']['result_dir'])
-        alto_result_path = self.alto_result_path(task_info)
-
-        if page_result_path is None:
-            return jsonify({
-                "status": "ERROR",
-                "msg": f"Can't find page results for task {task_info['result']['uid']}"
-            })
-
-        for file_path in page_result_path.iterdir():
-            converter = OcrdPageAltoConverter(page_filename=file_path)
-            alto_xml = converter.convert()
-            alto_file_name = file_path.name.replace("CALAMARI", "ALTO")
-            alto_result_file = alto_result_path.joinpath(alto_file_name)
-            with open(alto_result_file, "w") as alto_file:
-                alto_file.write(str(alto_xml))
+        page_to_alto_util(task.uid, task_info['result']['result_dir'])
 
         return jsonify({
             "status": "SUCCESS",
             "msg": f"You can get the results via {host_url(request)}api/tasks/{task.uid}/download_alto"
         })
-
-    def alto_result_path(self, task_info: dict) -> pathlib.Path:
-        """ Get path to dir for alto xml files. If it not exists, it will be created. """
-        alto_path = f"{task_info['result']['result_dir']}/OCR-D-OCR-ALTO"
-        if not os.path.exists(alto_path):
-            os.mkdir(alto_path)
-        return pathlib.Path(alto_path)
 
     def download_page(self, task):
         """ Download the results of the task for e.g. pageviewer, including PAGE XML,
@@ -384,11 +364,9 @@ class TaskActions(TasksBase):
     def download_alto(self, task):
         """ Download the results of the task as ALTO XML. """
         task_info = task_information(task.worker_task_id)
-        alto_xml_dir = os.path.join(task_info["result"]["result_dir"], "OCR-D-OCR-ALTO")
-        if not os.path.exists(alto_xml_dir):
-            response = self.page_to_alto(task)
-            logger.info(f'(Re)convert page2alto, result: {response.json}')
-        if not os.path.exists(alto_xml_dir):
+        alto_path = alto_result_path(task_info["result"]["result_dir"])
+        page_to_alto_util(task.uid, task_info['result']['result_dir'])
+        if not os.path.exists(alto_path):
             return jsonify({
                 "status": "ERROR",
                 "msg": f"Can't find alto results for task {task_info['result']['uid']}"
@@ -396,7 +374,6 @@ class TaskActions(TasksBase):
 
         img_dir = os.path.join(f"{task_info['result']['result_dir']}/{task.default_file_grp}")
         img_path = pathlib.Path(img_dir)
-        alto_path = pathlib.Path(alto_xml_dir)
         data = io.BytesIO()
         with zipfile.ZipFile(data, mode='w') as zip_file:
             zip_file.write(f"{task_info['result']['result_dir']}/mets.xml", arcname="mets.xml")
