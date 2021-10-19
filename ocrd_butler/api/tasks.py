@@ -414,10 +414,18 @@ class TaskActions(TasksBase):
             if xmlns in page_xml_namespaces.values():
                 for regions in tree.iterfind(".//{%s}TextRegion" % xmlns):
                     fulltext += "\n"
-                    for content in regions.findall(
-                            ".//{%s}TextLine//{%s}TextEquiv//{%s}Unicode" % (xmlns, xmlns, xmlns)):
-                        if content.text is not None:
-                            fulltext += content.text
+                    words = regions.findall(
+                        ".//{{{0}}}TextLine//{{{0}}}Word"
+                        "//{{{0}}}TextEquiv//{{{0}}}Unicode".format(xmlns))
+                    if len(words) == 0:
+                        words = regions.findall(
+                            ".//{{{0}}}TextLine"
+                            "//{{{0}}}TextEquiv//{{{0}}}Unicode".format(xmlns))
+                    for index, word in enumerate(words):
+                        if word.text is not None:
+                            fulltext += word.text
+                            if ++index < len(words):
+                                fulltext += " "
 
         response = make_response(fulltext, 200)
         response.mimetype = "text/txt"

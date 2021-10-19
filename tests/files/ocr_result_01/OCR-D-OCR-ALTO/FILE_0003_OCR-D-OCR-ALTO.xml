@@ -1,1 +1,103 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><alto SCHEMAVERSION="4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/standards/alto/ns-v4# http://www.loc.gov/standards/alto/v4/alto-4-1.xsd" xmlns="http://www.loc.gov/standards/alto/ns-v4#"><Description><MeasurementUnit>pixel</MeasurementUnit><sourceImageInformation><fileName>DEFAULT/FILE_0003_DEFAULT.jpg</fileName></sourceImageInformation><Processing ID="pro1"><processingStepDescription>layout/segmentation/region ocrd-tesserocr-recognize</processingStepDescription></Processing><Processing ID="pro2"><processingStepDescription>layout/segmentation/region ocrd-tesserocr-recognize</processingStepDescription></Processing><Processing ID="pro3"><processingStepDescription>layout/segmentation/region ocrd-tesserocr-recognize</processingStepDescription></Processing><Processing ID="pro4"><processingStepDescription>recognition/text-recognition ocrd-calamari-recognize</processingStepDescription></Processing></Description><Layout><Page HEIGHT="613" ID="FILE_0003_OCR-D-OCR-CALAMARI" PHYSICAL_IMG_NR="0" WIDTH="800"><PrintSpace ID="PageSpaceTypeID0"><TextBlock HEIGHT="52" HPOS="463" ID="region0000" IDNEXT="region0001" ROTATION="-0.215050160204299" VPOS="64" WIDTH="268"><Shape><Polygon POINTS="463,64 730,64 730,115 463,115"/></Shape></TextBlock><TextBlock HEIGHT="70" HPOS="231" ID="region0001" IDNEXT="region0002" ROTATION="-0.215050160204299" VPOS="492" WIDTH="223"><Shape><Polygon POINTS="231,492 453,492 453,561 231,561"/></Shape></TextBlock><Illustration HEIGHT="614" HPOS="9" ID="region0002" ROTATION="-0.215050160204299" TYPE="ImageRegion" VPOS="0" WIDTH="774"><Shape><Polygon POINTS="9,0 782,0 782,613 9,613"/></Shape></Illustration></PrintSpace></Page></Layout></alto>
+<alto xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.loc.gov/standards/alto/ns-v4#" xsi:schemaLocation="http://www.loc.gov/standards/alto/v4/alto-4-2.xsd">
+  <Description>
+    <MeasurementUnit>pixel</MeasurementUnit>
+    <sourceImageInformation>
+      <fileName>DEFAULT/FILE_0003_DEFAULT.jpg</fileName>
+    </sourceImageInformation>
+    <Processing ID="ocrd-tesserocr-recognize-0">
+      <processingStepDescription>layout/segmentation/region</processingStepDescription>
+      <processingStepSettings>{"dpi": "0", "padding": "0", "shrink_polygons": "False", "find_tables": "True", "sparse_text": "False", "overwrite_segments": "True", "segmentation_level": "region", "textequiv_level": "region", "block_polygons": "False", "overwrite_text": "True", "raw_lines": "False", "char_whitelist": "", "char_blacklist": "", "char_unblacklist": "", "tesseract_parameters": "{}"}</processingStepSettings>
+      <processingSoftware>
+        <softwareName>ocrd-tesserocr-recognize</softwareName>
+      </processingSoftware>
+    </Processing>
+    <Processing ID="ocrd-tesserocr-recognize-1">
+      <processingStepDescription>layout/segmentation/region</processingStepDescription>
+      <processingStepSettings>{"dpi": "0", "padding": "0", "shrink_polygons": "False", "overwrite_segments": "True", "segmentation_level": "line", "textequiv_level": "line", "overwrite_text": "True", "block_polygons": "False", "find_tables": "True", "sparse_text": "False", "raw_lines": "False", "char_whitelist": "", "char_blacklist": "", "char_unblacklist": "", "tesseract_parameters": "{}"}</processingStepSettings>
+      <processingSoftware>
+        <softwareName>ocrd-tesserocr-recognize</softwareName>
+      </processingSoftware>
+    </Processing>
+    <Processing ID="ocrd-tesserocr-recognize-2">
+      <processingStepDescription>layout/segmentation/region</processingStepDescription>
+      <processingStepSettings>{"dpi": "0", "padding": "0", "shrink_polygons": "False", "overwrite_segments": "True", "segmentation_level": "word", "textequiv_level": "word", "overwrite_text": "True", "block_polygons": "False", "find_tables": "True", "sparse_text": "False", "raw_lines": "False", "char_whitelist": "", "char_blacklist": "", "char_unblacklist": "", "tesseract_parameters": "{}"}</processingStepSettings>
+      <processingSoftware>
+        <softwareName>ocrd-tesserocr-recognize</softwareName>
+      </processingSoftware>
+    </Processing>
+    <Processing ID="ocrd-calamari-recognize-3">
+      <processingStepDescription>recognition/text-recognition</processingStepDescription>
+      <processingStepSettings>{"voter": "confidence_voter_default_ctc", "textequiv_level": "line", "glyph_conf_cutoff": "0.001", "checkpoint": "/home/j23d/projects/ocrd/ocrd-butler/tests/calamari_models/*ckpt.json"}</processingStepSettings>
+      <processingSoftware>
+        <softwareName>ocrd-calamari-recognize</softwareName>
+      </processingSoftware>
+    </Processing>
+  </Description>
+  <Styles/>
+  <Tags/>
+  <Layout>
+    <Page ID="FILE_0003_OCR-D-OCR-CALAMARI" PHYSICAL_IMG_NR="0" WIDTH="613" HEIGHT="613">
+      <TopMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
+      <LeftMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
+      <RightMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
+      <BottomMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
+      <PrintSpace>
+        <Illustration ID="region0002" HEIGHT="613" WIDTH="773" HPOS="9" VPOS="0">
+          <Shape>
+            <Polygon POINTS="9,0 782,0 782,613 9,613"/>
+          </Shape>
+        </Illustration>
+        <TextBlock ID="region0000" HEIGHT="51" WIDTH="267" HPOS="463" VPOS="64" IDNEXT="region0001">
+          <Shape>
+            <Polygon POINTS="463,64 730,64 730,115 463,115"/>
+          </Shape>
+          <TextLine ID="region0000_line0000" HEIGHT="51" WIDTH="266" HPOS="464" VPOS="64">
+            <Shape>
+              <Polygon POINTS="730,65 464,64 464,115 730,115"/>
+            </Shape>
+            <String ID="region0000_line0000-dummy-Word" HEIGHT="51" WIDTH="266" HPOS="464" VPOS="64" CONTENT="&#182;">
+              <Shape>
+                <Polygon POINTS="730,65 464,64 464,115 730,115"/>
+              </Shape>
+            </String>
+          </TextLine>
+        </TextBlock>
+        <TextBlock ID="region0001" HEIGHT="69" WIDTH="222" HPOS="231" VPOS="492" IDNEXT="region0002">
+          <Shape>
+            <Polygon POINTS="231,492 453,492 453,561 231,561"/>
+          </Shape>
+          <TextLine ID="region0001_line0000" HEIGHT="16" WIDTH="154" HPOS="232" VPOS="492">
+            <Shape>
+              <Polygon POINTS="232,492 386,493 386,508 232,507"/>
+            </Shape>
+            <String ID="region0001_line0000-dummy-Word" HEIGHT="16" WIDTH="154" HPOS="232" VPOS="492" CONTENT="staatsbibliotnen">
+              <Shape>
+                <Polygon POINTS="232,492 386,493 386,508 232,507"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0001_line0001" HEIGHT="15" WIDTH="84" HPOS="232" VPOS="516">
+            <Shape>
+              <Polygon POINTS="232,516 316,516 316,531 232,531"/>
+            </Shape>
+            <String ID="region0001_line0001-dummy-Word" HEIGHT="15" WIDTH="84" HPOS="232" VPOS="516" CONTENT="2erlin">
+              <Shape>
+                <Polygon POINTS="232,516 316,516 316,531 232,531"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0001_line0002" HEIGHT="17" WIDTH="221" HPOS="232" VPOS="544">
+            <Shape>
+              <Polygon POINTS="453,545 232,544 232,561 453,561"/>
+            </Shape>
+            <String ID="region0001_line0002-dummy-Word" HEIGHT="17" WIDTH="221" HPOS="232" VPOS="544" CONTENT="reereulturbesit">
+              <Shape>
+                <Polygon POINTS="453,545 232,544 232,561 453,561"/>
+              </Shape>
+            </String>
+          </TextLine>
+        </TextBlock>
+      </PrintSpace>
+    </Page>
+  </Layout>
+</alto>

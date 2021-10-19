@@ -116,12 +116,18 @@ class ApiTaskActions(TestCase):
     def test_api_task_download_txt(self, mock_task_information, mock_fs):
         """Check if download txt is working."""
         self.setup_mocks(mock_task_information, mock_fs)
-
         response = self.client.get("/api/tasks/foobar/download_txt")
-
         assert response.status_code == 200
         assert response.content_type == "text/txt; charset=utf-8"
-        assert b"nen eer gbaun nonenronrndannn" in response.data
+        assert b"deutsehe Solaten und Offriere bei der" in response.data
+        response.data.count(b"deutsehe Solaten und Offriere bei der") == 1
+
+        self.setup_mocks(mock_task_information, mock_fs, "02")
+        response = self.client.get("/api/tasks/foobar/download_txt")
+        assert response.status_code == 200
+        assert response.content_type == "text/txt; charset=utf-8"
+        assert b"vnd vns des liechtes kinder macht" in response.data
+        response.data.count(b"vnd vns des liechtes kinder macht") == 1
 
     @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
     @mock.patch("ocrd_butler.api.tasks.task_information")
