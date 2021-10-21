@@ -86,8 +86,13 @@
                     <td>{{ task.default_file_grp }}</td>
                     <td>
                         <div class="task-info">
-                            {{ task.workflow }}
-                        </div>
+                            <a href="/workflows#workflow-{{ task.workflow.id }}">
+                                {{ task.workflow.id }}
+                                {{ task.workflow.name }}
+                            </a>
+                            <br />
+                            {{ task.workflow.description }}
+                    </div>
                     </td>
                     <td>
                         <div class="task-info">

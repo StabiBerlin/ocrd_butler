@@ -18,7 +18,7 @@
 
         <div class="col-md-12">
             {% for processor in processors %}
-                <h2>{{ processor.name }} <a name="table-{{ processor.name }}" style="cursor:nesw-resize;"
+                <h2 id="processor-{{ processor.name }}">{{ processor.name }} <a name="table-{{ processor.name }}" style="cursor:nesw-resize;"
                     onclick="javascript:;jQuery('.table-{{ processor.name }}').toggle('fast');window.location.hash='table-{{ processor.name }}';">
                     +
                     </a>

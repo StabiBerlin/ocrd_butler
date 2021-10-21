@@ -60,23 +60,34 @@
 
 
             {% for workflow in workflows %}
-                <h3>{{ workflow.name }} (<a title="Delete workflow." href="/workflow/delete/{{ workflow.id }}">x</a>)</h3>
+                <h3 id="workflow-{{ workflow.id }}">{{ workflow.name }}</h3>
                 <p>
+                    <h4>ID: {{ workflow.id }}</h4>
+
                     <h4>Description</h4>
                     {{ workflow.description }}
+                    <br />
 
                     <h4>Processors</h4>
-                    {% for processor in workflow.processors %}
-                        <h5>{{ processor.name }}</h5>
-                        <br />
-                        <h5><strong>Parameters:</strong></h6>
-                        <ul>
-                            {% for param, value in processor.get('parameters', {}).items() %}
-                                <li>{{ param }}: {{ value }}</li>
-                            {% endfor %}
-                        </ul>
-                        <br />
+                    <table>
+                        <tr>
+                            <th>Name:</th>
+                            <th>Parameters:</th>
+                        </tr>
+                        {% for processor in workflow.processors %}
+                        <tr>
+                            <td>
+                                <a href="/processors#processor-{{ processor.name }}">
+                                    {{ processor.name }}
+                                </a>
+                            </td>
+                            <td>
+                                {{ json2html.convert(processor.get('parameters', {})) | safe }}
+                            </td>
+                        <tr/>
                     {% endfor %}
+                    </table>
+                    (<a title="Delete workflow." href="/workflow/delete/{{ workflow.id }}">^^ Workflow {{ workflow.name }} löschen.</a>)
                 </p>
             {% endfor %}
 
