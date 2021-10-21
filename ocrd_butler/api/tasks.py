@@ -269,6 +269,13 @@ class TaskActions(TasksBase):
                 status=f"Unknown action \"{action}\".",
                 statusCode="400")
 
+        if (action.startswith("download") or action == "results")\
+                and task.status != "SUCCESS":
+            task_namespace.abort(
+                400, "Task not ready yet.",
+                status=f"Action \"{action}\" not possible.",
+                statusCode="400")
+
         action = getattr(self, action)
         try:
             return action(task)
