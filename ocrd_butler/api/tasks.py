@@ -114,6 +114,7 @@ class TasksBase(Resource):
             "download_txt",
             "download_page",
             "download_alto",
+            "download_alto_with_images",
             "download_log",
         )
         self.post_actions = (
@@ -368,8 +369,8 @@ class TaskActions(TasksBase):
             attachment_filename=f"ocr_page_xml_{task_info['result']['uid']}.zip"
         )
 
-    def download_alto(self, task):
-        """ Download the results of the task as ALTO XML. """
+    def download_alto_with_images(self, task):
+        """ Download the results of the task as ALTO XML and include the images. """
         task_info = task_information(task.worker_task_id)
         alto_path = alto_result_path(task_info["result"]["result_dir"])
         page_to_alto_util(task.uid, task_info['result']['result_dir'])
@@ -389,6 +390,32 @@ class TaskActions(TasksBase):
                 zip_file.write(f_name, arcname=arcname)
             for f_name in alto_path.iterdir():
                 arcname = f"{os.path.basename(os.path.dirname(f_name))}/{os.path.basename(f_name)}"
+                zip_file.write(f_name, arcname=arcname)
+        data.seek(0)
+
+        return send_file(
+            data,
+            mimetype="application/zip",
+            as_attachment=True,
+            attachment_filename="ocr_alto_xml_%s.zip" % task_info["result"]["uid"]
+        )
+
+    def download_alto(self, task):
+        """ Download the results of the task as ALTO XML. """
+        task_info = task_information(task.worker_task_id)
+        alto_path = alto_result_path(task_info["result"]["result_dir"])
+        page_to_alto_util(task.uid, task_info['result']['result_dir'])
+        if not os.path.exists(alto_path):
+            return jsonify({
+                "status": "ERROR",
+                "msg": f"Can't find alto results for task {task_info['result']['uid']}"
+            })
+
+        data = io.BytesIO()
+        with zipfile.ZipFile(data, mode='w') as zip_file:
+            zip_file.write(f"{task_info['result']['result_dir']}/mets.xml", arcname="mets.xml")
+            for f_name in alto_path.iterdir():
+                arcname = f"{os.path.basename(os.path.dirname(f_name))}"
                 zip_file.write(f_name, arcname=arcname)
         data.seek(0)
 

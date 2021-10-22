@@ -1,4 +1,5 @@
-<alto xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.loc.gov/standards/alto/ns-v4#" xsi:schemaLocation="http://www.loc.gov/standards/alto/v4/alto-4-2.xsd">
+<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+<alto xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.loc.gov/standards/alto/ns-v4#" xsi:schemaLocation="http://www.loc.gov/standards/alto/ns-v4# http://www.loc.gov/standards/alto/v4/alto-4-2.xsd" SCHEMAVERSION="4.2">
   <Description>
     <MeasurementUnit>pixel</MeasurementUnit>
     <sourceImageInformation>
@@ -38,12 +39,8 @@
     <LayoutTag ID="layouttag-caption" LABEL="caption"/>
   </Tags>
   <Layout>
-    <Page ID="FILE_0001_OCR-D-OCR-CALAMARI" PHYSICAL_IMG_NR="0" WIDTH="1073" HEIGHT="1073">
-      <TopMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
-      <LeftMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
-      <RightMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
-      <BottomMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
-      <PrintSpace>
+    <Page ID="FILE_0001_OCR-D-OCR-CALAMARI" PHYSICAL_IMG_NR="0" WIDTH="800" HEIGHT="1073">
+      <PrintSpace VPOS="0" HPOS="0" HEIGHT="1073" WIDTH="800">
         <Illustration ID="region0011" HEIGHT="1073" WIDTH="800" HPOS="0" VPOS="0" IDNEXT="region0001">
           <Shape>
             <Polygon POINTS="0,0 800,0 800,1073 0,1073"/>
@@ -209,7 +206,7 @@
             <Shape>
               <Polygon POINTS="301,860 592,860 592,880 301,880"/>
             </Shape>
-            <String ID="region0007_line0001-dummy-Word" HEIGHT="20" WIDTH="291" HPOS="301" VPOS="860" CONTENT="f&#252;r deutsehe Solaten und">
+            <String ID="region0007_line0001-dummy-Word" HEIGHT="20" WIDTH="291" HPOS="301" VPOS="860" CONTENT="für deutsehe Solaten und">
               <Shape>
                 <Polygon POINTS="301,860 592,860 592,880 301,880"/>
               </Shape>
@@ -227,6 +224,10 @@
           </TextLine>
         </TextBlock>
       </PrintSpace>
+      <TopMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
+      <LeftMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
+      <RightMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
+      <BottomMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
     </Page>
   </Layout>
 </alto>
