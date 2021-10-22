@@ -413,9 +413,8 @@ class TaskActions(TasksBase):
 
         data = io.BytesIO()
         with zipfile.ZipFile(data, mode='w') as zip_file:
-            zip_file.write(f"{task_info['result']['result_dir']}/mets.xml", arcname="mets.xml")
             for f_name in alto_path.iterdir():
-                arcname = f"{os.path.basename(os.path.dirname(f_name))}"
+                arcname = f"{os.path.basename(f_name)}"
                 zip_file.write(f_name, arcname=arcname)
         data.seek(0)
 
