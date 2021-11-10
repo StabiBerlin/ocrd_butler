@@ -1,6 +1,13 @@
 {
     "tasks": [
         {
+            "description": "Faust Einladung",
+            "src": "https://content.staatsbibliothek-berlin.de/dc/PPN788846140.mets.xml",
+            "default_file_grp": "MAX",
+            "workflow_id": 1
+        }
+        ,
+        {
             "description": "PPN729167801",
             "src": "https://content.staatsbibliothek-berlin.de/dc/PPN729167801.mets.xml",
             "default_file_grp": "DEFAULT",

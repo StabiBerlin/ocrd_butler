@@ -1,7 +1,7 @@
 {
     "workflows": [
         {
-            "name": "SBB - eynollah - binarize - tesserocr-recognize",
+            "name": "SBB - eynollah - binarize - tesserocr-recognize - page2alto",
             "description": "Workflow with eynollah segmentation, olena binarization and tesserocr recognize.",
             "processors": [
                 {
@@ -20,7 +20,13 @@
                 {
                     "name": "ocrd-tesserocr-recognize",
                     "parameters": {
-                        "model": "deu+pol+ces"
+                        "model": "deu"
+                    }
+                },
+                {
+                    "name": "ocrd-fileformat-transform",
+                    "parameters": {
+                        "from-to": "page alto"
                     }
                 }
             ]

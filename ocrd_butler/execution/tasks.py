@@ -34,7 +34,7 @@ from ocrd_butler.database import db
 from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import (
     logger,
-    page_to_alto
+    ocr_result_path
 )
 
 
@@ -212,6 +212,7 @@ def run_task(self, task: dict) -> dict:
         logger.info(f"Prepare workspace for task '{task['uid']}'.")
 
     task_processors = task["workflow"]["processors"]
+    mets_url = "{}/mets.xml".format(dst_dir)
 
     # TODO: Steps could be saved along the other task information to get a
     # more informational task.
@@ -233,7 +234,6 @@ def run_task(self, task: dict) -> dict:
 
         logger.info(f'Start processor {processor["name"]}. {json.dumps(processor)}.')
 
-        mets_url = "{}/mets.xml".format(dst_dir)
         logger.info(f'Run processor {processor["name"]}.')
         exit_code = run_cli(
             processor["executable"],
@@ -253,9 +253,6 @@ def run_task(self, task: dict) -> dict:
         workspace.reload_mets()
 
         logger.info(f'Finished processor {processor["name"]} for task {task["uid"]}.')
-
-    # if there are produced page xml results, convert it also to alto
-    page_to_alto(task["uid"], dst_dir)
 
     logger.info(f'Finished processing task {task["uid"]}.')
     logger.remove(task_log_handler)
