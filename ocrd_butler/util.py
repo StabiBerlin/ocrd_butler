@@ -99,17 +99,17 @@ def camel_case_split(identifier):
     return [m.group(0) for m in matches]
 
 
-def ocr_result_path(task_result_dir: str, path_part: str = "RECOGNIZE") -> pathlib.Path:
+def ocr_result_path(task_result_dir: str, path_part: tuple = ("RECOGNIZE", "CALAMARI")) -> pathlib.Path:
     """ Get base path to the page xml results of the task. """
     result_xml_files = glob.glob(f"{task_result_dir}/*/*.xml")
-    for file in result_xml_files:
-        if not path_part in file:  # This is a bit fixed.
+    for _file in result_xml_files:
+        if not any(part in _file for part in path_part):  # This is a bit fixed.
             continue
-        tree = ET.parse(file)
+        tree = ET.parse(_file)
         xmlns = tree.getroot().tag.split("}")[0].strip("{")
         if xmlns in page_xml_namespaces.values():
             if tree.findall(".//pc:Unicode", {"pc": xmlns}):
-                return pathlib.Path(os.path.dirname(file))
+                return pathlib.Path(os.path.dirname(_file))
 
 
 def alto_result_path(task_result_dir: str) -> pathlib.Path:
