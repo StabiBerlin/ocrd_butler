@@ -373,7 +373,6 @@ class TaskActions(TasksBase):
         """ Download the results of the task as ALTO XML and include the images. """
         task_info = task_information(task.worker_task_id)
         alto_path = alto_result_path(task_info["result"]["result_dir"])
-        page_to_alto_util(task.uid, task_info['result']['result_dir'])
         if not os.path.exists(alto_path):
             return jsonify({
                 "status": "ERROR",
@@ -404,7 +403,6 @@ class TaskActions(TasksBase):
         """ Download the results of the task as ALTO XML. """
         task_info = task_information(task.worker_task_id)
         alto_path = alto_result_path(task_info["result"]["result_dir"])
-        page_to_alto_util(task.uid, task_info['result']['result_dir'])
         if not os.path.exists(alto_path):
             return jsonify({
                 "status": "ERROR",
