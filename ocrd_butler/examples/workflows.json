@@ -1,8 +1,49 @@
 {
     "workflows": [
         {
+            "description": "Workflow with eynollah segmentation, SBB binarization and Calamari GT4HistOCT.",
+            "name": "SBB - eynollah-segment - sbb-binarize - calamari-recognize - page2alto",
+            "processors": [
+                {
+                    "name": "ocrd-eynollah-segment",
+                    "parameters": {
+                        "allow_scaling": false,
+                        "curved_line": false,
+                        "dpi": 0,
+                        "full_layout": true,
+                        "headers_off": false,
+                        "models": "/data/default"
+                    }
+                },
+                {
+                    "name": "ocrd-sbb-binarize",
+                    "parameters": {
+                        "model": "/data/sbb_binarization/models",
+                        "operation_level": "page"
+                    }
+                },
+                {
+                    "name": "ocrd-calamari-recognize",
+                    "output_file_grp": "OCR-D-OCR-CALAMARI",
+                    "parameters": {
+                        "checkpoint": "/data/calamari_models/*ckpt.json",
+                        "checkpoint_dir": "/data/ocrd-resources/ocrd-calamari-recognize/qurator-gt4histocr-1.0",
+                        "glyph_conf_cutoff": 0.001,
+                        "textequiv_level": "word",
+                        "voter": "confidence_voter_default_ctc"
+                    }
+                },
+                {
+                    "name": "ocrd-fileformat-transform",
+                    "parameters": {
+                        "from-to": "page alto"
+                    }
+                }
+            ]
+        },
+        {
             "name": "SBB - eynollah - binarize - tesserocr-recognize - page2alto",
-            "description": "Workflow with eynollah segmentation, olena binarization and tesserocr recognize.",
+            "description": "Workflow with eynollah segmentation, sbb binarization and tesserocr recognize.",
             "processors": [
                 {
                     "name": "ocrd-eynollah-segment",
@@ -30,11 +71,10 @@
                     }
                 }
             ]
-        }
-        ,
+        },
         {
             "name": "SBB - binarize - textline - calamari",
-            "description": "Workflow with olena binarization and calamari recognize.",
+            "description": "Workflow with sbb binarization and calamari recognize.",
             "processors": [
                 {
                     "name": "ocrd-sbb-binarize",
@@ -59,11 +99,10 @@
                     }
                 }
             ]
-        }
-        ,
+        },
         {
             "name": "SBB - b-t-c-p2a",
-            "description": "Workflow with olena binarization and calamari recognize.",
+            "description": "Workflow with sbb binarization and calamari recognize.",
             "processors": [
                 {
                     "name": "ocrd-sbb-binarize",
@@ -94,26 +133,38 @@
                     }
                 }
             ]
-        }
-        ,
+        },
         {
             "name": "Tesseract",
             "description": "Workflow with only tesseract processors",
             "processors": [
-                { "name": "ocrd-tesserocr-segment-region" },
-                { "name": "ocrd-tesserocr-segment-line" },
-                { "name": "ocrd-tesserocr-segment-word" },
-                { "name": "ocrd-tesserocr-recognize" }
+                {
+                    "name": "ocrd-tesserocr-segment-region"
+                },
+                {
+                    "name": "ocrd-tesserocr-segment-line"
+                },
+                {
+                    "name": "ocrd-tesserocr-segment-word"
+                },
+                {
+                    "name": "ocrd-tesserocr-recognize"
+                }
             ]
-        }
-        ,
+        },
         {
             "name": "Tesseract - Calamari",
             "description": "Workflow with tesserocr preps and calamari recognize",
             "processors": [
-                { "name": "ocrd-tesserocr-segment-region" },
-                { "name": "ocrd-tesserocr-segment-line" },
-                { "name": "ocrd-tesserocr-segment-word" },
+                {
+                    "name": "ocrd-tesserocr-segment-region"
+                },
+                {
+                    "name": "ocrd-tesserocr-segment-line"
+                },
+                {
+                    "name": "ocrd-tesserocr-segment-word"
+                },
                 {
                     "name": "ocrd-calamari-recognize",
                     "parameters": {
@@ -121,8 +172,7 @@
                     }
                 }
             ]
-        }
-        ,
+        },
         {
             "name": "Olena - Calamari",
             "description": "Workflow with olena binarization and calamari recognize",
@@ -133,8 +183,12 @@
                         "impl": "sauvola-ms-split"
                     }
                 },
-                { "name": "ocrd-tesserocr-segment-line" },
-                { "name": "ocrd-tesserocr-segment-word" },
+                {
+                    "name": "ocrd-tesserocr-segment-line"
+                },
+                {
+                    "name": "ocrd-tesserocr-segment-word"
+                },
                 {
                     "name": "ocrd-calamari-recognize",
                     "parameters": {
