@@ -210,8 +210,9 @@ class FrontendTests(TestCase):
         """Check if workflows are shown."""
         response = self.client.get("/workflows")
         html = HTML(html=response.data)
-        assert "ocrd-olena-binarize" in [elem.text for elem in html.find('h5')]
-        assert "impl: sauvola-ms-split" in [elem.text for elem in html.find('li')]
+        assert "ocrd-olena-binarize" in [elem.text for elem in html.find('td')]
+        assert "impl" in [elem.text for elem in html.find('th')]
+        assert "sauvola-ms-split" in [elem.text for elem in html.find('td')]
         # TODO: check if there are the defaults added by validation
 
     @responses.activate
@@ -278,6 +279,20 @@ class FrontendTests(TestCase):
 
         assert response.status_code == 200
         assert response.data == b"foobar"
+
+    @mock.patch("requests.get")
+    def test_frontend_download_log(self, mock_requests_get):
+        """Check if download log is working."""
+
+        mock_requests_get.return_value = type('', (object,), {
+            "text": "42er log",
+            "status_code": 200
+        })()
+
+        response = self.client.get("/download/log/42")
+
+        assert response.status_code == 200
+        assert response.data == b"42er log"
 
     @mock.patch("requests.get")
     def test_frontend_page_zip(self, mock_requests_get):
@@ -373,9 +388,8 @@ class FrontendTests(TestCase):
         })
         response = self.client.get("/workflows")
         html = HTML(html=response.data)
-        assert html.find(
-            'body > div > div > div > h3:nth-child(2) > a'
-        )[0].attrs['href'] == '/workflow/delete/1'
+        links = html.find('body div.col-md-10 a')
+        assert links[0].attrs['href'] == '/processors#processor-ocrd-eynollah-segment'
 
     @mock.patch("requests.delete")
     @mock.patch("requests.get")

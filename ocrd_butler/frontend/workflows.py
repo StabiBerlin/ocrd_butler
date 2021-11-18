@@ -5,6 +5,8 @@ Routes for the workflows.
 import json
 import requests
 
+from json2html import json2html
+
 from flask import (
     Blueprint,
     flash,
@@ -41,6 +43,12 @@ class NewWorkflowForm(FlaskForm):
     description = StringField('Description', [DataRequired()])
     processors = SelectMultipleField('Processors for workflow')
     submit = SubmitField('Create new workflow')
+
+
+@workflows_blueprint.context_processor
+def utility_processor():
+    """Add utilities for the jinja2 template."""
+    return dict(json2html=json2html)
 
 
 @workflows_blueprint.route("/new-workflow", methods=['POST'])

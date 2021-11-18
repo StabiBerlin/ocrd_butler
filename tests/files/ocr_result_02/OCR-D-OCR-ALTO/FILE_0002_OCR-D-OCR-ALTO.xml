@@ -1,4 +1,5 @@
-<alto xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.loc.gov/standards/alto/ns-v4#" xsi:schemaLocation="http://www.loc.gov/standards/alto/v4/alto-4-2.xsd">
+<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+<alto xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.loc.gov/standards/alto/ns-v4#" xsi:schemaLocation="http://www.loc.gov/standards/alto/ns-v4# http://www.loc.gov/standards/alto/v4/alto-4-2.xsd" SCHEMAVERSION="4.2">
   <Description>
     <MeasurementUnit>pixel</MeasurementUnit>
     <sourceImageInformation>
@@ -31,12 +32,11 @@
     <LayoutTag ID="layouttag-paragraph" LABEL="paragraph"/>
   </Tags>
   <Layout>
-    <Page ID="FILE_0002_OCR-D-OCR-CALAMARI" PHYSICAL_IMG_NR="0" WIDTH="3705" HEIGHT="3705">
-      <TopMargin VPOS="0" HPOS="0" HEIGHT="42" WIDTH="3705"/>
-      <LeftMargin VPOS="0" HPOS="0" HEIGHT="3705" WIDTH="42"/>
-      <RightMargin VPOS="0" HPOS="2556" HEIGHT="3705" WIDTH="1149"/>
-      <BottomMargin VPOS="3657" HPOS="0" HEIGHT="48" WIDTH="3705"/>
+    <Page ID="FILE_0002_OCR-D-OCR-CALAMARI" PHYSICAL_IMG_NR="0" WIDTH="2610" HEIGHT="3705">
       <PrintSpace HEIGHT="3609" WIDTH="2514" HPOS="42" VPOS="48">
+        <Shape>
+          <Polygon POINTS="42,48 2556,48 2556,3657 42,3657"/>
+        </Shape>
         <Shape>
           <Polygon POINTS="42,48 2556,48 2556,3657 42,3657"/>
         </Shape>
@@ -144,7 +144,7 @@
             <Shape>
               <Polygon POINTS="2017,2143 1658,2149 1658,2177 1655,2186 1655,2211 1658,2215 1664,2216 1707,2215 1760,2218 1819,2218 1855,2215 1879,2215 1892,2213 2100,2213 2127,2210 2171,2210 2175,2207 2175,2171 2162,2169 2159,2166 2155,2165 2151,2160 2134,2160 2126,2162 2105,2160 2049,2159 1955,2159 1955,2155 1994,2154 2000,2147 2007,2147"/>
             </Shape>
-            <String ID="l2_word0000" HEIGHT="75" WIDTH="232" HPOS="1675" VPOS="2143" CONTENT="Preu&#223;ischer">
+            <String ID="l2_word0000" HEIGHT="75" WIDTH="232" HPOS="1675" VPOS="2143" CONTENT="Preußischer">
               <Shape>
                 <Polygon POINTS="1675,2143 1907,2143 1907,2218 1675,2218"/>
               </Shape>
@@ -237,7 +237,7 @@
               </Shape>
             </String>
             <SP/>
-            <String ID="l6_word0001" HEIGHT="227" WIDTH="250" HPOS="1419" VPOS="2246" CONTENT="zeygenan&#11799;">
+            <String ID="l6_word0001" HEIGHT="227" WIDTH="250" HPOS="1419" VPOS="2246" CONTENT="zeygenan⸗">
               <Shape>
                 <Polygon POINTS="1419,2246 1669,2246 1669,2473 1419,2473"/>
               </Shape>
@@ -253,13 +253,13 @@
               </Shape>
             </String>
             <SP/>
-            <String ID="l7_word0001" HEIGHT="227" WIDTH="105" HPOS="454" VPOS="2367" CONTENT="fro&#868;w">
+            <String ID="l7_word0001" HEIGHT="227" WIDTH="105" HPOS="454" VPOS="2367" CONTENT="froͤw">
               <Shape>
                 <Polygon POINTS="454,2367 559,2367 559,2594 454,2594"/>
               </Shape>
             </String>
             <SP/>
-            <String ID="l7_word0002" HEIGHT="227" WIDTH="72" HPOS="583" VPOS="2367" CONTENT="&#383;ich">
+            <String ID="l7_word0002" HEIGHT="227" WIDTH="72" HPOS="583" VPOS="2367" CONTENT="ſich">
               <Shape>
                 <Polygon POINTS="583,2367 655,2367 655,2594 583,2594"/>
               </Shape>
@@ -271,7 +271,7 @@
               </Shape>
             </String>
             <SP/>
-            <String ID="l7_word0004" HEIGHT="227" WIDTH="282" HPOS="792" VPOS="2367" CONTENT="Ch&#42843;i&#383;tenhait">
+            <String ID="l7_word0004" HEIGHT="227" WIDTH="282" HPOS="792" VPOS="2367" CONTENT="Chꝛiſtenhait">
               <Shape>
                 <Polygon POINTS="792,2367 1074,2367 1074,2594 792,2594"/>
               </Shape>
@@ -457,7 +457,7 @@
               </Shape>
             </String>
             <SP/>
-            <String ID="l15_word0001" HEIGHT="179" WIDTH="282" HPOS="615" VPOS="278" CONTENT="De&#252;t&#383;ch">
+            <String ID="l15_word0001" HEIGHT="179" WIDTH="282" HPOS="615" VPOS="278" CONTENT="Deütſch">
               <Shape>
                 <Polygon POINTS="615,278 897,278 897,457 615,457"/>
               </Shape>
@@ -469,7 +469,7 @@
               </Shape>
             </String>
             <SP/>
-            <String ID="l15_word0003" HEIGHT="179" WIDTH="437" HPOS="1278" VPOS="278" CONTENT="oderlob&#383;ang">
+            <String ID="l15_word0003" HEIGHT="179" WIDTH="437" HPOS="1278" VPOS="278" CONTENT="oderlobſang">
               <Shape>
                 <Polygon POINTS="1278,278 1715,278 1715,457 1278,457"/>
               </Shape>
@@ -514,6 +514,10 @@
           </Shape>
         </TextBlock>
       </PrintSpace>
+      <TopMargin VPOS="0" HPOS="0" HEIGHT="42" WIDTH="2610"/>
+      <LeftMargin VPOS="0" HPOS="0" HEIGHT="3705" WIDTH="42"/>
+      <RightMargin VPOS="0" HPOS="2556" HEIGHT="3705" WIDTH="54"/>
+      <BottomMargin VPOS="3657" HPOS="0" HEIGHT="48" WIDTH="2610"/>
     </Page>
   </Layout>
 </alto>

@@ -19,12 +19,13 @@
             </div>
         </div>
 
-        <div class="col-md-2">
+        <div class="col-md-12">
             <button id="new-task" type="button" class="btn">Add a new task</button>
+            <br />
+            <br />
         </div>
 
-        <div class="col-md-10">
-
+        <div class="col-md-12">
             <div class="new-task-form">
                 <form action="/new-task" method="post">
                   <div class="form-group">
@@ -83,8 +84,21 @@
                     </td>
                     <td><a href="{{ task.src }}">XML</a></td>
                     <td>{{ task.default_file_grp }}</td>
-                    <td>{{ task.workflow }}</td>
-                    <td>{{ task.parameters }}</td>
+                    <td>
+                        <div class="task-info">
+                            <a href="/workflows#workflow-{{ task.workflow.id }}">
+                                {{ task.workflow.id }}
+                                {{ task.workflow.name }}
+                            </a>
+                            <br />
+                            {{ task.workflow.description }}
+                    </div>
+                    </td>
+                    <td>
+                        <div class="task-info">
+                            {{ task.parameters }}
+                        </div>
+                    </td>
                     <td><a href="/task/run/{{ task.id }}">Run</a></td>
                     <td><a href="{{ task.flower_url }}"
                            target="_blank">{{ task.worker_task_id }}</a>
@@ -114,6 +128,10 @@
                             <a href="{{ task.result.alto }}">ALTO</a>
                             <br />
                             <a href="{{ task.result.txt }}">TXT</a>
+                        {% endif %}
+                        <br />
+                        {% if task.result.started %}
+                            <a href="{{ task.result.log }}">LOG</a>
                         {% endif %}
                     </td>
                     <td><a class="delete-task" href="/task/delete/{{ task.id }}">x</a></td>

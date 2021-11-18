@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
 """Celery tasks definitions."""
+from __future__ import print_function
 
 import json
-from pathlib import PurePosixPath
-import requests
+from pathlib import (
+    Path,
+    PurePosixPath
+)
 from urllib.parse import (
     urlparse,
     unquote
@@ -18,22 +21,20 @@ from celery.signals import (
     task_success,
 )
 
-from flask import (
-    current_app,
-    request
-)
+from flask import current_app
 
 from ocrd_models import OcrdFile
 from ocrd.resolver import Resolver
 from ocrd.processor.base import run_cli
 from ocrd.workspace import Workspace
+from ocrd_utils import getLogger
 
 from ocrd_butler import celery
 from ocrd_butler.database import db
 from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import (
     logger,
-    host_url
+    ocr_result_path
 )
 
 
@@ -68,7 +69,7 @@ def task_prerun_handler(task_id, task, *args, **kwargs):
                  f"args: {args}, kwargs: {kwargs}")
     uid = kwargs.get('args')[0].get('uid')
     update_task(uid, 'STARTED')
-    logger.info(f"Start processing task '{uid}'.")
+    logger.info(f"Start processing task {uid}.")
 
 
 @task_postrun.connect
@@ -77,7 +78,7 @@ def task_postrun_handler(task_id, task, retval, state, *args, **kwargs):
                  f"args: {args}, kwargs: {kwargs}")
     uid = kwargs.get('args')[-1].get('uid')
     update_task(uid, state)
-    logger.info(f"Finished processing task '{uid}'.")
+    logger.info(f"Finished processing task {uid}.")
 
 
 @task_success.connect
@@ -194,9 +195,11 @@ def determine_input_file_grp(
 @celery.task(bind=True)
 def run_task(self, task: dict) -> dict:
     """ Create a task an run the given workflow. """
-    # logger.remove()
     logger_path = current_app.config["LOGGER_PATH"]
-    task_log_handler = logger.add(f"{logger_path}/task-{task['uid']}.log")
+    log_file = f"{logger_path}/task-{task['uid']}.log"
+    task_log_handler = logger.add(log_file)
+
+    logger.info(f'Start processing task {task["uid"]}.')
 
     # Create workspace
     from ocrd_butler.app import flask_app
@@ -209,6 +212,7 @@ def run_task(self, task: dict) -> dict:
         logger.info(f"Prepare workspace for task '{task['uid']}'.")
 
     task_processors = task["workflow"]["processors"]
+    mets_url = "{}/mets.xml".format(dst_dir)
 
     # TODO: Steps could be saved along the other task information to get a
     # more informational task.
@@ -230,10 +234,7 @@ def run_task(self, task: dict) -> dict:
 
         logger.info(f'Start processor {processor["name"]}. {json.dumps(processor)}.')
 
-        mets_url = "{}/mets.xml".format(dst_dir)
         logger.info(f'Run processor {processor["name"]}.')
-        # stream = StreamToLogger()
-        # with contextlib.redirect_stdout(stream):
         exit_code = run_cli(
             processor["executable"],
             mets_url=mets_url,
@@ -253,16 +254,25 @@ def run_task(self, task: dict) -> dict:
 
         logger.info(f'Finished processor {processor["name"]} for task {task["uid"]}.')
 
-    # if there are produced page xml results, convert it also to alto
-    try:
-        response = requests.post(f"{host_url(request)}api/tasks/{task['uid']}/page_to_alto")
-        if response.json().get('status') == 'SUCCESS':
-            logger.info(f"Finished creating alto from page for task {task['uid']}.")
-    except RuntimeError as exc:
-            logger.info(f"Failed to create alto from page for task {task['uid']}."
-                        f"Reason: {exc}")
-
     logger.info(f'Finished processing task {task["uid"]}.')
+    logger.remove(task_log_handler)
+    task_log_handler = logger.add(log_file, format='{message}', mode='a')
+    service_debug_log = f"{logger_path}/celery/ocrd-butler.celery.service.stderr.log"
+    if Path(service_debug_log).is_file():
+        lines = []
+        start = f'Start processing task {task["uid"]}'
+        end = f'Finished processing task {task["uid"]}'
+        record = False
+        with open(service_debug_log, 'r') as log:
+            for line in log:
+                if start in line:
+                    record = True
+                if end in line:
+                    break
+                if record:
+                    lines.append(line.rstrip())
+        for line in lines:
+            logger.info(line)
     logger.remove(task_log_handler)
 
     return {

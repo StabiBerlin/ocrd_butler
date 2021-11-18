@@ -146,6 +146,24 @@ table tfoot .links a {
     padding: 2px 8px;
     border-radius: 5px;
 }
+
+table .task-info {
+    overflow: hidden;
+
+    -webkit-transition: max-height 1.5s cubic-bezier(0, 1.05, 0, 1);
+    -moz-transition: max-height 1.5s cubic-bezier(0, 1.05, 0, 1);
+    transition: max-height 1.5s ease cubic-bezier(0, 1.05, 0, 1);
+
+    max-height: 135px;
+}
+
+table .task-info:hover {
+    -webkit-transition: max-height 2s ease;
+    -moz-transition: max-height 2s ease;
+    transition: max-height 2s ease;
+
+    max-height: 1000px;
+}
 /**/
 
 /**/

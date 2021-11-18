@@ -13,6 +13,7 @@ import logging
 import loguru
 import xml.etree.ElementTree as ET
 
+from ocrd_page_to_alto.convert import OcrdPageAltoConverter
 from ocrd_utils.logging import initLogging
 
 from . import config
@@ -55,12 +56,13 @@ class StreamToLogger(object):
     """ Fake input and output streams for other processes to
         get the logging messages.
     """
-    def __init__(self, log_level="INFO"):
-        self.log_level = log_level
+    def __init__(self, level="INFO"):
+        self.level = level
+        self.linebuf = ''
 
     def write(self, buf):
         for line in buf.rstrip().splitlines():
-            loguru.logger.log(self.log_level, line.rstrip())
+            loguru.logger.log(self.level, line.rstrip())
 
     def flush(self):
         pass
@@ -81,6 +83,11 @@ loguru.logger.add(
     rotation="06:00",
     retention="20 days",
     compression="gz")
+# If we start as service allow logging for other users.
+try:
+    os.chmod(f"{config.LOGGER_PATH}/ocrd-butler.log", 0o766)
+except PermissionError:
+    pass
 logger = loguru.logger
 
 
@@ -92,16 +99,48 @@ def camel_case_split(identifier):
     return [m.group(0) for m in matches]
 
 
-def ocr_result_path(result_dir: str, path_part: str = "OCR") -> pathlib.Path:
+def ocr_result_path(task_result_dir: str, path_part: tuple = ("RECOGNIZE", "CALAMARI")) -> pathlib.Path:
     """ Get base path to the page xml results of the task. """
-    result_xml_files = glob.glob(f"{result_dir}/*/*.xml")
-    for file in result_xml_files:
-        if not path_part in file:  # This is a bit fixed.
+    result_xml_files = glob.glob(f"{task_result_dir}/*/*.xml")
+    for _file in result_xml_files:
+        if not any(part in _file for part in path_part):  # This is a bit fixed.
             continue
-        tree = ET.parse(file)
+        tree = ET.parse(_file)
         xmlns = tree.getroot().tag.split("}")[0].strip("{")
         if xmlns in page_xml_namespaces.values():
-            return pathlib.Path(os.path.dirname(file))
+            if tree.findall(".//pc:Unicode", {"pc": xmlns}):
+                return pathlib.Path(os.path.dirname(_file))
+
+
+def alto_result_path(task_result_dir: str) -> pathlib.Path:
+    alto_result_dir = f"{task_result_dir}/OCR-D-OCR-ALTO"
+    if not os.path.exists(alto_result_dir):
+        os.mkdir(alto_result_dir)
+    return pathlib.Path(alto_result_dir)
+
+
+def page_to_alto(uid: str, task_result_dir: str):
+    """ Convert page files to alto. """
+    page_result_path = ocr_result_path(task_result_dir)
+
+    if page_result_path is None:
+        logger.info(f"Can't find page results to create alto for task {uid}.")
+        return
+
+    alto_path = alto_result_path(task_result_dir)
+    for file_path in page_result_path.iterdir():
+        converter = OcrdPageAltoConverter(
+            check_words=False,
+            check_border=False,
+            page_filename=file_path
+        )
+        alto_xml = converter.convert()
+        alto_file_name = file_path.name.replace("CALAMARI", "ALTO")
+        alto_result_file = alto_path.joinpath(alto_file_name)
+        with open(alto_result_file, "w") as alto_file:
+            alto_file.write(str(alto_xml))
+
+    logger.info(f"Created alto from page for task {uid}.")
 
 
 def host_url(request):

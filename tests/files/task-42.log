@@ -1,0 +1,6 @@
+2021-10-04 16:35:40.958 | INFO     | ocrd_butler.execution.tasks:run_task:210 - Prepare workspace for task 'foobar'.
+2021-10-04 16:35:40.959 | INFO     | ocrd_butler.execution.tasks:run_task:232 - Start processor ocrd-dummy. {"name": "ocrd-dummy", "executable": "ocrd-dummy", "description": "Bare-bones processor that copies file from input group to output group", "steps": ["preprocessing/optimization"], "categories": ["Image preprocessing"], "parameters": {}, "output_file_grp": "01-OCRD-DUMMY-OUTPUT"}.
+2021-10-04 16:35:40.959 | INFO     | ocrd_butler.execution.tasks:run_task:235 - Run processor ocrd-dummy.
+2021-10-04 16:35:41.744 | INFO     | ocrd_butler.execution.tasks:run_task:258 - Finished processor ocrd-dummy for task foobar.
+2021-10-04 16:35:41.744 | INFO     | ocrd_butler.execution.tasks:run_task:266 - Failed to create alto from page for task foobar.Reason: Working outside of request context.
+2021-10-06 16:02:29.328 | INFO     | ocrd_butler.execution.tasks:run_task:265 - Finished processing task foobar.
