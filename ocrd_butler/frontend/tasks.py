@@ -311,7 +311,7 @@ def download_page_zip(task_id):
 @tasks_blueprint.route("/download/alto/<string:task_id>")
 def download_alto_zip(task_id):
     """Define route to download the alto xml results as zip file."""
-    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_alto")
+    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_alto_with_images")
 
     return validate_and_wrap_response(
         response, 'content',
