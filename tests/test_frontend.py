@@ -175,9 +175,10 @@ class FrontendTests(TestCase):
         assert len(html.find("table > tr > td")) == COLUMN_COUNT
 
         download_links = html.find("table > tr:nth-child(2) > td:nth-child(9) > a")
-        assert download_links[0].links == {'/download/page/uid'}
-        assert download_links[1].links == {'/download/alto/uid'}
-        assert download_links[2].links == {'/download/txt/uid'}
+        assert download_links[0].links == {'/download/results/uid'}
+        assert download_links[1].links == {'/download/page/uid'}
+        assert download_links[2].links == {'/download/alto/uid'}
+        assert download_links[3].links == {'/download/txt/uid'}
 
     def get_workflow_id(self):
         """Create a workflow for the tests."""

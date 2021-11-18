@@ -107,6 +107,7 @@ def current_tasks():
         uid = result.get('uid')
         if task_info is not None and task_info["ready"]:
             task["result"].update({
+                "results": f"/download/results/{uid}",
                 "page": f"/download/page/{uid}",
                 "alto": f"/download/alto/{uid}",
                 "txt": f"/download/txt/{uid}",
@@ -278,6 +279,21 @@ def validate_and_wrap_response(
         )
 
 
+@tasks_blueprint.route("/download/results/<string:task_id>")
+def download_results(task_id):
+    """Define route to download all results together."""
+    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_results")
+
+    return validate_and_wrap_response(
+        response, 'content',
+        mimetype="application/zip",
+        headers={
+            "Content-Disposition":
+            f"attachment;filename=results_{task_id}.zip"
+        }
+    )
+
+
 @tasks_blueprint.route("/download/txt/<string:task_id>")
 def download_txt(task_id):
     """Define route to download the results as text."""
@@ -321,6 +337,7 @@ def download_alto_zip(task_id):
             f"attachment;filename=ocr_alto_{task_id}.zip"
         }
     )
+
 
 @tasks_blueprint.route("/download/log/<string:task_id>")
 def download_log(task_id):

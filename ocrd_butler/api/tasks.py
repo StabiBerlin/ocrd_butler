@@ -111,6 +111,7 @@ class TasksBase(Resource):
         self.get_actions = (
             "status",
             "results",
+            "download_results",
             "download_txt",
             "download_page",
             "download_alto",
@@ -245,6 +246,7 @@ class TaskActions(TasksBase):
         Available GET actions:
         * status
         * results
+        * download_results
         * download_txt
         * download_page
         * download_alto
@@ -334,6 +336,33 @@ class TaskActions(TasksBase):
             "status": "SUCCESS",
             "msg": f"You can get the results via {host_url(request)}api/tasks/{task.uid}/download_alto"
         })
+
+    def download_results(self, task):
+        """ Download the results of the task as ALTO XML and include the images. """
+        task_info = task_information(task.worker_task_id)
+        if not os.path.exists(task_info["result"]["result_dir"]):
+            return jsonify({
+                "status": "ERROR",
+                "msg": f"Can't find results for task {task_info['result']['uid']}"
+            })
+
+        results_path = pathlib.Path(task_info["result"]["result_dir"])
+        data = io.BytesIO()
+        with zipfile.ZipFile(data, mode='w') as zip_file:
+            # zip_file.write(f"{results_path}/mets.xml", arcname="mets.xml")
+            for root, dirs, files in os.walk(results_path):
+                for _file in files:
+                    zip_file.write(os.path.join(root, _file),
+                            os.path.relpath(os.path.join(root, _file),
+                                            os.path.join(results_path, '..')))
+        data.seek(0)
+
+        return send_file(
+            data,
+            mimetype="application/zip",
+            as_attachment=True,
+            attachment_filename="ocr_alto_xml_%s.zip" % task_info["result"]["uid"]
+        )
 
     def download_page(self, task):
         """ Download the results of the task for e.g. pageviewer, including PAGE XML,

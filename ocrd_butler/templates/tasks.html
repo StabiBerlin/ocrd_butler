@@ -123,6 +123,8 @@
                     </td>
                     <td>
                         {% if task.result.succeeded %}
+                            <a href="{{ task.result.results }}">RESULTS</a>
+                            <br />
                             <a href="{{ task.result.page }}">PAGE</a>
                             <br />
                             <a href="{{ task.result.alto }}">ALTO</a>
