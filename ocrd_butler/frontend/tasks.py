@@ -2,13 +2,14 @@
 Routes for the tasks.
 """
 
+import os
+import json
+import requests
+import uuid
 from datetime import (
     datetime,
     timedelta
 )
-import json
-
-import requests
 
 from flask import (
     Blueprint,
@@ -21,7 +22,12 @@ from flask import (
 )
 
 from flask_wtf import FlaskForm
+from flask_wtf.file import (
+    FileField,
+    FileAllowed
+)
 from six import iterbytes
+from werkzeug.utils import secure_filename
 from wtforms import (
     StringField,
     SubmitField,
@@ -144,10 +150,14 @@ class NewTaskForm(FlaskForm):
     """New task form."""
     task_description = StringField("Task description", [
         DataRequired(),
-        Length(min=4, message=("The task has to be at least 4 letters."))])
-    src = StringField("Source (METS)", validators=[
-        DataRequired(message="Please enter an URL to a METS file."),
+        Length(min=4, message=("The task description has to be at least 4 letters."))])
+    src = StringField("METS URL", validators=[
         URL(message="Please enter a valid URL to a METS file.")])
+    # src = StringField("METS file - URL", validators=[
+    #     DataRequired(message="Please enter an URL to a METS file."),
+    #     URL(message="Please enter a valid URL to a METS file.")])
+    mets_file = FileField("METS file", validators=[
+        FileAllowed(["xml"], "You have to provide a XML file.")])
     input_file_grp = StringField("Input file group (defaults to 'DEFAULT')")
     workflow_id = SelectField('Workflow', validators=[
         DataRequired(message="Please choose a workflow.")])
@@ -170,13 +180,23 @@ def new_task():
     else:
         parameters = {}
 
+    src = request.form.get("src")
+
+    mets_file = request.files.get("mets_file")
+    if mets_file:
+        filename = f'{uuid.uuid4().__str__()}-{secure_filename(mets_file.filename)}'
+        dst = os.path.join('/tmp', filename)
+        mets_file.save(dst)
+        src = dst
+
     data = json.dumps({
         "description": request.form.get("task_description"),
-        "src": request.form.get("src"),
+        "src": src,
         "default_file_grp": request.form.get("input_file_grp") or "DEFAULT",
         "workflow_id": request.form.get("workflow_id"),
         "parameters": parameters
     })
+
     headers = {"Content-Type": "application/json"}
     response = requests.post("{}api/tasks".format(host_url(request)),
                              data=data, headers=headers)

@@ -27,7 +27,7 @@
 
         <div class="col-md-12">
             <div class="new-task-form">
-                <form action="/new-task" method="post">
+                <form action="/new-task" method="post" enctype="multipart/form-data">
                   <div class="form-group">
                     {{ form.task_description.label }}
                     <br />
@@ -37,6 +37,11 @@
                     {{ form.src.label }}
                     <br />
                     {{ form.src() }}
+                    <br />
+                    <br />
+                    {{ form.mets_file.label }}
+                    <br />
+                    {{ form.mets_file() }}
                     <br />
                     <br />
                     {{ form.input_file_grp.label }}
