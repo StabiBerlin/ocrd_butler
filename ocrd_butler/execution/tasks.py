@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 import json
+from logging import Logger
 from pathlib import (
     Path,
     PurePosixPath
@@ -135,7 +136,8 @@ def prepare_workspace(task: dict, resolver: Resolver, dst_dir: str) -> Workspace
     )
 
     parsed_url = urlparse(task["src"])
-    is_sbb = parsed_url.hostname == current_app.config["SBB_CONTENT_SERVER_HOST"]
+    is_sbb = parsed_url.hostname == current_app.config["SBB_CONTENT_SERVER_HOST"]\
+             or "<mods:publisher>Staatsbibliothek zu Berlin" in str(workspace.mets.to_xml())
 
     if is_sbb and task[
             "default_file_grp"
@@ -190,6 +192,30 @@ def determine_input_file_grp(
             task['default_file_grp']
         )
     )
+
+
+def to_task_log(
+    task_log_handler:Logger, log_file:str, logger_path:str, task:dict):
+    """ Write the information from the celery service file to the task log. """
+    logger.remove(task_log_handler)
+    task_log_handler = logger.add(log_file, format='{message}', mode='a')
+    service_debug_log = f"{logger_path}/celery/ocrd-butler.celery.service.stderr.log"
+    if Path(service_debug_log).is_file():
+        lines = []
+        start = f'Start processing task {task["uid"]}'
+        end = f'Finished processing task {task["uid"]}'
+        record = False
+        with open(service_debug_log, 'r') as log:
+            for line in log:
+                if start in line:
+                    record = True
+                if end in line:
+                    break
+                if record:
+                    lines.append(line.rstrip())
+        for line in lines:
+            logger.info(line)
+    logger.remove(task_log_handler)
 
 
 @celery.task(bind=True)
@@ -247,33 +273,15 @@ def run_task(self, task: dict) -> dict:
         )
 
         if exit_code != 0:
+            logger.info(f'Finished processing task {task["uid"]}.')
+            to_task_log(task_log_handler, log_file, logger_path, task)
             raise Exception(f"Processor {processor['name']} failed with exit code {exit_code}.")
 
-        # reload mets
         workspace.reload_mets()
-
         logger.info(f'Finished processor {processor["name"]} for task {task["uid"]}.')
 
     logger.info(f'Finished processing task {task["uid"]}.')
-    logger.remove(task_log_handler)
-    task_log_handler = logger.add(log_file, format='{message}', mode='a')
-    service_debug_log = f"{logger_path}/celery/ocrd-butler.celery.service.stderr.log"
-    if Path(service_debug_log).is_file():
-        lines = []
-        start = f'Start processing task {task["uid"]}'
-        end = f'Finished processing task {task["uid"]}'
-        record = False
-        with open(service_debug_log, 'r') as log:
-            for line in log:
-                if start in line:
-                    record = True
-                if end in line:
-                    break
-                if record:
-                    lines.append(line.rstrip())
-        for line in lines:
-            logger.info(line)
-    logger.remove(task_log_handler)
+    to_task_log(task_log_handler, log_file, logger_path, task)
 
     return {
         "id": task["id"],
