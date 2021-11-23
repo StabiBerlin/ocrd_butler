@@ -137,9 +137,7 @@
                             <a href="{{ task.result.txt }}">TXT</a>
                         {% endif %}
                         <br />
-                        {% if task.result.started %}
-                            <a href="{{ task.result.log }}">LOG</a>
-                        {% endif %}
+                        <a href="{{ task.result.log }}">LOG</a>
                     </td>
                     <td><a class="delete-task" href="/task/delete/{{ task.id }}">x</a></td>
                 </tr>

@@ -116,7 +116,7 @@ class TasksBase(Resource):
             "download_page",
             "download_alto",
             "download_alto_with_images",
-            "download_log",
+            "log",
         )
         self.post_actions = (
             "run",
@@ -250,7 +250,7 @@ class TaskActions(TasksBase):
         * download_txt
         * download_page
         * download_alto
-        * download_log
+        * log
 
         TODO: Return the actions as OPTIONS.
         """
@@ -496,8 +496,8 @@ class TaskActions(TasksBase):
         return response
 
 
-    def download_log(self, task):
-        """ Download the log file of the task. """
+    def log(self, task):
+        """ Get the log file of the task. """
         log_file_path = pathlib.Path(
             f"{current_app.config['LOGGER_PATH']}/task-{task.uid}.log"
         )

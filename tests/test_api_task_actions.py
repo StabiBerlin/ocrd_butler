@@ -150,13 +150,13 @@ class ApiTaskActions(TestCase):
 
     @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
     @mock.patch("ocrd_butler.api.tasks.task_information")
-    def test_api_task_download_log(self, mock_task_information, mock_fs):
-        """Check if download txt is working."""
+    def test_api_task_log(self, mock_task_information, mock_fs):
+        """Check if the download of the log is working."""
         self.setup_mocks(mock_task_information, mock_fs)
 
         from flask import current_app
         current_app.config['LOGGER_PATH'] = f"{CURRENT_DIR}/files"
-        response = self.client.get("/api/tasks/foobar/download_log")
+        response = self.client.get("/api/tasks/foobar/log")
 
         assert response.status_code == 200
         assert response.content_type == "text/txt; charset=utf-8"

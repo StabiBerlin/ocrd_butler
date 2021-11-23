@@ -282,15 +282,15 @@ class FrontendTests(TestCase):
         assert response.data == b"foobar"
 
     @mock.patch("requests.get")
-    def test_frontend_download_log(self, mock_requests_get):
-        """Check if download log is working."""
+    def test_frontend_log(self, mock_requests_get):
+        """Check if the download of the log is working."""
 
         mock_requests_get.return_value = type('', (object,), {
             "text": "42er log",
             "status_code": 200
         })()
 
-        response = self.client.get("/download/log/42")
+        response = self.client.get("/log/42")
 
         assert response.status_code == 200
         assert response.data == b"42er log"

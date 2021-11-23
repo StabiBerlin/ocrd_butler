@@ -97,7 +97,8 @@ def current_tasks():
                 "received": "",
                 "started": "",
                 "succeeded": "",
-                "runtime": ""
+                "runtime": "",
+                "log": ""
             },
         }
         for task in requests.get(f'{host_url(request)}api/tasks').json()
@@ -109,32 +110,37 @@ def current_tasks():
         task = {**result}
 
         task_info = task_information(result.get('worker_task_id'))
-
         uid = result.get('uid')
-        if task_info is not None and task_info["ready"]:
-            task["result"].update({
-                "results": f"/download/results/{uid}",
-                "page": f"/download/page/{uid}",
-                "alto": f"/download/alto/{uid}",
-                "txt": f"/download/txt/{uid}",
-            })
+        task["result"].update({
+            "log": f"/log/{uid}"
+        })
 
-            if task_info["received"] is not None:
+        if task_info is not None:
+
+            if task_info["ready"]:
                 task["result"].update({
-                    "received": datetime.fromtimestamp(task_info["received"])
+                    "results": f"/download/results/{uid}",
+                    "page": f"/download/page/{uid}",
+                    "alto": f"/download/alto/{uid}",
+                    "txt": f"/download/txt/{uid}",
                 })
 
-            if task_info["started"] is not None:
-                task["result"].update({
-                    "started": datetime.fromtimestamp(task_info["started"]),
-                    "log": f"/download/log/{uid}",
-                })
+                if task_info["started"] is not None:
+                    task["result"].update({
+                        "started": datetime.fromtimestamp(task_info["started"])
+                    })
 
-            if task_info["succeeded"] is not None:
-                task["result"].update({
-                    "succeeded": datetime.fromtimestamp(task_info["succeeded"]),
-                    "runtime": timedelta(seconds=task_info["runtime"])
-                })
+                if task_info["received"] is not None:
+                    task["result"].update({
+                        "received": datetime.fromtimestamp(task_info["received"])
+                    })
+
+                if task_info["succeeded"] is not None:
+                    task["result"].update({
+                        "succeeded": datetime.fromtimestamp(task_info["succeeded"]),
+                        "runtime": timedelta(seconds=task_info["runtime"])
+                    })
+
 
         # A bit hacky, but for devs on localhost.
         flower_host_url = request.host_url.replace("5000", "5555")
@@ -359,10 +365,10 @@ def download_alto_zip(task_id):
     )
 
 
-@tasks_blueprint.route("/download/log/<string:task_id>")
-def download_log(task_id):
-    """Define route to download the results as text."""
-    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/download_log")
+@tasks_blueprint.route("/log/<string:task_id>")
+def log(task_id):
+    """Define route to get the current log of the task."""
+    response = requests.get(f"{host_url(request)}api/tasks/{task_id}/log")
     return validate_and_wrap_response(
         response, 'text',
         mimetype="text/txt",
