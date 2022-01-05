@@ -113,6 +113,14 @@ def ocr_result_path(task_result_dir: str, path_part: tuple = ("RECOGNIZE", "CALA
 
 
 def alto_result_path(task_result_dir: str) -> pathlib.Path:
+    """ Get base path to the alto xml results of the task. """
+    result_xml_files = glob.glob(f"{task_result_dir}/*/*.xml")
+    for _file in result_xml_files:
+        tree = ET.parse(_file)
+        xmlns = tree.getroot().tag.split("}")[0].strip("{")
+        if xmlns in ("http://www.loc.gov/standards/alto/ns-v4#", ):
+            return pathlib.Path(os.path.dirname(_file))
+
     alto_result_dir = f"{task_result_dir}/OCR-D-OCR-ALTO"
     if not os.path.exists(alto_result_dir):
         os.mkdir(alto_result_dir)

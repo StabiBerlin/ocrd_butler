@@ -1,0 +1,350 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+<alto xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.loc.gov/standards/alto/ns-v4#" xsi:schemaLocation="http://www.loc.gov/standards/alto/ns-v4# http://www.loc.gov/standards/alto/v4/alto-4-2.xsd" SCHEMAVERSION="4.2">
+  <Description>
+    <MeasurementUnit>pixel</MeasurementUnit>
+    <sourceImageInformation>
+      <fileName>DEFAULT/FILE_0002_DEFAULT.jpg</fileName>
+    </sourceImageInformation>
+    <Processing ID="ocrd-tesserocr-recognize-0">
+      <processingStepDescription>layout/segmentation/region</processingStepDescription>
+      <processingStepSettings>{"dpi": "0", "padding": "0", "shrink_polygons": "False", "find_tables": "True", "sparse_text": "False", "overwrite_segments": "True", "segmentation_level": "region", "textequiv_level": "region", "block_polygons": "False", "overwrite_text": "True", "raw_lines": "False", "char_whitelist": "", "char_blacklist": "", "char_unblacklist": "", "tesseract_parameters": "{}"}</processingStepSettings>
+      <processingSoftware>
+        <softwareName>ocrd-tesserocr-recognize</softwareName>
+      </processingSoftware>
+    </Processing>
+    <Processing ID="ocrd-tesserocr-recognize-1">
+      <processingStepDescription>layout/segmentation/region</processingStepDescription>
+      <processingStepSettings>{"dpi": "0", "padding": "0", "shrink_polygons": "False", "overwrite_segments": "True", "segmentation_level": "line", "textequiv_level": "line", "overwrite_text": "True", "block_polygons": "False", "find_tables": "True", "sparse_text": "False", "raw_lines": "False", "char_whitelist": "", "char_blacklist": "", "char_unblacklist": "", "tesseract_parameters": "{}"}</processingStepSettings>
+      <processingSoftware>
+        <softwareName>ocrd-tesserocr-recognize</softwareName>
+      </processingSoftware>
+    </Processing>
+    <Processing ID="ocrd-tesserocr-recognize-2">
+      <processingStepDescription>layout/segmentation/region</processingStepDescription>
+      <processingStepSettings>{"dpi": "0", "padding": "0", "shrink_polygons": "False", "overwrite_segments": "True", "segmentation_level": "word", "textequiv_level": "word", "overwrite_text": "True", "block_polygons": "False", "find_tables": "True", "sparse_text": "False", "raw_lines": "False", "char_whitelist": "", "char_blacklist": "", "char_unblacklist": "", "tesseract_parameters": "{}"}</processingStepSettings>
+      <processingSoftware>
+        <softwareName>ocrd-tesserocr-recognize</softwareName>
+      </processingSoftware>
+    </Processing>
+    <Processing ID="ocrd-calamari-recognize-3">
+      <processingStepDescription>recognition/text-recognition</processingStepDescription>
+      <processingStepSettings>{"voter": "confidence_voter_default_ctc", "textequiv_level": "line", "glyph_conf_cutoff": "0.001", "checkpoint": "/home/j23d/projects/ocrd/ocrd-butler/tests/calamari_models/*ckpt.json"}</processingStepSettings>
+      <processingSoftware>
+        <softwareName>ocrd-calamari-recognize</softwareName>
+      </processingSoftware>
+    </Processing>
+  </Description>
+  <Styles/>
+  <Tags>
+    <LayoutTag ID="layouttag-caption" LABEL="caption"/>
+  </Tags>
+  <Layout>
+    <Page ID="FILE_0002_OCR-D-OCR-CALAMARI" PHYSICAL_IMG_NR="0" WIDTH="800" HEIGHT="1073">
+      <PrintSpace VPOS="0" HPOS="0" HEIGHT="1073" WIDTH="800">
+        <Illustration ID="region0012" HEIGHT="1073" WIDTH="800" HPOS="0" VPOS="0" IDNEXT="region0001">
+          <Shape>
+            <Polygon POINTS="0,0 800,0 800,1073 0,1073"/>
+          </Shape>
+        </Illustration>
+        <GraphicalElement ID="region0001" HEIGHT="33" WIDTH="434" HPOS="135" VPOS="218" IDNEXT="region0004">
+          <Shape>
+            <Polygon POINTS="135,218 569,218 569,251 135,251"/>
+          </Shape>
+        </GraphicalElement>
+        <GraphicalElement ID="region0004" HEIGHT="29" WIDTH="443" HPOS="128" VPOS="513" IDNEXT="region0008">
+          <Shape>
+            <Polygon POINTS="128,513 571,513 571,542 128,542"/>
+          </Shape>
+        </GraphicalElement>
+        <GraphicalElement ID="region0008" HEIGHT="30" WIDTH="526" HPOS="122" VPOS="771" IDNEXT="region0010">
+          <Shape>
+            <Polygon POINTS="122,771 648,771 648,801 122,801"/>
+          </Shape>
+        </GraphicalElement>
+        <GraphicalElement ID="region0010" HEIGHT="33" WIDTH="527" HPOS="118" VPOS="924">
+          <Shape>
+            <Polygon POINTS="118,924 645,924 645,957 118,957"/>
+          </Shape>
+        </GraphicalElement>
+        <TextBlock ID="region0000" HEIGHT="35" WIDTH="537" HPOS="136" VPOS="204" IDNEXT="region0002">
+          <Shape>
+            <Polygon POINTS="136,204 673,204 673,239 136,239"/>
+          </Shape>
+          <TextLine ID="region0000_line0000" HEIGHT="30" WIDTH="536" HPOS="137" VPOS="204">
+            <Shape>
+              <Polygon POINTS="673,209 484,204 137,204 137,217 673,234"/>
+            </Shape>
+            <String ID="region0000_line0000-dummy-Word" HEIGHT="30" WIDTH="536" HPOS="137" VPOS="204" CONTENT="ehaun nen eer gbaun nonen">
+              <Shape>
+                <Polygon POINTS="673,209 484,204 137,204 137,217 673,234"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0000_line0001" HEIGHT="22" WIDTH="428" HPOS="136" VPOS="217">
+            <Shape>
+              <Polygon POINTS="564,239 564,231 137,217 136,237 197,239"/>
+            </Shape>
+            <String ID="region0000_line0001-dummy-Word" HEIGHT="22" WIDTH="428" HPOS="136" VPOS="217" CONTENT="ronrndannn au">
+              <Shape>
+                <Polygon POINTS="564,239 564,231 137,217 136,237 197,239"/>
+              </Shape>
+            </String>
+          </TextLine>
+        </TextBlock>
+        <TextBlock ID="region0002" HEIGHT="214" WIDTH="542" HPOS="130" VPOS="262" IDNEXT="region0003">
+          <Shape>
+            <Polygon POINTS="130,262 672,262 672,476 130,476"/>
+          </Shape>
+          <TextLine ID="region0002_line0000" HEIGHT="31" WIDTH="500" HPOS="172" VPOS="262">
+            <Shape>
+              <Polygon POINTS="672,266 506,262 172,262 172,278 672,293"/>
+            </Shape>
+            <String ID="region0002_line0000-dummy-Word" HEIGHT="31" WIDTH="500" HPOS="172" VPOS="262" CONTENT="n erum en">
+              <Shape>
+                <Polygon POINTS="672,266 506,262 172,262 172,278 672,293"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0002_line0001" HEIGHT="38" WIDTH="484" HPOS="174" VPOS="283">
+            <Shape>
+              <Polygon POINTS="174,283 658,298 657,321 174,306"/>
+            </Shape>
+            <String ID="region0002_line0001-dummy-Word" HEIGHT="38" WIDTH="484" HPOS="174" VPOS="283" CONTENT="berens ee oreen">
+              <Shape>
+                <Polygon POINTS="174,283 658,298 657,321 174,306"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0002_line0002" HEIGHT="39" WIDTH="495" HPOS="173" VPOS="314">
+            <Shape>
+              <Polygon POINTS="173,314 668,329 667,353 173,338"/>
+            </Shape>
+            <String ID="region0002_line0002-dummy-Word" HEIGHT="39" WIDTH="495" HPOS="173" VPOS="314" CONTENT="oooatee gahen">
+              <Shape>
+                <Polygon POINTS="173,314 668,329 667,353 173,338"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0002_line0003" HEIGHT="35" WIDTH="398" HPOS="133" VPOS="334">
+            <Shape>
+              <Polygon POINTS="134,334 531,347 530,369 133,356"/>
+            </Shape>
+            <String ID="region0002_line0003-dummy-Word" HEIGHT="35" WIDTH="398" HPOS="133" VPOS="334" CONTENT="ee">
+              <Shape>
+                <Polygon POINTS="134,334 531,347 530,369 133,356"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0002_line0004" HEIGHT="39" WIDTH="496" HPOS="171" VPOS="368">
+            <Shape>
+              <Polygon POINTS="172,368 667,383 666,407 171,392"/>
+            </Shape>
+            <String ID="region0002_line0004-dummy-Word" HEIGHT="39" WIDTH="496" HPOS="171" VPOS="368" CONTENT="erenes e">
+              <Shape>
+                <Polygon POINTS="172,368 667,383 666,407 171,392"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0002_line0005" HEIGHT="42" WIDTH="534" HPOS="132" VPOS="385">
+            <Shape>
+              <Polygon POINTS="133,385 666,402 665,427 132,410"/>
+            </Shape>
+            <String ID="region0002_line0005-dummy-Word" HEIGHT="42" WIDTH="534" HPOS="132" VPOS="385" CONTENT="oeho">
+              <Shape>
+                <Polygon POINTS="133,385 666,402 665,427 132,410"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0002_line0006" HEIGHT="42" WIDTH="534" HPOS="131" VPOS="405">
+            <Shape>
+              <Polygon POINTS="132,405 665,422 665,447 131,430"/>
+            </Shape>
+            <String ID="region0002_line0006-dummy-Word" HEIGHT="42" WIDTH="534" HPOS="131" VPOS="405" CONTENT="en ereenenale">
+              <Shape>
+                <Polygon POINTS="132,405 665,422 665,447 131,430"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0002_line0007" HEIGHT="42" WIDTH="534" HPOS="131" VPOS="425">
+            <Shape>
+              <Polygon POINTS="132,425 665,442 664,467 131,450"/>
+            </Shape>
+            <String ID="region0002_line0007-dummy-Word" HEIGHT="42" WIDTH="534" HPOS="131" VPOS="425" CONTENT="e ao oeo e">
+              <Shape>
+                <Polygon POINTS="132,425 665,442 664,467 131,450"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0002_line0008" HEIGHT="30" WIDTH="532" HPOS="131" VPOS="446">
+            <Shape>
+              <Polygon POINTS="662,476 663,463 131,446 131,469 349,476"/>
+            </Shape>
+            <String ID="region0002_line0008-dummy-Word" HEIGHT="30" WIDTH="532" HPOS="131" VPOS="446" CONTENT="uMsoen e aen strecee üsen">
+              <Shape>
+                <Polygon POINTS="662,476 663,463 131,446 131,469 349,476"/>
+              </Shape>
+            </String>
+          </TextLine>
+        </TextBlock>
+        <TextBlock ID="region0003" HEIGHT="19" WIDTH="462" HPOS="128" VPOS="501" IDNEXT="region0005">
+          <Shape>
+            <Polygon POINTS="128,501 590,501 590,520 128,520"/>
+          </Shape>
+          <TextLine ID="region0003_line0000" HEIGHT="19" WIDTH="461" HPOS="129" VPOS="501">
+            <Shape>
+              <Polygon POINTS="590,506 425,501 129,501 129,516 260,520 589,520"/>
+            </Shape>
+            <String ID="region0003_line0000-dummy-Word" HEIGHT="19" WIDTH="461" HPOS="129" VPOS="501" CONTENT="ee e nn  oe">
+              <Shape>
+                <Polygon POINTS="590,506 425,501 129,501 129,516 260,520 589,520"/>
+              </Shape>
+            </String>
+          </TextLine>
+        </TextBlock>
+        <TextBlock ID="region0005" HEIGHT="42" WIDTH="536" HPOS="168" VPOS="528" TAGREFS="layouttag-caption" IDNEXT="region0006">
+          <Shape>
+            <Polygon POINTS="168,528 704,528 704,570 168,570"/>
+          </Shape>
+          <TextLine ID="region0005_line0000" HEIGHT="15" WIDTH="403" HPOS="168" VPOS="528">
+            <Shape>
+              <Polygon POINTS="168,530 571,543 571,529 540,528 168,528"/>
+            </Shape>
+            <String ID="region0005_line0000-word0" CONTENT=""/>
+          </TextLine>
+          <TextLine ID="region0005_line0001" HEIGHT="42" WIDTH="535" HPOS="169" VPOS="528">
+            <Shape>
+              <Polygon POINTS="704,528 671,528 169,528 169,567 269,570 704,570"/>
+            </Shape>
+            <String ID="region0005_line0001-dummy-Word" HEIGHT="42" WIDTH="535" HPOS="169" VPOS="528" CONTENT="0">
+              <Shape>
+                <Polygon POINTS="704,528 671,528 169,528 169,567 269,570 704,570"/>
+              </Shape>
+            </String>
+          </TextLine>
+        </TextBlock>
+        <TextBlock ID="region0006" HEIGHT="159" WIDTH="495" HPOS="163" VPOS="576" IDNEXT="region0007">
+          <Shape>
+            <Polygon POINTS="163,576 658,576 658,735 163,735"/>
+          </Shape>
+          <TextLine ID="region0006_line0000" HEIGHT="24" WIDTH="322" HPOS="165" VPOS="576">
+            <Shape>
+              <Polygon POINTS="165,576 165,590 486,600 487,580 358,576"/>
+            </Shape>
+            <String ID="region0006_line0000-word0" CONTENT=""/>
+          </TextLine>
+          <TextLine ID="region0006_line0001" HEIGHT="39" WIDTH="493" HPOS="165" VPOS="601">
+            <Shape>
+              <Polygon POINTS="658,615 166,601 165,625 658,640"/>
+            </Shape>
+            <String ID="region0006_line0001-word0" CONTENT=""/>
+          </TextLine>
+          <TextLine ID="region0006_line0002" HEIGHT="41" WIDTH="492" HPOS="166" VPOS="626">
+            <Shape>
+              <Polygon POINTS="166,626 658,641 657,667 166,652"/>
+            </Shape>
+            <String ID="region0006_line0002-dummy-Word" HEIGHT="41" WIDTH="492" HPOS="166" VPOS="626" CONTENT="ee h e">
+              <Shape>
+                <Polygon POINTS="166,626 658,641 657,667 166,652"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0006_line0003" HEIGHT="44" WIDTH="492" HPOS="165" VPOS="669">
+            <Shape>
+              <Polygon POINTS="166,669 657,684 656,713 165,698"/>
+            </Shape>
+            <String ID="region0006_line0003-dummy-Word" HEIGHT="44" WIDTH="492" HPOS="165" VPOS="669" CONTENT="eennnoo ueoen il">
+              <Shape>
+                <Polygon POINTS="166,669 657,684 656,713 165,698"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0006_line0004" HEIGHT="32" WIDTH="279" HPOS="163" VPOS="703">
+            <Shape>
+              <Polygon POINTS="441,735 442,711 164,703 163,733 232,735"/>
+            </Shape>
+            <String ID="region0006_line0004-dummy-Word" HEIGHT="32" WIDTH="279" HPOS="163" VPOS="703" CONTENT="neeeees eſen!">
+              <Shape>
+                <Polygon POINTS="441,735 442,711 164,703 163,733 232,735"/>
+              </Shape>
+            </String>
+          </TextLine>
+        </TextBlock>
+        <TextBlock ID="region0007" HEIGHT="18" WIDTH="367" HPOS="122" VPOS="760" IDNEXT="region0009">
+          <Shape>
+            <Polygon POINTS="122,760 489,760 489,778 122,778"/>
+          </Shape>
+          <TextLine ID="region0007_line0000" HEIGHT="18" WIDTH="366" HPOS="123" VPOS="760">
+            <Shape>
+              <Polygon POINTS="489,766 289,760 123,760 123,772 322,778 488,778"/>
+            </Shape>
+            <String ID="region0007_line0000-dummy-Word" HEIGHT="18" WIDTH="366" HPOS="123" VPOS="760" CONTENT="e">
+              <Shape>
+                <Polygon POINTS="489,766 289,760 123,760 123,772 322,778 488,778"/>
+              </Shape>
+            </String>
+          </TextLine>
+        </TextBlock>
+        <TextBlock ID="region0009" HEIGHT="123" WIDTH="378" HPOS="257" VPOS="806" IDNEXT="region0011">
+          <Shape>
+            <Polygon POINTS="257,806 635,806 635,929 257,929"/>
+          </Shape>
+          <TextLine ID="region0009_line0000" HEIGHT="31" WIDTH="171" HPOS="361" VPOS="807">
+            <Shape>
+              <Polygon POINTS="362,807 532,812 531,838 361,833"/>
+            </Shape>
+            <String ID="region0009_line0000-word0" CONTENT=""/>
+          </TextLine>
+          <TextLine ID="region0009_line0001" HEIGHT="38" WIDTH="378" HPOS="257" VPOS="839">
+            <Shape>
+              <Polygon POINTS="258,839 635,851 634,877 257,865"/>
+            </Shape>
+            <String ID="region0009_line0001-dummy-Word" HEIGHT="38" WIDTH="378" HPOS="257" VPOS="839" CONTENT="eue">
+              <Shape>
+                <Polygon POINTS="258,839 635,851 634,877 257,865"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0009_line0002" HEIGHT="41" WIDTH="378" HPOS="257" VPOS="868">
+            <Shape>
+              <Polygon POINTS="635,879 258,868 257,897 635,909"/>
+            </Shape>
+            <String ID="region0009_line0002-dummy-Word" HEIGHT="41" WIDTH="378" HPOS="257" VPOS="868" CONTENT="p eaee">
+              <Shape>
+                <Polygon POINTS="635,879 258,868 257,897 635,909"/>
+              </Shape>
+            </String>
+          </TextLine>
+          <TextLine ID="region0009_line0003" HEIGHT="24" WIDTH="78" HPOS="410" VPOS="905">
+            <Shape>
+              <Polygon POINTS="487,929 488,908 411,905 410,929"/>
+            </Shape>
+            <String ID="region0009_line0003-dummy-Word" HEIGHT="24" WIDTH="78" HPOS="410" VPOS="905" CONTENT="A">
+              <Shape>
+                <Polygon POINTS="487,929 488,908 411,905 410,929"/>
+              </Shape>
+            </String>
+          </TextLine>
+        </TextBlock>
+        <TextBlock ID="region0011" HEIGHT="20" WIDTH="55" HPOS="412" VPOS="958" IDNEXT="region0012">
+          <Shape>
+            <Polygon POINTS="412,958 467,958 467,978 412,978"/>
+          </Shape>
+          <TextLine ID="region0011_line0000" HEIGHT="20" WIDTH="55" HPOS="412" VPOS="958">
+            <Shape>
+              <Polygon POINTS="467,959 413,958 412,978 467,978"/>
+            </Shape>
+            <String ID="region0011_line0000-dummy-Word" HEIGHT="20" WIDTH="55" HPOS="412" VPOS="958" CONTENT="1">
+              <Shape>
+                <Polygon POINTS="467,959 413,958 412,978 467,978"/>
+              </Shape>
+            </String>
+          </TextLine>
+        </TextBlock>
+      </PrintSpace>
+      <TopMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
+      <LeftMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
+      <RightMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
+      <BottomMargin VPOS="0" HPOS="0" HEIGHT="0" WIDTH="0"/>
+    </Page>
+  </Layout>
+</alto>
