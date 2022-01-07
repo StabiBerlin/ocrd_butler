@@ -211,8 +211,8 @@ class Workflow(WorkflowBase):
                 if field == 'processors':
                     workflow.processors = []
                     for processor in update_data["processors"]:
-                        self.validate_processor(processor)
-                        add_workflow_processor(workflow, processor)
+                        validated_processor = self.validate_processor(processor)
+                        add_workflow_processor(workflow, validated_processor)
                 else:
                     setattr(workflow, field, update_data[field])
         workflow.save()
