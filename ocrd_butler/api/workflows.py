@@ -159,7 +159,7 @@ def add_workflow_processor(
     """
     if not processor.get('output_file_grp'):
         position = len(workflow.processors) + 1
-        processor['output_file_grp'] = '{:02}-{}-OUTPUT'.format(
+        processor['output_file_grp'] = '_{:02}-{}-OUTPUT'.format(
             position, processor['name'].upper()
         )
     workflow.processors = workflow.processors + [processor]

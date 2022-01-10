@@ -256,7 +256,7 @@ class ApiWorkflowTests(TestCase):
         assert response.json["description"] == "Some barfoo workflow."
         assert response.json["processors"][0]["name"] == "ocrd-tesserocr-segment-word"
         assert response.json['processors'][-1]['output_file_grp'] == (
-            '01-OCRD-TESSEROCR-SEGMENT-WORD-OUTPUT'
+            '_01-OCRD-TESSEROCR-SEGMENT-WORD-OUTPUT'
         )
 
     def test_amend_workflow(self):
