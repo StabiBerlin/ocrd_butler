@@ -86,10 +86,10 @@ class ApiWorkflowTests(TestCase):
     def test_create_workflow_with_default_parameters(self):
         """Check if a new workflow is created."""
         self.get_workflow(processors=[
-            { "name": "ocrd-tesserocr-segment-region" },
-            { "name": "ocrd-tesserocr-segment-line" },
-            { "name": "ocrd-tesserocr-segment-word" },
-            { "name": "ocrd-tesserocr-recognize" },
+            {"name": "ocrd-tesserocr-segment-region"},
+            {"name": "ocrd-tesserocr-segment-line"},
+            {"name": "ocrd-tesserocr-segment-word"},
+            {"name": "ocrd-tesserocr-recognize"},
         ])
         response = self.client.get("/api/workflows/1")
         assert response.json["processors"][0]["name"] == "ocrd-tesserocr-segment-region"
@@ -145,7 +145,7 @@ class ApiWorkflowTests(TestCase):
 
     def test_create_workflow_with_reused_processors(self):
         """Check if a workflow with processors that are used multiple is created."""
-        foor = self.get_workflow(processors=[
+        self.get_workflow(processors=[
             {"name": "ocrd-olena-binarize"},
             {"name": "ocrd-tesserocr-recognize"},
             {"name": "ocrd-olena-binarize", "parameters": {"impl": "otsu"}},
@@ -212,10 +212,12 @@ class ApiWorkflowTests(TestCase):
         assert self.get_workflow(name="First Workflow", processors=[{
             "name": "ocrd-olena-binarize"
         }]).status_code == 201
-        assert self.get_workflow(name="Second Workflow",
+        assert self.get_workflow(
+            name="Second Workflow",
             description="Some barfoo workflow.", processors=[{
                 "name": "ocrd-sbb-textline-detector"
-        }]).status_code == 201
+            }],
+        ).status_code == 201
         response = self.client.get("/api/workflows")
         assert response.status_code == 200
         assert len(response.json) == 2

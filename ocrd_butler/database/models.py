@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """OCRD Butler database models."""
 
-from __future__ import annotations
 from typing import List
 import uuid
 
