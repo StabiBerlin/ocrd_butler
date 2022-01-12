@@ -115,32 +115,29 @@ def current_tasks():
             "log": f"/log/{uid}"
         })
 
+        if task["status"] == "SUCCESS":
+            task["result"].update({
+                "results": f"/download/results/{uid}",
+                "page": f"/download/page/{uid}",
+                "alto": f"/download/alto/{uid}",
+                "txt": f"/download/txt/{uid}",
+            })
+
         if task_info is not None:
-
             if task_info["ready"]:
-                task["result"].update({
-                    "results": f"/download/results/{uid}",
-                    "page": f"/download/page/{uid}",
-                    "alto": f"/download/alto/{uid}",
-                    "txt": f"/download/txt/{uid}",
-                })
-
                 if task_info["started"] is not None:
                     task["result"].update({
                         "started": datetime.fromtimestamp(task_info["started"])
                     })
-
                 if task_info["received"] is not None:
                     task["result"].update({
                         "received": datetime.fromtimestamp(task_info["received"])
                     })
-
                 if task_info["succeeded"] is not None:
                     task["result"].update({
                         "succeeded": datetime.fromtimestamp(task_info["succeeded"]),
                         "runtime": timedelta(seconds=task_info["runtime"])
                     })
-
 
         # A bit hacky, but for devs on localhost.
         flower_host_url = request.host_url.replace("5000", "5555")

@@ -73,7 +73,7 @@
                     <th>Workflow</th>
                     <th>Parameters</th>
                     <th>Actions</th>
-                    <th>Worker (Status)</th>
+                    <th>Status</th>
                     <th>Times</th>
                     <th>Results</th>
                     <th>Delete</th>
@@ -82,10 +82,7 @@
                 <tr>
                     <td>{{ task.description }}
                         <br />
-                        ID: {{ task.id }}
-                        <br />
                         UID: {{ task.uid }}
-                        <!--<input type="checkbox" name="id" value="{{ task.id }}" />-->
                     </td>
                     <td><a href="{{ task.src }}">XML</a></td>
                     <td>{{ task.default_file_grp }}</td>
@@ -105,7 +102,11 @@
                         </div>
                     </td>
                     <td><a href="/task/run/{{ task.id }}">Run</a></td>
-                    <td><a href="{{ task.flower_url }}"
+                    <td>
+                        {{ task.status }}
+                        <br />
+                        Worker:
+                        <a href="{{ task.flower_url }}"
                            target="_blank">{{ task.worker_task_id }}</a>
                         {% if task.result and task.result.status %}
                             ({{ task.result.status }})
@@ -127,7 +128,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if task.result.succeeded %}
+                        {% if task.status == "SUCCESS" %}
                             <a href="{{ task.result.results }}">RESULTS</a>
                             <br />
                             <a href="{{ task.result.page }}">PAGE</a>

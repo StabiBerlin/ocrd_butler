@@ -32,19 +32,9 @@ class ApiTaskActions(TestCase):
         headers = {"Content-Type": "application/json"}
         self.client.post("/api/tasks", data=data, headers=headers)
 
-    def setup_mocks(self, mock_task_information, mock_fs, result_num='01'):
-        """Setup the mocks for patching task_information and flask_sqlalchemy
-           query getter.
+    def setup_mocks(self, mock_fs, result_num='01'):
+        """Setup the mocks for patching flask_sqlalchemy query getter.
         """
-        mock_task_information.return_value = {
-            "ready": True,
-            "status": "SUCCESS",
-            "result": {
-                "result_dir": f"{CURRENT_DIR}/files/ocr_result_{result_num}",
-                "task_id": 23,
-                "uid": 42
-            }
-        }
         mock_fs\
             .return_value.filter_by\
             .return_value.first\
@@ -54,7 +44,10 @@ class ApiTaskActions(TestCase):
                 "worker_task_id": 42,
                 "default_file_grp": "DEFAULT",
                 "processors": ["ocrd-calamari-recognize"],
-                "status": "SUCCESS"
+                "status": "SUCCESS",
+                "results": {
+                    "result_dir": f"{CURRENT_DIR}/files/ocr_result_{result_num}"
+                }
             })()
 
     def test_api_task_invalid_id(self):
@@ -131,17 +124,16 @@ class ApiTaskActions(TestCase):
         assert response.data == b'{\n  "status": "SUCCESS"\n}\n'
 
     @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
-    @mock.patch("ocrd_butler.api.tasks.task_information")
-    def test_api_task_download_txt(self, mock_task_information, mock_fs):
+    def test_api_task_download_txt(self, mock_fs):
         """Check if download txt is working."""
-        self.setup_mocks(mock_task_information, mock_fs)
+        self.setup_mocks(mock_fs)
         response = self.client.get("/api/tasks/foobar/download_txt")
         assert response.status_code == 200
         assert response.content_type == "text/txt; charset=utf-8"
         assert b"deutsehe Solaten und Offriere bei der" in response.data
         response.data.count(b"deutsehe Solaten und Offriere bei der") == 1
 
-        self.setup_mocks(mock_task_information, mock_fs, "02")
+        self.setup_mocks(mock_fs, "02")
         response = self.client.get("/api/tasks/foobar/download_txt")
         assert response.status_code == 200
         assert response.content_type == "text/txt; charset=utf-8"
@@ -149,10 +141,9 @@ class ApiTaskActions(TestCase):
         response.data.count(b"vnd vns des liechtes kinder macht") == 1
 
     @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
-    @mock.patch("ocrd_butler.api.tasks.task_information")
-    def test_api_task_log(self, mock_task_information, mock_fs):
+    def test_api_task_log(self, mock_fs):
         """Check if the download of the log is working."""
-        self.setup_mocks(mock_task_information, mock_fs)
+        self.setup_mocks(mock_fs)
 
         from flask import current_app
         current_app.config['LOGGER_PATH'] = f"{CURRENT_DIR}/files"
@@ -163,10 +154,9 @@ class ApiTaskActions(TestCase):
         assert b"Finished processing task foobar" in response.data
 
     @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
-    @mock.patch("ocrd_butler.api.tasks.task_information")
-    def test_api_task_results_zip(self, mock_task_information, mock_fs):
+    def test_api_task_results_zip(self, mock_fs):
         """Check if download result files is working."""
-        self.setup_mocks(mock_task_information, mock_fs)
+        self.setup_mocks(mock_fs)
 
         response = self.client.get("/api/tasks/foobar/download_results")
 
@@ -175,10 +165,9 @@ class ApiTaskActions(TestCase):
         assert response.data[:10] == b'PK\x03\x04\x14\x00\x00\x00\x00\x00'
 
     @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
-    @mock.patch("ocrd_butler.api.tasks.task_information")
-    def test_api_task_page_zip(self, mock_task_information, mock_fs):
+    def test_api_task_page_zip(self, mock_fs):
         """Check if download txt is working."""
-        self.setup_mocks(mock_task_information, mock_fs)
+        self.setup_mocks(mock_fs)
 
         response = self.client.get("/api/tasks/foobar/download_page")
 
@@ -187,10 +176,9 @@ class ApiTaskActions(TestCase):
         assert response.data[:10] == b'PK\x03\x04\x14\x00\x00\x00\x00\x00'
 
     @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
-    @mock.patch("ocrd_butler.api.tasks.task_information")
-    def test_api_task_page_zip_03(self, mock_task_information, mock_fs):
+    def test_api_task_page_zip_03(self, mock_fs):
         """Check if download txt is working."""
-        self.setup_mocks(mock_task_information, mock_fs, result_num='03')
+        self.setup_mocks(mock_fs, result_num='03')
 
         response = self.client.get("/api/tasks/foobar/download_page")
 
@@ -200,10 +188,9 @@ class ApiTaskActions(TestCase):
 
 
     @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
-    @mock.patch("ocrd_butler.api.tasks.task_information")
-    def test_api_task_alto_zip(self, mock_task_information, mock_fs):
+    def test_api_task_alto_zip(self, mock_fs):
         """Check if download alto files is working."""
-        self.setup_mocks(mock_task_information, mock_fs)
+        self.setup_mocks(mock_fs)
 
         response = self.client.get("/api/tasks/foobar/download_alto")
 
@@ -212,10 +199,9 @@ class ApiTaskActions(TestCase):
         assert response.data[:10] == b'PK\x03\x04\x14\x00\x00\x00\x00\x00'
 
     @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
-    @mock.patch("ocrd_butler.api.tasks.task_information")
-    def test_api_task_alto_with_images_zip(self, mock_task_information, mock_fs):
+    def test_api_task_alto_with_images_zip(self, mock_fs):
         """Check if download alto files with images is working."""
-        self.setup_mocks(mock_task_information, mock_fs)
+        self.setup_mocks(mock_fs)
 
         response = self.client.get("/api/tasks/foobar/download_alto_with_images")
 
@@ -224,10 +210,9 @@ class ApiTaskActions(TestCase):
         assert response.data[:10] == b'PK\x03\x04\x14\x00\x00\x00\x00\x00'
 
     @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
-    @mock.patch("ocrd_butler.api.tasks.task_information")
-    def test_api_task_page_to_alto(self, mock_task_information, mock_fs):
+    def test_api_task_page_to_alto(self, mock_fs):
         """Check if page to alto conversion is working."""
-        self.setup_mocks(mock_task_information, mock_fs, result_num="02")
+        self.setup_mocks(mock_fs, result_num="02")
 
         response = self.client.post("/api/tasks/foobar/page_to_alto")
 

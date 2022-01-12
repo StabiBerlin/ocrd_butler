@@ -50,7 +50,6 @@ from ocrd_butler.util import (
 
 task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 
-
 # get the status of a task
 # stop a running task
 # delete a task
@@ -70,38 +69,6 @@ task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 # frontend:
 # - success event could push to frontend and change rotator gif that indicates the work
 # - downloadable and (even better) live log showing
-
-
-def task_information(worker_task_id):
-    """
-    Get information for the task based on its worker id.
-    """
-    if worker_task_id is None:
-        return None
-
-    flower_base = flower_url(request)
-    response = requests.get(f"{flower_base}/api/task/info/{worker_task_id}")
-    if response.status_code == 404:
-        current_app.logger.warning(f"Can't find task '{worker_task_id}'")
-        return None
-    try:
-        task_info = json.loads(response.content)
-    except json.decoder.JSONDecodeError as exc:
-        current_app.logger.error(f"Can't read response for task '{worker_task_id}'. ({exc.__str__()})")
-        return None
-
-    task_info["ready"] = task_info["state"] == "SUCCESS"
-    if task_info["result"] is not None:
-        task_info["result"] = json.loads(task_info["result"].replace("'", '"'))
-
-        # task_db_data = db_model_Task.get(worker_task_id=uid)
-        # workflow_db_data = db_model_Chain.get(id=task_db_data.workflow_id)
-        # last_step = workflow_db_data.processors[-1]
-        # last_output = PROCESSORS_ACTION[last_step]["output_file_grp"]
-        # task_info["last_output_file_grp"] = last_output
-
-    return task_info
-
 
 class TasksBase(Resource):
     """Base methods for tasks."""
@@ -329,8 +296,7 @@ class TaskActions(TasksBase):
 
     def page_to_alto(self, task):
         """ Convert page files to alto. """
-        task_info = task_information(task.worker_task_id)
-        page_to_alto_util(task.uid, task_info['result']['result_dir'])
+        page_to_alto_util(task.uid, task.results['result_dir'])
 
         return jsonify({
             "status": "SUCCESS",
@@ -339,14 +305,14 @@ class TaskActions(TasksBase):
 
     def download_results(self, task):
         """ Download the results of the task as ALTO XML and include the images. """
-        task_info = task_information(task.worker_task_id)
-        if not os.path.exists(task_info["result"]["result_dir"]):
+        if 'result_dir' in task.results:
+            results_path = pathlib.Path(task.results["result_dir"])
+        else:
             return jsonify({
                 "status": "ERROR",
-                "msg": f"Can't find results for task {task_info['result']['uid']}"
+                "msg": f"Can't find results for task {task.uid}"
             })
 
-        results_path = pathlib.Path(task_info["result"]["result_dir"])
         data = io.BytesIO()
         with zipfile.ZipFile(data, mode='w') as zip_file:
             # zip_file.write(f"{results_path}/mets.xml", arcname="mets.xml")
@@ -361,28 +327,32 @@ class TaskActions(TasksBase):
             data,
             mimetype="application/zip",
             as_attachment=True,
-            attachment_filename="ocr_alto_xml_%s.zip" % task_info["result"]["uid"]
+            attachment_filename=f"ocr_alto_xml_{task.uid}.zip"
         )
 
     def download_page(self, task):
         """ Download the results of the task for e.g. pageviewer, including PAGE XML,
             METS file and DEFAULT images.
         """
-        task_info = task_information(task.worker_task_id)
-        page_result_path = ocr_result_path(task_info['result']['result_dir'])
-
+        if 'result_dir' in task.results:
+            page_result_path = ocr_result_path(task.results['result_dir'])
+        else:
+            return jsonify({
+                "status": "ERROR",
+                "msg": f"Can't find page results for task {task.uid}"
+            })
         if page_result_path is None:
             return jsonify({
                 "status": "ERROR",
-                "msg": f"Can't find page results for task {task_info['result']['uid']}"
+                "msg": f"Can't find page results for task {task.uid}"
             })
 
-        img_dir = os.path.join(f"{task_info['result']['result_dir']}/{task.default_file_grp}")
+        img_dir = os.path.join(f"{task.results['result_dir']}/{task.default_file_grp}")
         img_path = pathlib.Path(img_dir)
 
         data = io.BytesIO()
         with zipfile.ZipFile(data, mode='w') as zip_file:
-            zip_file.write(f"{task_info['result']['result_dir']}/mets.xml", arcname="mets.xml")
+            zip_file.write(f"{task.results['result_dir']}/mets.xml", arcname="mets.xml")
             for f_name in img_path.iterdir():
                 arcname = f"{task.default_file_grp}/{os.path.basename(f_name)}"
                 zip_file.write(f_name, arcname=arcname)
@@ -395,24 +365,29 @@ class TaskActions(TasksBase):
             data,
             mimetype="application/zip",
             as_attachment=True,
-            attachment_filename=f"ocr_page_xml_{task_info['result']['uid']}.zip"
+            attachment_filename=f"ocr_page_xml_{task.uid}.zip"
         )
 
     def download_alto_with_images(self, task):
         """ Download the results of the task as ALTO XML and include the images. """
-        task_info = task_information(task.worker_task_id)
-        alto_path = alto_result_path(task_info["result"]["result_dir"])
+        if 'result_dir' in task.results:
+            alto_path = alto_result_path(task.results['result_dir'])
+        else:
+            return jsonify({
+                "status": "ERROR",
+                "msg": f"Can't find results for task {task.uid}"
+            })
         if not os.path.exists(alto_path):
             return jsonify({
                 "status": "ERROR",
-                "msg": f"Can't find alto results for task {task_info['result']['uid']}"
+                "msg": f"Can't find alto results for task {task.uid}"
             })
 
-        img_dir = os.path.join(f"{task_info['result']['result_dir']}/{task.default_file_grp}")
+        img_dir = os.path.join(f"{task.results['result_dir']}/{task.default_file_grp}")
         img_path = pathlib.Path(img_dir)
         data = io.BytesIO()
         with zipfile.ZipFile(data, mode='w') as zip_file:
-            zip_file.write(f"{task_info['result']['result_dir']}/mets.xml", arcname="mets.xml")
+            zip_file.write(f"{task.results['result_dir']}/mets.xml", arcname="mets.xml")
             for f_name in img_path.iterdir():
                 arcname = f"{task.default_file_grp}/{os.path.basename(f_name)}"
                 zip_file.write(f_name, arcname=arcname)
@@ -425,17 +400,22 @@ class TaskActions(TasksBase):
             data,
             mimetype="application/zip",
             as_attachment=True,
-            attachment_filename="ocr_alto_xml_%s.zip" % task_info["result"]["uid"]
+            attachment_filename=f"ocr_alto_xml_{task.uid}.zip"
         )
 
     def download_alto(self, task):
         """ Download the results of the task as ALTO XML. """
-        task_info = task_information(task.worker_task_id)
-        alto_path = alto_result_path(task_info["result"]["result_dir"])
+        if 'result_dir' in task.results:
+            alto_path = alto_result_path(task.results['result_dir'])
+        else:
+            return jsonify({
+                "status": "ERROR",
+                "msg": f"Can't find results for task {task.uid}"
+            })
         if not os.path.exists(alto_path):
             return jsonify({
                 "status": "ERROR",
-                "msg": f"Can't find alto results for task {task_info['result']['uid']}"
+                "msg": f"Can't find alto results for task {task.uid}"
             })
 
         data = io.BytesIO()
@@ -449,19 +429,19 @@ class TaskActions(TasksBase):
             data,
             mimetype="application/zip",
             as_attachment=True,
-            attachment_filename="ocr_alto_xml_%s.zip" % task_info["result"]["uid"]
+            attachment_filename=f"ocr_alto_xml_{task.uid}.zip"
         )
+
 
     def download_txt(self, task):
         """ Download the results of the task as text. """
         # https://github.com/qurator-spk/dinglehopper/blob/master/qurator/dinglehopper/extracted_text.py#L95
-        task_info = task_information(task.worker_task_id)
-        page_result_path = ocr_result_path(task_info['result']['result_dir'])
-
-        if page_result_path is None:
+        if 'result_dir' in task.results:
+            page_result_path = ocr_result_path(task.results['result_dir'])
+        else:
             return jsonify({
                 "status": "ERROR",
-                "msg": f"Can't find page results for task {task_info['result']['uid']}"
+                "msg": f"Can't find results for task {task.uid}"
             })
 
         fulltext = ""
@@ -491,7 +471,7 @@ class TaskActions(TasksBase):
         response.mimetype = "text/txt"
         response.headers.extend({
             "Content-Disposition":
-            "attachment;filename=fulltext_%s.txt" % task_info["result"]["uid"]
+            "attachment;filename=fulltext_%s.txt" % task.uid
         })
         return response
 

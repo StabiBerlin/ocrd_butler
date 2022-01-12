@@ -152,6 +152,10 @@ class FrontendTests(TestCase):
             src="http://foo.bar/mets.xml",
             workflow_id=self.get_workflow_id()
         ))
+        task = models.Task.get()
+        task.results = { "result_dir": "/foobar" }
+        task.status = "SUCCESS"
+
         mock_task_information.return_value = {
             "ready": True,
             "result": {
@@ -179,6 +183,7 @@ class FrontendTests(TestCase):
         assert download_links[1].links == {'/download/page/uid'}
         assert download_links[2].links == {'/download/alto/uid'}
         assert download_links[3].links == {'/download/txt/uid'}
+        assert download_links[4].links == {'/log/uid'}
 
     def get_workflow_id(self):
         """Create a workflow for the tests."""
@@ -231,7 +236,9 @@ class FrontendTests(TestCase):
         html = HTML(html=response.data)
         assert len(html.find('table > tr > td')) == COLUMN_COUNT
         assert html.find('table > tr > td')[2].text == "file_grp"
-        assert html.find('table > tr > td')[6].text == "worker_task.id"
+        status_col_txt = html.find('table > tr > td')[6].text
+        assert status_col_txt.startswith("CREATED")
+        assert "worker_task.id" in status_col_txt
         self.client.get("/task/delete/1")
 
     @responses.activate
