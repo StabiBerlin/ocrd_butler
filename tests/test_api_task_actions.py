@@ -57,13 +57,13 @@ class ApiTaskActions(TestCase):
             "/api/tasks/bielefeld/run"
         ).status_code == 404
 
-    def _create_task(self, task_id, status="SUCCESS"):
+    def _create_task(self, task_uid, status="SUCCESS"):
         """ create a new instance of the :class:`~ocrd_butler.database.models.Task`
         model without saving it to session.
         """
         return db_model.create(
             db_model.Task,
-            uid=task_id,
+            uid=task_uid,
             workflow_id="1",
             src="src",
             status=status
@@ -73,11 +73,11 @@ class ApiTaskActions(TestCase):
     def test_api_task_invalid_action(self, task_model_mock_get):
         """ test response codes for API call with unsupported action
         """
-        task = self._create_task("1")
+        task = self._create_task("23")
         task_model_mock_get.return_value = task
-        assert db_model.Task.get(id="1") == task
+        assert db_model.Task.get(uid="23") == task
         assert self.client.get(
-            "/api/tasks/1/unsupported_action"
+            "/api/tasks/23/unsupported_action"
         ).status_code == 400
 
     @mock.patch("ocrd_butler.database.models.Task.get")
@@ -101,24 +101,24 @@ class ApiTaskActions(TestCase):
     def test_api_task_run(self, celery_mock, task_model_mock_get):
         """ test whether run action gets called if task ID and action exist.
         """
-        task = self._create_task("2")
+        task = self._create_task("42")
         task_model_mock_get.return_value = task
         celery_mock.side_effect = Exception()
         assert self.client.post(
-            "/api/tasks/2/run"
+            "/api/tasks/42/run"
         ).status_code == 500
         assert self.client.post(
-            "/api/tasks/2/rerun"
+            "/api/tasks/42/rerun"
         ).status_code == 500
 
     @mock.patch("ocrd_butler.database.models.Task.get")
     def test_api_task_get_status(self, task_model_mock_get):
         """ test response codes for API for task status
         """
-        task = self._create_task("1")
+        task = self._create_task("23")
         task_model_mock_get.return_value = task
         response = self.client.get(
-            "/api/tasks/1/status"
+            "/api/tasks/23/status"
         )
         assert response.status_code == 200
         assert response.data == b'{\n  "status": "SUCCESS"\n}\n'

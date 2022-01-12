@@ -143,7 +143,7 @@ class ApiTaskActionRunTests(TestCase):
         assert task_response['message'] == 'Task created.'
         self.add_response_action(task_response['uid'])
         run_response = self.client.post(
-            f"/api/tasks/{task_response['id']}/run"
+            f"/api/tasks/{task_response['uid']}/run"
         ).json
         assert run_response['status'] == 'SUCCESS'
 
@@ -173,8 +173,8 @@ class ApiTaskActionRunTests(TestCase):
         ))
         self.add_response_action(task_response.json['uid'])
 
-        self.client.post("/api/tasks/1/run")
-        result_response = self.client.get("/api/tasks/1/results")
+        self.client.post(f"/api/tasks/{task_response.json['uid']}/run")
+        result_response = self.client.get(f"/api/tasks/{task_response.json['uid']}/results")
         max_file_dir = os.path.join(result_response.json["result_dir"], "MAX")
         max_files = os.listdir(max_file_dir)
         with open(os.path.join(max_file_dir, max_files[2]), "rb") as img_file:
@@ -220,14 +220,14 @@ class ApiTaskActionRunTests(TestCase):
         ))
         self.add_response_action(task_response.json['uid'])
 
-        response = self.client.post("/api/tasks/1/run")
+        response = self.client.post(f"/api/tasks/{task_response.json['uid']}/run")
         assert response.status_code == 200
         assert response.json["status"] == "SUCCESS"
 
-        response = self.client.get("/api/tasks/1/status")
+        response = self.client.get(f"/api/tasks/{task_response.json['uid']}/status")
         assert response.json["status"] == "SUCCESS"
 
-        response = self.client.get("/api/tasks/1/results")
+        response = self.client.get(f"/api/tasks/{task_response.json['uid']}/results")
         ocr_results = os.path.join(response.json["result_dir"],
                                    "03-OCRD-TESSEROCR-SEGMENT-WORD-OUTPUT")
         result_files = os.listdir(ocr_results)
@@ -270,13 +270,11 @@ class ApiTaskActionRunTests(TestCase):
         ))
         self.add_response_action(task_response.json['uid'])
 
-        response = self.client.post("/api/tasks/{0}/run".format(
-            task_response.json["uid"]))
+        response = self.client.post(f"/api/tasks/{task_response.json['uid']}/run")
         assert response.status_code == 200
         assert response.json["status"] == "SUCCESS"
 
-        response = self.client.get("/api/tasks/{0}/results".format(
-            task_response.json["id"]))
+        response = self.client.get(f"/api/tasks/{task_response.json['uid']}/results")
 
         ocr_results = os.path.join(response.json["result_dir"],
                                    "OCR-D-OCR-CALAMARI")
@@ -343,15 +341,12 @@ class ApiTaskActionRunTests(TestCase):
 
         self.add_response_action(task_response.json['uid'])
 
-        response = self.client.post(
-            "/api/tasks/{0}/run".format(task_response.json["id"])
-        )
+        response = self.client.post(f"/api/tasks/{task_response.json['uid']}/run")
 
         assert response.status_code == 200
         assert response.json["status"] == "SUCCESS"
 
-        response = self.client.get("/api/tasks/{0}/results".format(
-            task_response.json["uid"]))
+        response = self.client.get(f"/api/tasks/{task_response.json['uid']}/results")
 
         ocr_results = os.path.join(response.json["result_dir"],
                                    "OCR-D-OCR-CALAMARI")
@@ -401,9 +396,7 @@ class ApiTaskActionRunTests(TestCase):
 
         self.add_response_action(task_response.json['uid'])
 
-        response = self.client.post(
-            "/api/tasks/{0}/run".format(task_response.json["id"])
-        )
+        response = self.client.post(f"/api/tasks/{task_response.json['uid']}/run")
 
         assert response.status_code == 200
         assert response.json["status"] == "FAILURE"

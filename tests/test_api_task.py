@@ -42,8 +42,9 @@ class ApiTaskTests(TestCase):
         assert response.status_code == 201
         assert response.json["message"] == "Task created."
         assert response.json["id"] == 1
+        assert response.json["uid"] is not None
 
-        response = self.client.get("/api/tasks/1")
+        response = self.client.get(f"/api/tasks/{response.json['uid']}")
         assert response.status_code == 200
         assert response.json["id"] == 1
         assert response.json["src"] == "https://foobar.tdl/themets.xml"
@@ -78,28 +79,30 @@ class ApiTaskTests(TestCase):
         assert response.json["message"] == "Task created."
         assert response.json["id"] == 1
 
-        response = self.client.get("/api/tasks/1")
+        uid = response.json['uid']
+        response = self.client.get(f"/api/tasks/{uid}")
         assert response.json["src"] == "https://foobar.tdl/themets.xml"
 
-        response = self.client.put("/api/tasks/1", json=dict(
+        response = self.client.put(f"/api/tasks/{uid}", json=dict(
             src="https://barfoo.tdl/themets.xml",
         ))
-        response = self.client.get("/api/tasks/1")
+        response = self.client.get(f"/api/tasks/{uid}")
         assert response.json["src"] == "https://barfoo.tdl/themets.xml"
 
     def test_delete_task(self):
         """Check if a task is deleted."""
-        self.client.post("/api/tasks", json=dict(
+        response = self.client.post("/api/tasks", json=dict(
             workflow_id=self.workflow(),
             src="https://foobar.tdl/themets.xml",
             description="Just a task."
         ))
 
-        response = self.client.delete("/api/tasks/1")
+        uid = response.json['uid']
+        response = self.client.delete(f"/api/tasks/{uid}")
         assert response.status_code == 200
-        assert response.json["message"] == "Task \"1\" deleted."
+        assert response.json["message"] == f"Task \"{uid}\" deleted."
 
-        response = self.client.delete("/api/tasks/13")
+        response = self.client.delete("/api/tasks/foobar")
         assert response.status_code == 404
         assert response.json["message"].startswith("Unknown task")
 

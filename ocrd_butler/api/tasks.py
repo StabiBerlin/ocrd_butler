@@ -159,13 +159,13 @@ class TaskRoot(TasksBase):
         )
 
 
-@task_namespace.route("/<string:task_id>/<string:action>")
+@task_namespace.route("/<string:task_uid>/<string:action>")
 class TaskActions(TasksBase):
     """Run actions on the task."""
 
     @api.doc(responses={200: "OK", 400: "Unknown action",
                         404: "Unknown task", 500: "Error"})
-    def post(self, task_id, action):
+    def post(self, task_uid, action):
         """
         Execute the given action for the task.
 
@@ -177,16 +177,16 @@ class TaskActions(TasksBase):
 
         TODO: Return the actions as OPTIONS.
         """
-        logger.info(f"Task {task_id} post action {action} called.")
+        logger.info(f"Task {task_uid} post action {action} called.")
 
-        task = db_model_Task.get(id=task_id)
+        task = db_model_Task.get(uid=task_uid)
         if task is None:
-            task = db_model_Task.get(uid=task_id)
+            task = db_model_Task.get(id=task_uid)
 
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
-                status=f"Unknown task for id \"{task_id}\".",
+                status=f"Unknown task for uid \"{task_uid}\".",
                 statusCode="404")
 
         if action not in self.post_actions:
@@ -206,7 +206,7 @@ class TaskActions(TasksBase):
 
     @api.doc(responses={200: "OK", 400: "Unknown action",
                         404: "Unknown task", 500: "Error"})
-    def get(self, task_id, action):
+    def get(self, task_uid, action):
         """
         Get information or results of the task.
 
@@ -221,16 +221,16 @@ class TaskActions(TasksBase):
 
         TODO: Return the actions as OPTIONS.
         """
-        logger.info(f"Task {task_id} get action {action} called.")
+        logger.info(f"Task {task_uid} get action {action} called.")
 
-        task = db_model_Task.get(id=task_id)
+        task = db_model_Task.get(uid=task_uid)
         if task is None:
-            task = db_model_Task.get(uid=task_id)
+            task = db_model_Task.get(id=task_uid)
 
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
-                status=f"Unknown task with id or uid \"{task_id}\".",
+                status=f"Unknown task with id or uid \"{task_uid}\".",
                 statusCode="404")
 
         if action not in self.get_actions:
@@ -504,33 +504,32 @@ class TaskActions(TasksBase):
         })
         return response
 
-@task_namespace.route("/<string:task_id>")
+@task_namespace.route("/<string:task_uid>")
 class Task(TasksBase):
     """Methods for a specific task."""
 
-    @api.doc(responses={200: "OK", 400: "Unknown task id"})
-    def get(self, task_id):
-        """Get the task by given id."""
-        task = db_model_Task.query.filter_by(id=task_id).first()
-
+    @api.doc(responses={200: "OK", 400: "Unknown task uid"})
+    def get(self, task_uid):
+        """Get the task by given uid."""
+        task = db_model_Task.query.filter_by(uid=task_uid).first()
         if task is None:
             task_namespace.abort(
                 404, "Wrong parameter",
-                status=f"Can't find a task with the id \"{task_id}\".",
+                status=f"Can't find a task with the uid \"{task_uid}\".",
                 statusCode="404")
 
         return jsonify(task.to_json())
 
-    @api.doc(responses={200: "OK", 404: "Unknown task id"})
-    def put(self, task_id):
-        """Update the task of given id."""
-        res = db_model_Task.query.filter_by(id=task_id)
+    @api.doc(responses={200: "OK", 404: "Unknown task uid"})
+    def put(self, task_uid):
+        """Update the task of given uid."""
+        res = db_model_Task.query.filter_by(uid=task_uid)
         task = res.first()
 
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
-                status=f"Can't find a task with the id \"{task_id}\".",
+                status=f"Can't find a task with the uid \"{task_uid}\".",
                 statusCode="404")
 
         fields = task.to_json().keys()
@@ -541,22 +540,22 @@ class Task(TasksBase):
         db.session.commit()
 
         return jsonify({
-            "message": f"Task \"{task_id}\" updated."
+            "message": f"Task \"{task_uid}\" updated."
         })
 
-    @api.doc(responses={200: "OK", 404: "Unknown task id"})
-    def delete(self, task_id):
+    @api.doc(responses={200: "OK", 404: "Unknown task uid"})
+    def delete(self, task_uid):
         """Delete a task."""
-        res = db_model_Task.query.filter_by(id=task_id)
+        res = db_model_Task.query.filter_by(uid=task_uid)
         task = res.first()
 
         if task is None:
             task_namespace.abort(
                 404, "Unknown task.",
-                status=f"Can't find a task with the id \"{task_id}\".",
+                status=f"Can't find a task with the uid \"{task_uid}\".",
                 statusCode="404")
 
-        message = f"Task \"{task.id}\" deleted."
+        message = f"Task \"{task.uid}\" deleted."
         res.delete()
         db.session.commit()
 
