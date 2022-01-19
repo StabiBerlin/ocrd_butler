@@ -1,6 +1,26 @@
 {
     "workflows": [
         {
+            "name": "SBB - ocrd-tesserocr-recognize - page2alto",
+            "description": "Basic tesserocr workflow with Fraktur_GT4HistOCR model.",
+            "processors": [
+                {
+                    "name": "ocrd-tesserocr-recognize",
+                    "parameters": {
+                        "model": "Fraktur_GT4HistOCR",
+                        "segmentation_level": "region",
+                        "textequiv_level": "line"
+                    }
+                },
+                {
+                    "name": "ocrd-fileformat-transform",
+                    "parameters": {
+                        "from-to": "page alto"
+                    }
+                }
+            ]
+        },
+        {
             "description": "Workflow with eynollah segmentation, SBB binarization and Calamari GT4HistOCT.",
             "name": "SBB - eynollah-segment - sbb-binarize - calamari-recognize - page2alto",
             "processors": [
@@ -26,8 +46,8 @@
                     "name": "ocrd-calamari-recognize",
                     "output_file_grp": "OCR-D-OCR-CALAMARI",
                     "parameters": {
-                        "checkpoint": "/data/calamari_models/*ckpt.json",
-                        "checkpoint_dir": "/data/ocrd-resources/ocrd-calamari-recognize/qurator-gt4histocr-1.0",
+                        "checkpoint": "/data/qurator-gt4histocr-1.0/*ckpt.json",
+                        "checkpoint_dir": "/data/qurator-gt4histocr-1.0",
                         "glyph_conf_cutoff": 0.001,
                         "textequiv_level": "word",
                         "voter": "confidence_voter_default_ctc"
@@ -92,7 +112,7 @@
                 {
                     "name": "ocrd-calamari-recognize",
                     "parameters": {
-                        "checkpoint": "/data/calamari_models/*ckpt.json",
+                        "checkpoint": "/data/qurator-gt4histocr-1.0/*ckpt.json",
                         "voter": "confidence_voter_default_ctc",
                         "textequiv_level": "word",
                         "glyph_conf_cutoff": 0.001
