@@ -205,6 +205,7 @@ class ApiWorkflowTests(TestCase):
         response = self.client.get('/api/workflows')
         assert response.status_code == 200
         assert len(response.json) == 8
+        import ipdb; ipdb.set_trace()
         assert response.json[0]['description'].startswith('Workflow ')
 
     def test_get_workflows(self):
