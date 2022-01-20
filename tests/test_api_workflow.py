@@ -204,7 +204,7 @@ class ApiWorkflowTests(TestCase):
         )
         response = self.client.get('/api/workflows')
         assert response.status_code == 200
-        assert len(response.json) == 7
+        assert len(response.json) == 8
         assert response.json[0]['description'].startswith('Workflow ')
 
     def test_get_workflows(self):

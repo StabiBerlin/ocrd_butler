@@ -397,7 +397,7 @@ class FrontendTests(TestCase):
         response = self.client.get("/workflows")
         html = HTML(html=response.data)
         links = html.find('body div.col-md-10 a')
-        assert links[0].attrs['href'] == '/processors#processor-ocrd-eynollah-segment'
+        assert links[0].attrs['href'] == '/processors#processor-ocrd-tesserocr-recognize'
 
     @mock.patch("requests.delete")
     @mock.patch("requests.get")
