@@ -24,7 +24,6 @@ from wtforms.validators import DataRequired
 from wtforms.widgets import Select
 
 from ocrd_butler.api.processors import PROCESSORS_ACTION
-from ocrd_butler.frontend.tasks import task_information
 from ocrd_butler.database.models import Workflow as db_model_Workflow
 from ocrd_butler.database.models import Task as db_model_Task
 
@@ -51,7 +50,7 @@ def compare():
     """
     compare_form = CompareForm()
     task_choices = [
-        (task.id, task.worker_task_id)
+        (task.uid, f"{task.id}. {task.description}")
         for task in db_model_Task.get_all()
     ]
     compare_form.task_from.choices = task_choices
@@ -76,39 +75,27 @@ def compare_results():
     3. We create an own mets file for this, copy there (fake) GT and (other) OCR and
        use also ocrd-dinglehopper.
     """
-
-    task_from_id = request.form.get("task_from")
-    task_to_id = request.form.get("task_to")
-    if task_from_id == task_to_id:
-        # not making sense to compare to itself, but why not?
-        pass
-
-    task_from = db_model_Task.get(id=task_from_id)
-    task_to = db_model_Task.get(id=task_to_id)
-
-    result_from = task_information(task_from.worker_task_id)
-    result_to = task_information(task_to.worker_task_id)
+    task_from = db_model_Task.get(uid=request.form.get("task_from"))
+    task_to = db_model_Task.get(uid=request.form.get("task_to"))
 
     dst_dir = "{0}-{1}".format(
-        result_from["result"]["result_dir"],
-        os.path.basename(result_to["result"]["result_dir"]))
+        task_from.results["result_dir"],
+        os.path.basename(task_to.results["result_dir"]))
 
     if not os.path.exists(dst_dir):
         os.mkdir(dst_dir)
 
     # Get the output group of the last step in the workflow of the task.
     workflow_from = db_model_Workflow.get(id=task_from.workflow_id)
-    last_proc_from = json.loads(workflow_from.processors)[-1]
-    last_output_from = PROCESSORS_ACTION[last_proc_from]["output_file_grp"]
+    last_output_from = workflow_from.processors[-1]['output_file_grp']
     workflow_to = db_model_Workflow.get(id=task_to.workflow_id)
-    last_proc_to = json.loads(workflow_to.processors)[-1]
-    last_output_to = PROCESSORS_ACTION[last_proc_to]["output_file_grp"]
+    last_output_to = workflow_to.processors[-1]['output_file_grp']
 
     # TODO: collect informations to this task
-    results_from_path = "{0}/{1}/*".format(result_from["result"]["result_dir"], last_output_from)
+    results_from_path = "{0}/{1}/*".format(task_from.results["result_dir"], last_output_from)
     for file in glob.glob(results_from_path):
         copyfile(file, "{0}/FROM-{1}".format(dst_dir, os.path.basename(file)))
-    results_to_path = "{0}/{1}/*".format(result_to["result"]["result_dir"], last_output_to)
+    results_to_path = "{0}/{1}/*".format(task_to.results["result_dir"], last_output_to)
     for file in glob.glob(results_to_path):
         copyfile(file, "{0}/TO-{1}".format(dst_dir, os.path.basename(file)))
 
