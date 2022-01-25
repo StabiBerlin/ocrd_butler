@@ -11,11 +11,17 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['Click>=6.0', ]
 
-setup_requirements = ['pytest-runner', ]
+def load_requirements(filename: str):
+    with open(filename) as req_file:
+        requirements = [
+            req for req in req_file.read().split('\n')
+            if '-e .' not in req
+        ]
+    return requirements
 
-test_requirements = ['pytest', ]
+
+dev_dependencies = load_requirements('requirements-dev.txt')
 
 setup(
     author="Marco Scheidhuber",
@@ -36,16 +42,18 @@ setup(
             'ocrd_butler=ocrd_butler.cli:main',
         ],
     },
-    install_requires=requirements,
+    install_requires=load_requirements('requirements.txt'),
     license="MIT",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='ocrd_butler',
     name='ocrd_butler',
     packages=find_packages(include=['ocrd_butler']),
-    setup_requires=setup_requirements,
     test_suite='tests',
-    tests_require=test_requirements,
+    tests_require=dev_dependencies,
+    extras_require={
+        'dev': dev_dependencies,
+    },
     url='https://github.com/StaatsbibliothekBerlin/ocrd_butler',
     version='0.1.0',
     zip_safe=False,
