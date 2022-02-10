@@ -10,6 +10,7 @@ before_script:
   - pip install -r requirements.txt
   - pip install -r requirements-dev.txt
   - mkdir -p /data/log
+  - apt-get install -y -qq build-essential
 
 stages:
   - analysis
