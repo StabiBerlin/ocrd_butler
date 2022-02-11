@@ -2,6 +2,15 @@
 
 image: "python:3.7"
 
+variables:
+  SAST_EXCLUDED_ANALYZERS: "eslint"
+
+.prepare_sast:
+  before_script:
+    - export HTTP_PROXY=http://proxy.sbb.spk-berlin.de:3128
+    - export HTTPS_PROXY=http://proxy.sbb.spk-berlin.de:3128
+    - apk --update add build-base
+
 before_script:
   - export HTTP_PROXY=http://proxy.sbb.spk-berlin.de:3128
   - export HTTPS_PROXY=http://proxy.sbb.spk-berlin.de:3128
@@ -11,10 +20,30 @@ before_script:
   - pip install -r requirements-dev.txt
   - mkdir -p /data/log
 
+include:
+  ###- template: Auto-DevOps.gitlab-ci.yml
+  ##- template: Jobs/Build.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Build.gitlab-ci.yml
+  ##- template: Jobs/Test.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Test.gitlab-ci.yml
+  #- template: Jobs/Code-Quality.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Code-Quality.gitlab-ci.yml
+  #- template: Jobs/Code-Intelligence.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Code-Intelligence.gitlab-ci.yml
+  ##- template: Jobs/Deploy.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml
+  ##- template: Jobs/Deploy/ECS.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy/ECS.gitlab-ci.yml
+  ##- template: Jobs/Deploy/EC2.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy/EC2.gitlab-ci.yml
+  ##- template: Jobs/DAST-Default-Branch-Deploy.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/DAST-Default-Branch-Deploy.gitlab-ci.yml
+  ##- template: Jobs/Browser-Performance-Testing.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Browser-Performance-Testing.gitlab-ci.yml
+  ##- template: Jobs/Helm-2to3.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Helm-2to3.gitlab-ci.yml
+  ##- template: Security/DAST.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/DAST.gitlab-ci.yml
+  ##- template: Security/Container-Scanning.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/Container-Scanning.gitlab-ci.yml
+  ##- template: Security/Cluster-Image-Scanning.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Security/Cluster-Image-Scanning.gitlab-ci.yml
+  #- template: Security/Dependency-Scanning.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/Dependency-Scanning.gitlab-ci.yml
+  #- template: Security/License-Scanning.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/License-Scanning.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml
+  #- template: Security/Secret-Detection.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/Secret-Detection.gitlab-ci.yml
+
+
 stages:
   - analysis
   - test
-
 
 linting:
   stage: analysis
@@ -36,6 +65,30 @@ tests:
     reports:
       junit: test-report.xml
       cobertura: coverage.xml
+    expire_in: 80 weeks
+
+bandit-sast:
+  extends:
+    - .prepare_sast
+    - .sast-analyzer
+  artifacts:
+    when: always
+    reports:
+      sast: gl-sast-report.json
+    paths:
+      - gl-sast-report.json
+    expire_in: 80 weeks
+
+semgrep-sast:
+  extends:
+    - .prepare_sast
+    - .sast-analyzer
+  artifacts:
+    when: always
+    reports:
+      sast: gl-sast-report.json
+    paths:
+      - gl-sast-report.json
     expire_in: 80 weeks
 
 ...
