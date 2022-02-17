@@ -82,7 +82,7 @@
                 <tr>
                     <td>{{ task.description }}
                         <br />
-                        UID: {{ task.uid }}
+                        UID: <a href="{{url_for('tasks_blueprint.tasks')}}#{{ task.uid }}" id="{{ task.uid }}">{{ task.uid }}</a>
                     </td>
                     <td><a href="{{ task.src }}">XML</a></td>
                     <td>{{ task.default_file_grp }}</td>
