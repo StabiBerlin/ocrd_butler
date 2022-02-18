@@ -159,6 +159,25 @@ class TaskRoot(TasksBase):
         )
 
 
+@task_namespace.route("/<string:task_uid>")
+class Task(TasksBase):
+    """Run actions on the task."""
+
+    @api.doc(reponses={200: "Found", 404: "Unknown task"})
+    def get(self, task_uid=None):
+        """ Get one task.
+        """
+        if task_uid is not None:
+            task = db_model_Task.get(uid=task_uid)
+            return jsonify(task.to_json())
+
+        task_namespace.abort(
+            404, "Unknown task.",
+            status=f"Unknown task for uid \"{task_uid}\".",
+            statusCode="404")
+
+
+
 @task_namespace.route("/<string:task_uid>/<string:action>")
 class TaskActions(TasksBase):
     """Run actions on the task."""

@@ -81,10 +81,13 @@ def task_information(worker_task_id):
     return task_info
 
 
-def current_tasks():
+def current_tasks(tasks=None):
     """
     Collect and prepare the current tasks.
     """
+    if tasks == None:
+        tasks = requests.get(f'{host_url(request)}api/tasks').json()
+
     results = [
         {
             **task,
@@ -101,7 +104,7 @@ def current_tasks():
                 "log": ""
             },
         }
-        for task in requests.get(f'{host_url(request)}api/tasks').json()
+        for task in tasks
     ]
 
     cur_tasks = []
@@ -239,6 +242,18 @@ def tasks():
         form=new_task_form)
 
 
+@tasks_blueprint.route('/task/<string:task_uid>', methods=['GET'])
+def task(task_uid):
+    """Presenting one task."""
+    task = current_tasks(
+        [requests.get(f'{host_url(request)}api/tasks/{task_uid}').json(),]
+    )[0]
+    return render_template(
+        "task.html",
+        task=task
+    )
+
+
 @tasks_blueprint.route("/task/delete/<int:task_id>")
 def task_delete(task_id):
     """Delete the task with the given id."""
@@ -253,14 +268,14 @@ def task_delete(task_id):
     return redirect("/tasks", code=302)
 
 
-@tasks_blueprint.route("/task/run/<int:task_id>")
-def task_run(task_id):
-    """Run the task with the given id."""
+@tasks_blueprint.route("/task/run/<int:task_uid>")
+def task_run(task_uid):
+    """Run the task with the given uid."""
     # pylint: disable=broad-except
-    response = requests.post(f"{host_url(request)}api/tasks/{task_id}/run")
+    response = requests.post(f"{host_url(request)}api/tasks/{task_uid}/run")
 
     if response.status_code in (200, 201):
-        flash(f"Task {task_id} started.")
+        flash(f"Task {task_uid} started.")
     else:
         try:
             result = json.loads(response.content)

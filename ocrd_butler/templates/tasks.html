@@ -80,7 +80,7 @@
                 </tr>
                 {% for task in tasks %}
                 <tr>
-                    <td>{{ task.description }}
+                    <td><a href="/task/{{ task.uid }}">{{ task.description }}</a>
                         <br />
                         UID: <a href="{{url_for('tasks_blueprint.tasks')}}#{{ task.uid }}" id="{{ task.uid }}">{{ task.uid }}</a>
                     </td>

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+    {{super()}}
+    <script src="{{url_for('static', filename='butler.js')}}"></script>
+{% endblock scripts %}
+
+{% block app_content %}
+    <div class="container">
+        <div class="jumbotron">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-10">
+                        <h1>Tasks</h1>
+                        <p>Madam/Sir, you choose to see this task.</p>
+                    </div>
+                    <div class="col-md-2">
+                        <img width="100%%" src="{{url_for('static', filename='butler_tasks.png')}}" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table">
+                    <tr>
+                        <th>Task</th>
+                        <th>Source</th>
+                        <th>Input file group</th>
+                        <th>Workflow</th>
+                        <th>Parameters</th>
+                        <th>Actions</th>
+                        <th>Status</th>
+                        <th>Times</th>
+                        <th>Results</th>
+                        <th>Delete</th>
+                    </tr>
+                    <tr>
+                        <td>{{ task.description }}
+                            <br />
+                            UID: {{ task.uid }}
+                        </td>
+                        <td><a href="{{ task.src }}">XML</a></td>
+                        <td>{{ task.default_file_grp }}</td>
+                        <td>
+                            <div class="task-info">
+                                <a href="/workflows#workflow-{{ task.workflow.id }}">
+                                    {{ task.workflow.id }}
+                                    {{ task.workflow.name }}
+                                </a>
+                                <br />
+                                {{ task.workflow.description }}
+                        </div>
+                        </td>
+                        <td>
+                            <div class="task-info">
+                                {{ task.parameters }}
+                            </div>
+                        </td>
+                        <td><a href="/task/run/{{ task.id }}">Run</a></td>
+                        <td>
+                            {{ task.status }}
+                            <br />
+                            Worker:
+                            <a href="{{ task.flower_url }}"
+                            target="_blank">{{ task.worker_task_id }}</a>
+                            {% if task.result and task.result.status %}
+                                ({{ task.result.status }})
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if task.result %}
+                                {% if task.result.started %}
+                                    Started: {{ task.result.started | format_date }}
+                                {% endif %}
+                                {% if task.result.succeeded %}
+                                    <br />
+                                    Succeeded: {{ task.result.succeeded | format_date }}
+                                {% endif %}
+                                {% if task.result.runtime %}
+                                    <br />
+                                    Runtime: {{ task.result.runtime | format_delta }}
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if task.status == "SUCCESS" %}
+                                <a href="{{ task.result.results }}">RESULTS</a>
+                                <br />
+                                <a href="{{ task.result.page }}">PAGE</a>
+                                <br />
+                                <a href="{{ task.result.alto }}">ALTO</a>
+                                <br />
+                                <a href="{{ task.result.txt }}">TXT</a>
+                            {% endif %}
+                            <br />
+                            <a href="{{ task.result.log }}">LOG</a>
+                        </td>
+                        <td><a class="delete-task" href="/task/delete/{{ task.uid }}">x</a></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
