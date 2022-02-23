@@ -1,3 +1,4 @@
+-i https://artefakt.dev.sbb.berlin/repository/pypi-central/simple
 -e .
 click==7.1.2
 Flask==1.1.1
@@ -18,4 +19,4 @@ readline==6.2.4.1
 responses==0.16
 loguru==0.5.3
 SQLAlchemy==1.3.23
-ocrd-page-to-alto @ https://github.com/kba/page-to-alto/archive/refs/heads/master.zip
+ocrd-page-to-alto==1.1.0

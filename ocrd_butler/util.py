@@ -140,14 +140,14 @@ def page_to_alto(uid: str, task_result_dir: str):
         converter = OcrdPageAltoConverter(
             check_words=False,
             check_border=False,
-            page_filename=file_path
+            page_filename=file_path,
+            region_order="reading-order",
         )
         alto_xml = converter.convert()
         alto_file_name = file_path.name.replace("CALAMARI", "ALTO")
         alto_result_file = alto_path.joinpath(alto_file_name)
         with open(alto_result_file, "w") as alto_file:
             alto_file.write(str(alto_xml))
-
     logger.info(f"Created alto from page for task {uid}.")
 
 

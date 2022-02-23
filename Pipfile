@@ -1,6 +1,5 @@
 [[source]]
-# url = "https://pypi.python.org/simple"
-url = "https://mirrors.aliyun.com/pypi/simple"
+url = "https://artefakt.dev.sbb.berlin/repository/pypi-central/simple"
 verify_ssl = true
 
 [dev-packages]
@@ -43,4 +42,4 @@ flask-wtf = "*"
 flask-restx = "*"
 pipenv-to-requirements = "*"
 readline = "*"
-ocrd-page-to-alto = {file = "https://github.com/kba/page-to-alto/archive/refs/heads/master.zip"}
+ocrd-page-to-alto = "1.1.0"
