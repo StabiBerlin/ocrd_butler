@@ -4,6 +4,22 @@ image: "python:3.7"
 
 variables:
   SAST_EXCLUDED_ANALYZERS: "eslint"
+  SONAR_TOKEN: $SONAR_TOKEN
+  SONAR_HOST_URL: "http://code-quality.dev.sbb.berlin:9000"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PIP_INDEX_URL: "https://artefakt.dev.sbb.berlin/repository/pypi-central/simple"
+
+cache:
+  - key:
+      files:
+        - requirements.txt
+        - requirements-dev.txt
+    paths:
+      - .cache/pip/
+      - .venv/
+  - key: "${CI_PIPELINE_ID}"
+    paths:
+      - test-reports/
 
 .prepare_sast:
   before_script:
@@ -11,14 +27,18 @@ variables:
     - export HTTPS_PROXY=http://proxy.sbb.spk-berlin.de:3128
     - apk --update add build-base
 
-before_script:
-  - export HTTP_PROXY=http://proxy.sbb.spk-berlin.de:3128
-  - export HTTPS_PROXY=http://proxy.sbb.spk-berlin.de:3128
-  - python --version
-  - pip install --upgrade pip
-  - pip install -r requirements.txt
-  - pip install -r requirements-dev.txt
-  - mkdir -p /data/log
+.prepare_tests:
+  before_script:
+    - export HTTP_PROXY=http://proxy.sbb.spk-berlin.de:3128
+    - export HTTPS_PROXY=http://proxy.sbb.spk-berlin.de:3128
+    - python --version
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+    - pip install -r requirements-dev.txt
+    - mkdir -p /data/log
+
+include:
+  - template: Security/SAST.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml
 
 include:
   ###- template: Auto-DevOps.gitlab-ci.yml
@@ -44,14 +64,19 @@ include:
 stages:
   - analysis
   - test
+  - sonarqube
 
 linting:
   stage: analysis
+  extends:
+    - .prepare_tests
   script:
     - flake8 --exit-zero --statistics --doctests ocrd_butler/ tests/
 
 tests:
   stage: test
+  extends:
+    - .prepare_tests
   script:
     - export PROFILE=test
     - pytest tests --doctest-modules ocrd_butler
@@ -60,11 +85,11 @@ tests:
   artifacts:
     when: always
     paths:
-      - coverage.xml
-      - test-report.xml
+      - test-reports/coverage.xml
+      - test-reports/test-report.xml
     reports:
-      junit: test-report.xml
-      cobertura: coverage.xml
+      junit: test-reports/test-report.xml
+      cobertura: test-reports/coverage.xml
     expire_in: 80 weeks
 
 bandit-sast:
@@ -90,5 +115,12 @@ semgrep-sast:
     paths:
       - gl-sast-report.json
     expire_in: 80 weeks
+
+sonarqube-check:
+  stage: sonarqube
+  image:
+    name: "sonarsource/sonar-scanner-cli:latest"
+  script:
+    - sonar-scanner
 
 ...
