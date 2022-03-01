@@ -58,7 +58,7 @@ tests:
     - export PROFILE=test
     - pytest tests --doctest-modules ocrd_butler
     - coverage xml
-  coverage: '/^TOTAL\s+\d+\s+\d+\s+(\d+\%)/'
+  coverage: '/^TOTAL\s+\d+\s+\d+\s+\d+\s+\d+\s+(\d+\%)/'
   artifacts:
     when: always
     paths:
