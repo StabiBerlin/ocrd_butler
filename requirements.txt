@@ -1,6 +1,7 @@
 click==7.1.2
 wheel==0.37.1
 Flask==1.1.1
+itsdangerous==2.0.1
 celery==4.3.0
 redis==3.3.11
 flower==0.9.4
