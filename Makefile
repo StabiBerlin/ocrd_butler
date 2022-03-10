@@ -62,7 +62,7 @@ test-init: ## download current checkpoint data files from Calamari OCR github re
         endif
 
 test: test-init ocrd-venv ## run tests quickly with the default Python
-	PROFILE=test TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata py.test tests --doctest-modules ocrd_butler
+	PROFILE=test py.test tests --doctest-modules ocrd_butler
 
 test-all: ## run tests on every Python version with tox
 	tox
@@ -101,7 +101,7 @@ ocrd-venv: ## activate python virtual environment under relative path ../ocrd_al
 	which deactivate &>/dev/null || . ../ocrd_all/venv/bin/activate
 
 run-celery: ocrd-venv ## start celery worker ocrd_butler.celery_worker
-	TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata celery worker -A ocrd_butler.celery_worker.celery -E -l info
+	celery worker -A ocrd_butler.celery_worker.celery -E -l info
 
 run-flask: ocrd-venv ##run ocrd_butler/app.py
 	FLASK_APP=ocrd_butler/app.py flask run
