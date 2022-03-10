@@ -16,7 +16,7 @@
                     "name": "ocrd-fileformat-transform",
                     "parameters": {
                         "from-to": "page alto",
-                        "script-args": "--region-order reading-order"
+                        "script-args": "--region-order reading-order --no-check-words --no-check-border"
                     }
                 }
             ]
