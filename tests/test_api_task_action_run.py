@@ -163,26 +163,6 @@ class ApiTaskActionRunTests(TestCase):
 
     @responses.activate
     @require_ocrd_processors("ocrd-tesserocr-segment-region")
-    def test_task_max_file_download(self):
-        """Check if max size images are downloaded."""
-        task_response = self.client.post("/api/tasks", json=dict(
-            workflow_id=self.light_workflow(),
-            src="http://foo.bar/mets.xml",
-            description="Check workspace task.",
-            default_file_grp="MAX"
-        ))
-        self.add_response_action(task_response.json['uid'])
-
-        self.client.post(f"/api/tasks/{task_response.json['uid']}/run")
-        result_response = self.client.get(f"/api/tasks/{task_response.json['uid']}/results")
-        max_file_dir = os.path.join(result_response.json["result_dir"], "MAX")
-        max_files = os.listdir(max_file_dir)
-        with open(os.path.join(max_file_dir, max_files[2]), "rb") as img_file:
-            content = img_file.read()
-            assert content.startswith(b"\xff\xd8\xff\xe0\x00\x10JFIF")
-
-    @responses.activate
-    @require_ocrd_processors("ocrd-tesserocr-segment-region")
     def test_task_status_change(self):
         """ Test task status life cycle.
         """
@@ -190,7 +170,7 @@ class ApiTaskActionRunTests(TestCase):
             workflow_id=self.light_workflow(),
             src="http://foo.bar/mets.xml",
             description="Check workspace task.",
-            default_file_grp="MAX"
+            default_file_grp="DEFAULT"
         ))
         self.add_response_action(task_response.json['uid'])
 
