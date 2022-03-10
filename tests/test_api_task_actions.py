@@ -130,15 +130,15 @@ class ApiTaskActions(TestCase):
         response = self.client.get("/api/tasks/foobar/download_txt")
         assert response.status_code == 200
         assert response.content_type == "text/txt; charset=utf-8"
-        assert b"deutsehe Solaten und Offriere bei der" in response.data
-        response.data.count(b"deutsehe Solaten und Offriere bei der") == 1
+        assert b"deutsehe Solaten und \nOffriere bei der" in response.data
+        assert response.data.count(b"deutsehe Solaten und \nOffriere bei der") == 1
 
         self.setup_mocks(mock_fs, "02")
         response = self.client.get("/api/tasks/foobar/download_txt")
         assert response.status_code == 200
         assert response.content_type == "text/txt; charset=utf-8"
         assert b"vnd vns des liechtes kinder macht" in response.data
-        response.data.count(b"vnd vns des liechtes kinder macht") == 1
+        assert response.data.count(b"vnd vns des liechtes kinder macht") == 1
 
     @mock.patch('flask_sqlalchemy._QueryProperty.__get__')
     def test_api_task_log(self, mock_fs):

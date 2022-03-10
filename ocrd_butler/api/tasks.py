@@ -21,11 +21,9 @@ from flask_restx import (
     Resource,
     marshal
 )
-import requests
 
+from ocrd_models.ocrd_page import parse
 from ocrd_validators import ParameterValidator
-
-from ocrd_page_to_alto.convert import OcrdPageAltoConverter
 
 from ocrd_butler.api.restx import api
 from ocrd_butler.api.models import task_model
@@ -44,7 +42,7 @@ from ocrd_butler.util import (
     ocr_result_path,
     alto_result_path,
     page_to_alto as page_to_alto_util,
-    page_xml_namespaces,
+    alto_xml_namespaces,
 )
 
 
@@ -456,7 +454,7 @@ class TaskActions(TasksBase):
         """ Download the results of the task as text. """
         # https://github.com/qurator-spk/dinglehopper/blob/master/qurator/dinglehopper/extracted_text.py#L95
         if 'result_dir' in task.results:
-            page_result_path = ocr_result_path(task.results['result_dir'])
+            alto_path = alto_result_path(task.results['result_dir'])
         else:
             return jsonify({
                 "status": "ERROR",
@@ -464,27 +462,17 @@ class TaskActions(TasksBase):
             })
 
         fulltext = ""
-
-        files = glob.glob(f"{page_result_path}/*.xml")
+        files = glob.glob(f"{alto_path}/*.xml")
         files.sort()
-        for file in files:
-            tree = ET.parse(file)
-            xmlns = tree.getroot().tag.split("}")[0].strip("{")
-            if xmlns in page_xml_namespaces.values():
-                for regions in tree.iterfind(".//{%s}TextRegion" % xmlns):
-                    fulltext += "\n"
-                    words = regions.findall(
-                        ".//{{{0}}}TextLine//{{{0}}}Word"
-                        "//{{{0}}}TextEquiv//{{{0}}}Unicode".format(xmlns))
-                    if len(words) == 0:
-                        words = regions.findall(
-                            ".//{{{0}}}TextLine"
-                            "//{{{0}}}TextEquiv//{{{0}}}Unicode".format(xmlns))
-                    for index, word in enumerate(words):
-                        if word.text is not None:
-                            fulltext += word.text
-                            if ++index < len(words):
-                                fulltext += " "
+        for _file in files:
+            tree = ET.parse(_file)
+            xmlns = tree.getroot().tag.split('}')[0].strip('{')
+            if xmlns in alto_xml_namespaces.values():
+                for lines in tree.iterfind('.//{%s}TextLine' % xmlns):
+                    fulltext += '\n'
+                    for line in lines.findall('{%s}String' % xmlns):
+                        text = line.attrib.get('CONTENT') + ' '
+                        fulltext += text
 
         response = make_response(fulltext, 200)
         response.mimetype = "text/txt"

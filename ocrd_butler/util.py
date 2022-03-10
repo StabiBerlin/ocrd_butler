@@ -31,6 +31,14 @@ page_xml_namespaces = {
 }
 
 
+alto_xml_namespaces = {
+    'alto-1': 'http://schema.ccs-gmbh.com/ALTO',
+    'alto-2': 'http://www.loc.gov/standards/alto/ns-v2#',
+    'alto-3': 'http://www.loc.gov/standards/alto/ns-v3#',
+    'alto-4': 'http://www.loc.gov/standards/alto/ns-v4#',
+}
+
+
 class InterceptHandler(logging.Handler):
     """ Handler can be added to existing logging configuration
         of other modules to get its logging messages.
