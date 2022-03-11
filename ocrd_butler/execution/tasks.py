@@ -104,6 +104,22 @@ def task_failure_handler(task_id, exception, traceback, einfo, *args, **kwargs):
                  f"exception: {exception}, traceback: {traceback}.")
 
 
+def add_max_file_to_workspace(workspace: Workspace, file_name: OcrdFile) -> OcrdFile:
+    """ Use a remote TIFF representation instead of JPG of a given workspace file,
+    and add the corresponding file entry to the workspace.
+    """
+    iiif_max_url = file_name.url.replace('.jpg', '.tif')
+    file_id = file_name.ID.replace("DEFAULT", "MAX")
+    return workspace.add_file(
+        file_grp="MAX",
+        pageId=file_name.pageId,
+        url=iiif_max_url,
+        ID=file_id,
+        mimetype="image/tiff",
+        extension=".tif"
+    )
+
+
 def prepare_workspace(task: dict, resolver: Resolver, dst_dir: str) -> Workspace:
     """Prepare a workspace and return it."""
     mets_basename = "mets.xml"
@@ -115,11 +131,23 @@ def prepare_workspace(task: dict, resolver: Resolver, dst_dir: str) -> Workspace
         clobber_mets=True
     )
 
-    for file_name in workspace.mets.find_files(
-            fileGrp=task["default_file_grp"]
-    ):
-        if not file_name.local_filename:
-            workspace.download_file(file_name)
+    if task[
+        "default_file_grp"
+    ] == "MAX" and "MAX" not in workspace.mets.file_groups:
+        for file_name in workspace.mets.find_files(
+                fileGrp="DEFAULT"
+        ):
+            workspace.download_file(
+                add_max_file_to_workspace(
+                    workspace, file_name
+                )
+            )
+    else:
+        for file_name in workspace.mets.find_files(
+                fileGrp=task["default_file_grp"]
+        ):
+            if not file_name.local_filename:
+                workspace.download_file(file_name)
 
     workspace.save_mets()
 
@@ -133,7 +161,7 @@ def determine_input_file_grp(
     on its own configuration, the previous processor's ``output_file_grp``,
     or the task's ``default_file_grp`` parameter, respectively.
 
-    >>> task = {'default_file_grp': 'DEFAULT'}
+    >>> task = {'default_file_grp': 'MAX'}
     >>> prev = {'output_file_grp': 'OCR-D-IMG-BIN'}
     >>> proc = {'input_file_grp': 'OCR-D-IMG-FOO'}
 
@@ -144,7 +172,7 @@ def determine_input_file_grp(
     'OCR-D-IMG-BIN'
 
     >>> determine_input_file_grp(task, {}, {})
-    'DEFAULT'
+    'MAX'
 
     """
     return processor.get(
