@@ -19,6 +19,7 @@ def exec_processor_dump_json(processor: str) -> dict:
     Throws:
         FileNotFoundError
     """
+    logger.info(f'load processor specs for {processor}')
     return json.loads(
         subprocess.check_output([processor, "-J"])
     )

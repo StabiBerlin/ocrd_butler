@@ -61,9 +61,7 @@ Install ocrd-butler in the virtual environment created by ocrd_all:
 
   /home/ocrd > git clone https://github.com/StaatsbibliothekBerlin/ocrd_butler.git & cd ocrd-butler
   /home/ocrd/ocrd-butler > source ../ocrd_all/venv/bin/activate
-  (venv) /home/ocrd/ocrd-butler > pip install -r requirements.txt
-  (venv) /home/ocrd/ocrd-butler > pip install -r requirements-dev.txt
-  (venv) /home/ocrd/ocrd-butler > python setup.py develop
+  (venv) /home/ocrd/ocrd-butler > pip install -e .[dev]
 
 
 For some modules in `ocrd_all`_ there are further files nessesary, e.g. trained models for the OCR itself. The folders on the server can be overwritten it every single task.

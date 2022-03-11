@@ -1,45 +1,13 @@
 [[source]]
 url = "https://artefakt.dev.sbb.berlin/repository/pypi-central/simple"
 verify_ssl = true
+name = "pypi"
 
 [dev-packages]
-bumpversion = "*"
-wheel = "*"
-watchdog = "*"
-flake8 = "*"
-tox = "*"
-coverage = "*"
-pytest = "*"
-pytest-runner = "*"
-PyInstaller = "*"
-Sphinx = "*"
-twine = "*"
-pylint = "*"
-pdbpp = "*"
-pytest-mock = "*"
-pytest-cov = "*"
-pylint-flask = "*"
-flask-testing = "*"
-responses = "*"
-requests-html = "*"
-pylint-flask-sqlalchemy = "*"
+ocrd_butler = {path = ".", extras = ["dev"], editable = true}
 
 [packages]
-ocrd_butler = {path = ".",editable = true}
-click = "*"
-flask = "==1.1.1"
-celery = "==4.3.0"
-redis = "==3.3.11"
-flower = "==0.9.4"
-kombu = "==4.6.3" # https://github.com/celery/kombu/issues/1063
-flask-sqlalchemy = "*"
-flask-bootstrap = "*"
-flask-nav = "*"
-blinker = "*"
-json2html = "*"
-requests = "==2.24.0"
-flask-wtf = "*"
-flask-restx = "*"
-pipenv-to-requirements = "*"
-readline = "*"
-ocrd-page-to-alto = "1.1.0"
+ocrd_butler = {path = ".", editable = true}
+
+[requires]
+python_version = "3.7"

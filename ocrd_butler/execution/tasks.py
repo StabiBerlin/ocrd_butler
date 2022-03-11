@@ -4,9 +4,7 @@
 from __future__ import print_function
 
 import json
-from logging import Logger
 from pathlib import (
-    Path,
     PurePosixPath
 )
 from urllib.parse import (
@@ -14,6 +12,7 @@ from urllib.parse import (
     unquote
 )
 import sys
+import subprocess
 
 from celery.signals import (
     task_failure,
@@ -24,18 +23,14 @@ from celery.signals import (
 
 from flask import current_app
 
-from ocrd_models import OcrdFile
 from ocrd.resolver import Resolver
-from ocrd.processor.base import run_cli
 from ocrd.workspace import Workspace
-from ocrd_utils import getLogger
 
 from ocrd_butler import celery
 from ocrd_butler.database import db
 from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import (
     logger,
-    ocr_result_path
 )
 
 
@@ -46,7 +41,7 @@ def get_task_backend_state(task_id: str) -> str:
     return celery.backend.get_status(task_id)
 
 
-def update_task(uid: str, state: str, results: dict =None):
+def update_task(uid: str, state: str, results: dict = None):
     """ Update the given state of the task in our database.
         Also set the results if given.
     """
@@ -158,28 +153,35 @@ def determine_input_file_grp(
     )
 
 
-def to_task_log(
-    task_log_handler:Logger, log_file:str, logger_path:str, task:dict):
-    """ Write the information from the celery service file to the task log. """
-    logger.remove(task_log_handler)
-    task_log_handler = logger.add(log_file, format='{message}', mode='a')
-    service_debug_log = f"{logger_path}/celery/ocrd-butler.celery.service.stderr.log"
-    if Path(service_debug_log).is_file():
-        lines = []
-        start = f'Start processing task {task["uid"]}'
-        end = f'Finished processing task {task["uid"]}'
-        record = False
-        with open(service_debug_log, 'r') as log:
-            for line in log:
-                if start in line:
-                    record = True
-                if end in line:
-                    break
-                if record:
-                    lines.append(line.rstrip())
-        for line in lines:
-            logger.info(line)
-    logger.remove(task_log_handler)
+def _run_processor(
+    executable: str, mets_url: str, resolver: Resolver, workspace: Workspace,
+    log_level: str, input_file_grp: str, output_file_grp: str, parameter: dict,
+) -> subprocess.CompletedProcess:
+    """ run an OCRD processor executable with the specified configuration, wait for the
+    execution to complete, and return a :class:`subprocess.CompletedProcess` object.
+
+    Basically the only difference from ``ocrd.processor.helper.run_cli`` is that
+    ``/dev/stderr`` is being redirected to ``/dev/stdout``, and ``/dev/stdout`` output
+    of the spawned subprocess is being captured and copied to the current logger.
+
+    """
+    args = [
+        executable, '--working-dir', workspace.directory,
+        '--mets', mets_url, '--log-level', log_level,
+        '--input-file-grp', input_file_grp,
+        '--output-file-grp', output_file_grp,
+    ]
+    if parameter:
+        args += ['--parameter', parameter]
+    logger.info(f'Start processor subprocess: `{" ".join(args)}`')
+    result = subprocess.run(
+        args, check=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    )
+    logger.info(f'Processor subprocess completed: `{" ".join(result.args)}')
+    for processor_stdout_line in result.stdout.decode().split('\n'):
+        logger.info(processor_stdout_line)
+    logger.info(f'Processor subprocess returned with exit code {result.returncode}')
+    return result
 
 
 @celery.task(bind=True)
@@ -187,7 +189,7 @@ def run_task(self, task: dict) -> dict:
     """ Create a task an run the given workflow. """
     logger_path = current_app.config["LOGGER_PATH"]
     log_file = f"{logger_path}/task-{task['uid']}.log"
-    task_log_handler = logger.add(log_file)
+    task_log_handler = logger.add(log_file, format='{message}')
 
     logger.info(f'Start processing task {task["uid"]}.')
 
@@ -224,8 +226,8 @@ def run_task(self, task: dict) -> dict:
 
         logger.info(f'Start processor {processor["name"]}. {json.dumps(processor)}.')
 
-        logger.info(f'Run processor {processor["name"]}.')
-        exit_code = run_cli(
+        logger.info(f'Run processor {processor["name"]} on METS file {mets_url}.')
+        result = _run_processor(
             processor["executable"],
             mets_url=mets_url,
             resolver=resolver,
@@ -236,16 +238,17 @@ def run_task(self, task: dict) -> dict:
             parameter=parameter,
         )
 
-        if exit_code != 0:
+        if result.returncode != 0:
             logger.info(f'Finished processing task {task["uid"]}.')
-            to_task_log(task_log_handler, log_file, logger_path, task)
-            raise Exception(f"Processor {processor['name']} failed with exit code {exit_code}.")
+            raise Exception(
+                f"Processor {processor['name']} failed with exit code {result.returncode}."
+            )
 
         workspace.reload_mets()
         logger.info(f'Finished processor {processor["name"]} for task {task["uid"]}.')
 
     logger.info(f'Finished processing task {task["uid"]}.')
-    to_task_log(task_log_handler, log_file, logger_path, task)
+    logger.remove(task_log_handler)
 
     return {
         "id": task["id"],
