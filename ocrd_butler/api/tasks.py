@@ -22,7 +22,6 @@ from flask_restx import (
     marshal
 )
 
-from ocrd_models.ocrd_page import parse
 from ocrd_validators import ParameterValidator
 
 from ocrd_butler.api.restx import api
@@ -38,7 +37,6 @@ from ocrd_butler.util import (
     logger,
     to_json,
     host_url,
-    flower_url,
     ocr_result_path,
     alto_result_path,
     page_to_alto as page_to_alto_util,
@@ -67,6 +65,7 @@ task_namespace = api.namespace("tasks", description="Manage OCR-D Tasks")
 # frontend:
 # - success event could push to frontend and change rotator gif that indicates the work
 # - downloadable and (even better) live log showing
+
 
 class TasksBase(Resource):
     """Base methods for tasks."""
@@ -173,7 +172,6 @@ class Task(TasksBase):
             404, "Unknown task.",
             status=f"Unknown task for uid \"{task_uid}\".",
             statusCode="404")
-
 
 
 @task_namespace.route("/<string:task_uid>/<string:action>")
@@ -317,7 +315,9 @@ class TaskActions(TasksBase):
 
         return jsonify({
             "status": "SUCCESS",
-            "msg": f"You can get the results via {host_url(request)}api/tasks/{task.uid}/download_alto"
+            "msg": (
+                f"You can get the results via {host_url(request)}api/tasks/{task.uid}/download_alto"
+            )
         })
 
     def download_results(self, task):
@@ -335,9 +335,13 @@ class TaskActions(TasksBase):
             # zip_file.write(f"{results_path}/mets.xml", arcname="mets.xml")
             for root, dirs, files in os.walk(results_path):
                 for _file in files:
-                    zip_file.write(os.path.join(root, _file),
-                            os.path.relpath(os.path.join(root, _file),
-                                            os.path.join(results_path, '..')))
+                    zip_file.write(
+                        os.path.join(root, _file),
+                        os.path.relpath(
+                            os.path.join(root, _file),
+                            os.path.join(results_path, '..')
+                        )
+                    )
         data.seek(0)
 
         return send_file(
@@ -449,7 +453,6 @@ class TaskActions(TasksBase):
             attachment_filename=f"ocr_alto_xml_{task.uid}.zip"
         )
 
-
     def download_txt(self, task):
         """ Download the results of the task as text. """
         # https://github.com/qurator-spk/dinglehopper/blob/master/qurator/dinglehopper/extracted_text.py#L95
@@ -482,7 +485,6 @@ class TaskActions(TasksBase):
         })
         return response
 
-
     def log(self, task):
         """ Get the log file of the task. """
         log_file_path = pathlib.Path(
@@ -510,6 +512,7 @@ class TaskActions(TasksBase):
             "attachment;filename=fulltext_%s.txt" % task.uid
         })
         return response
+
 
 @task_namespace.route("/<string:task_uid>")
 class Task(TasksBase):

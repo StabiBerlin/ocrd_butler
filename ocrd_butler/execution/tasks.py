@@ -7,11 +7,6 @@ import json
 from logging import Logger
 from pathlib import (
     Path,
-    PurePosixPath
-)
-from urllib.parse import (
-    urlparse,
-    unquote
 )
 import sys
 
@@ -28,14 +23,12 @@ from ocrd_models import OcrdFile
 from ocrd.resolver import Resolver
 from ocrd.processor.base import run_cli
 from ocrd.workspace import Workspace
-from ocrd_utils import getLogger
 
 from ocrd_butler import celery
 from ocrd_butler.database import db
 from ocrd_butler.database.models import Task as db_model_Task
 from ocrd_butler.util import (
     logger,
-    ocr_result_path
 )
 
 
@@ -46,7 +39,7 @@ def get_task_backend_state(task_id: str) -> str:
     return celery.backend.get_status(task_id)
 
 
-def update_task(uid: str, state: str, results: dict =None):
+def update_task(uid: str, state: str, results: dict = None):
     """ Update the given state of the task in our database.
         Also set the results if given.
     """
@@ -135,7 +128,7 @@ def prepare_workspace(task: dict, resolver: Resolver, dst_dir: str) -> Workspace
         "default_file_grp"
     ] == "MAX" and "MAX" not in workspace.mets.file_groups:
         for file_name in workspace.mets.find_files(
-                fileGrp="DEFAULT"
+            fileGrp="DEFAULT"
         ):
             workspace.download_file(
                 add_max_file_to_workspace(
@@ -144,7 +137,7 @@ def prepare_workspace(task: dict, resolver: Resolver, dst_dir: str) -> Workspace
             )
     else:
         for file_name in workspace.mets.find_files(
-                fileGrp=task["default_file_grp"]
+            fileGrp=task["default_file_grp"]
         ):
             if not file_name.local_filename:
                 workspace.download_file(file_name)
@@ -187,7 +180,8 @@ def determine_input_file_grp(
 
 
 def to_task_log(
-    task_log_handler:Logger, log_file:str, logger_path:str, task:dict):
+    task_log_handler: Logger, log_file: str, logger_path: str, task: dict
+):
     """ Write the information from the celery service file to the task log. """
     logger.remove(task_log_handler)
     task_log_handler = logger.add(log_file, format='{message}', mode='a')
