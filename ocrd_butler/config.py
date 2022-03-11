@@ -35,8 +35,6 @@ class Config(object):
     CELERY_BROKER_URL = "redis://localhost:6379"
     OCRD_BUTLER_RESULTS = "/data/ocrd_butler_results"
     SBB_CONTENT_SERVER_HOST = "content.staatsbibliothek-berlin.de"
-    SBB_IIIF_FULL_TIF_URL = "https://content.staatsbibliothek-berlin.de/dc/"\
-                            "{0}-{1}/full/full/0/default.tif"
     LOGGER_PATH = "/data/log"
 
     PROCESSORS = [

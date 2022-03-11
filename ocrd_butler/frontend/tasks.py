@@ -164,7 +164,7 @@ class NewTaskForm(FlaskForm):
     #     URL(message="Please enter a valid URL to a METS file.")])
     mets_file = FileField("METS file", validators=[
         FileAllowed(["xml"], "You have to provide a XML file.")])
-    input_file_grp = StringField("Input file group (defaults to 'DEFAULT')")
+    input_file_grp = StringField("Input file group (defaults to 'MAX')")
     workflow_id = SelectField('Workflow', validators=[
         DataRequired(message="Please choose a workflow.")])
     parameter = TextAreaField('Parameters')

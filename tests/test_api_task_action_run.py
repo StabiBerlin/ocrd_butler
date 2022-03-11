@@ -38,7 +38,7 @@ class ApiTaskActionRunTests(TestCase):
             os.path.abspath(__file__)), "files")
 
         with open(
-                os.path.join(testfiles, "sbb-mets-PPN821929127.xml"),
+                os.path.join(testfiles, "PPN821881744.mets.xml"),
                 "r", encoding="utf-8"
         ) as tfh:
             responses.add(
@@ -56,8 +56,8 @@ class ApiTaskActionRunTests(TestCase):
                 responses.add(
                     method=responses.GET,
                     url=(
-                        "http://content.staatsbibliothek-berlin.de/dms/"
-                        f"PPN821929127/800/0/0000000{i}.jpg"
+                        "https://content.staatsbibliothek-berlin.de/dc/"
+                        f"PPN821881744-0000000{i}/full/max/0/default.jpg"
                     ),
                     body=img_file,
                     status=200,
@@ -67,7 +67,7 @@ class ApiTaskActionRunTests(TestCase):
                     method=responses.GET,
                     url=(
                         "https://content.staatsbibliothek-berlin.de/dc/"
-                        f"PPN821929127-0000000{i}/full/full/0/default.tif"
+                        f"PPN821881744-0000000{i}/full/max/0/default.tif"
                     ),
                     body=img_file,
                     status=200,
@@ -160,6 +160,26 @@ class ApiTaskActionRunTests(TestCase):
             status=200,
             content_type="application/json"
         )
+
+    @responses.activate
+    @require_ocrd_processors("ocrd-tesserocr-segment-region")
+    def test_task_max_file_download(self):
+        """Check if max size images are downloaded."""
+        task_response = self.client.post("/api/tasks", json=dict(
+            workflow_id=self.light_workflow(),
+            src="http://foo.bar/mets.xml",
+            description="Check workspace task.",
+            default_file_grp="MAX"
+        ))
+        self.add_response_action(task_response.json['uid'])
+
+        self.client.post(f"/api/tasks/{task_response.json['uid']}/run")
+        result_response = self.client.get(f"/api/tasks/{task_response.json['uid']}/results")
+        max_file_dir = os.path.join(result_response.json["result_dir"], "MAX")
+        max_files = os.listdir(max_file_dir)
+        with open(os.path.join(max_file_dir, max_files[2]), "rb") as img_file:
+            content = img_file.read()
+            assert content.startswith(b"\xff\xd8\xff\xe0\x00\x10JFIF")
 
     @responses.activate
     @require_ocrd_processors("ocrd-tesserocr-segment-region")

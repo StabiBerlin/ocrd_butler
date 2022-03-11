@@ -34,8 +34,8 @@ task_model = api.model("Task Model", {
             "The default file group in the METS file to start the processor "
             "workflow with."
         ),
-        help="Defaults to 'DEFAULT'.",
-        default="DEFAULT"),
+        help="Defaults to 'MAX'.",
+        default="MAX"),
     "worker_task_id": fields.String(
         title="Worker Task ID",
         required=False,

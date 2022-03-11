@@ -34,7 +34,7 @@ class Task(db.Model):
 
     def __init__(
         self, src, workflow_id, uid=None, parameters={}, description="",
-        default_file_grp="DEFAULT", worker_task_id=None,
+        default_file_grp="MAX", worker_task_id=None,
         status="CREATED", results={}
     ):
         if uid is None:
