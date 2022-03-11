@@ -23,6 +23,7 @@ from celery.signals import (
 
 from flask import current_app
 
+from ocrd_models import OcrdFile
 from ocrd.resolver import Resolver
 from ocrd.workspace import Workspace
 
