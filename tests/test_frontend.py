@@ -80,7 +80,7 @@ class FrontendTests(TestCase):
         )
 
         responses.add_callback(
-            responses.DELETE, "http://localhost/api/tasks/1",
+            responses.DELETE, "http://localhost/api/tasks/uid",
             callback=delete_api_task_callback)
 
         def api_get_taskinfo_callback(request):
@@ -231,6 +231,7 @@ class FrontendTests(TestCase):
             workflow_id=self.get_workflow_id(),
             default_file_grp="file_grp"
         ))
+        task = models.Task.get()
 
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
@@ -239,7 +240,7 @@ class FrontendTests(TestCase):
         status_col_txt = html.find('table > tr > td')[6].text
         assert status_col_txt.startswith("CREATED")
         assert "worker_task.id" in status_col_txt
-        self.client.get("/task/delete/1")
+        self.client.get(f"/task/delete/{ task.uid }")
 
     @responses.activate
     def test_delete_task(self):
@@ -251,13 +252,14 @@ class FrontendTests(TestCase):
             src="http://foo.bar/mets.xml",
             workflow_id=self.get_workflow_id()
         ))
+        task = models.Task.get()
 
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
         assert len(html.find('table > tr > td')) == COLUMN_COUNT
 
         delete_link = html.find('table > tr > td > a.delete-task')[0].attrs["href"]
-        assert delete_link == "/task/delete/1"
+        assert delete_link == f"/task/delete/uid"
         response = self.client.get(delete_link)
         assert response.status == '302 FOUND'
         assert response.status_code == 302

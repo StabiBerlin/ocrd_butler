@@ -254,13 +254,13 @@ def task(task_uid):
     )
 
 
-@tasks_blueprint.route("/task/delete/<int:task_id>")
-def task_delete(task_id):
+@tasks_blueprint.route("/task/delete/<string:task_uid>")
+def task_delete(task_uid):
     """Delete the task with the given id."""
-    response = requests.delete(f"{host_url(request)}api/tasks/{task_id}")
+    response = requests.delete(f"{host_url(request)}api/tasks/{task_uid}")
 
     if response.status_code in (200, 201):
-        flash(f"Task {task_id} deleted.")
+        flash(f"Task {task_uid} deleted.")
     else:
         result = json.loads(response.content)
         flash(f"An error occured: {result['status']}")
