@@ -6,6 +6,7 @@ import io
 import json
 import pathlib
 import os
+import shutil
 import uuid
 import xml.etree.ElementTree as ET
 import zipfile
@@ -562,8 +563,11 @@ class Task(TasksBase):
                 status=f"Can't find a task with the uid \"{task_uid}\".",
                 statusCode="404")
 
-        message = f"Task \"{task.uid}\" deleted."
+        if "result_dir" in task.results and os.path.exists(task.results["result_dir"]):
+            shutil.rmtree(task.results["result_dir"], ignore_errors=True)
+
         res.delete()
+        message = f"Task \"{task.uid}\" deleted."
         db.session.commit()
 
         return jsonify({
