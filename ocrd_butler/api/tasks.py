@@ -563,8 +563,10 @@ class Task(TasksBase):
                 status=f"Can't find a task with the uid \"{task_uid}\".",
                 statusCode="404")
 
-        if "result_dir" in task.results and os.path.exists(task.results["result_dir"]):
-            shutil.rmtree(task.results["result_dir"], ignore_errors=True)
+        result_dir = f"{current_app.config['OCRD_BUTLER_RESULTS']}/{task.uid}"
+        if os.path.exists(result_dir):
+            shutil.rmtree(result_dir, ignore_errors=True)
+            logger.info(f"Result dir '{result_dir}' deleted.")
 
         res.delete()
         message = f"Task \"{task.uid}\" deleted."
