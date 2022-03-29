@@ -34,7 +34,10 @@ from ocrd_butler.database import db
 from ocrd_butler.database.models import Workflow as db_model_Workflow
 from ocrd_butler.database.models import Task as db_model_Task
 
-from ocrd_butler.execution.tasks import run_task
+from ocrd_butler.execution.tasks import (
+    is_task_processing,
+    run_task
+)
 from ocrd_butler.util import (
     logger,
     to_json,
@@ -277,25 +280,25 @@ class TaskActions(TasksBase):
         """ Run this task. """
         logger.info(f"Action 'run' called for task: {task.to_json()}")
 
-        # celery_worker_task = run_task(task.to_json())  # use for debugging
+        check = is_task_processing(task.to_json())
+        if check["processing"]:
+            return make_response(jsonify({
+                "status": "ALREADY_IN_PROCESS",
+                "message": check["message"]
+            }), 406)
+
         celery_worker_task = run_task.delay(task.to_json())
-        # celery_worker_task = run_task.apply_async(args=[task.to_json()],
-        #                                    countdown=20)
-        # if '__dict__' in dir(celery_worker_task):
-        #     # async task result
-        #     celery_worker_task = celery_worker_task.__dict__
+        # celery_worker_task = run_task(task.to_json())  # use for debugging
 
         task.worker_task_id = celery_worker_task.task_id
         task.status = celery_worker_task.status
         db.session.commit()
 
-        result = {
+        return jsonify({
             "worker_task_id": celery_worker_task.task_id,
             "status": celery_worker_task.status,
             "traceback": celery_worker_task.traceback,
-        }
-
-        return jsonify(result)
+        })
 
     def rerun(self, task):
         """ Run this task once again. """

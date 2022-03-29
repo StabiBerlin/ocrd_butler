@@ -284,3 +284,37 @@ def run_task(self, task: dict) -> dict:
         "uid": task["uid"],
         "result_dir": dst_dir
     }
+
+def is_task_processing(task: dict) -> dict:
+    """Check if the given task is already in process."""
+    inspector = celery.control.inspect()
+    workers = list(inspector.ping().keys())
+
+    active_tasks = inspector.active()
+    reserved_tasks = inspector.reserved()
+
+    already_processing = False
+    area = ""
+
+    for worker in workers:
+        active_uids = [eval(task["args"])[0]["uid"]
+                       for task in active_tasks[worker]]
+        if task["uid"] in active_uids:
+            already_processing = True
+            area = "active"
+
+        reserved_uids = [eval(task["args"])[0]["uid"]
+                         for task in reserved_tasks[worker]]
+        if task["uid"] in reserved_uids:
+            already_processing = True
+            area = "reserved"
+
+    if already_processing:
+        return {
+            "processing": True,
+            "message": f"The task is already in {area} tasks."
+        }
+
+    return {
+        "processing": False
+    }

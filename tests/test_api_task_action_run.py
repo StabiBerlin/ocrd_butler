@@ -109,6 +109,23 @@ class ApiTaskActionRunTests(TestCase):
         ))
         return response.json["id"]
 
+    def r_workflow(self):
+        """Creates a workflow with tesseract processors."""
+        response = self.client.post("/api/workflows", json=dict(
+            name="T Workflow",
+            description="Some foobar workflow.",
+            processors=[
+                {
+                    "name": "ocrd-tesserocr-recognize",
+                    "parameters": {
+                        "model": "deu"
+                    },
+                    "output_file_grp": "OCR-D-SEG-WORD",
+                },
+            ],
+        ))
+        return response.json["id"]
+
     def light_workflow(self):
         """Creates a workflow without processors."""
         response = self.client.post("/api/workflows", json=dict(
@@ -160,6 +177,29 @@ class ApiTaskActionRunTests(TestCase):
             status=200,
             content_type="application/json"
         )
+
+    @responses.activate
+    @require_ocrd_processors(
+        "ocrd-tesserocr-recognize",
+    )
+    def test_check_task_before_run(self):
+        task_response = self.client.post(
+            '/api/tasks',
+            json=dict(
+                workflow_id=self.r_workflow(),
+                src="http://foo.bar/mets.xml",
+            )
+        ).json
+        self.add_response_action(task_response['uid'])
+        from ocrd_butler.execution.tasks import is_task_processing
+        res = is_task_processing(task_response)
+        assert res['processing'] == False
+        run_response = self.client.post(
+            f"/api/tasks/{task_response['uid']}/run"
+        ).json
+        # TODO: Exception: Processor ocrd-tesserocr-recognize failed with exit code 1.
+        # res = is_task_processing(task_response)
+        # assert res['processing'] == True
 
     @responses.activate
     @require_ocrd_processors("ocrd-tesserocr-segment-region")

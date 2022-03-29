@@ -268,7 +268,7 @@ def task_delete(task_uid):
     return redirect("/tasks", code=302)
 
 
-@tasks_blueprint.route("/task/run/<int:task_uid>")
+@tasks_blueprint.route("/task/run/<string:task_uid>")
 def task_run(task_uid):
     """Run the task with the given uid."""
     # pylint: disable=broad-except
@@ -276,10 +276,13 @@ def task_run(task_uid):
 
     if response.status_code in (200, 201):
         flash(f"Task {task_uid} started.")
+    elif response.status_code == 406:
+        result = json.loads(response.content)
+        flash(f"Task {task_uid} can't be started: { result['message']}")
     else:
         try:
             result = json.loads(response.content)
-            flash(f"An error occured: {result['status']}")
+            flash(f"An error occured: {result['status']}, {result['traceback']}")
         except Exception as exc:
             result = response.content
             flash(f"An error occured: {result}. (Exception: {exc.__str__()})")
