@@ -47,8 +47,8 @@
                     "name": "ocrd-calamari-recognize",
                     "output_file_grp": "OCR-D-OCR-CALAMARI",
                     "parameters": {
-                        "checkpoint": "/data/qurator-gt4histocr-1.0/*ckpt.json",
-                        "checkpoint_dir": "/data/qurator-gt4histocr-1.0",
+                        "checkpoint": "/data/calamari_models/*ckpt.json",
+                        "checkpoint_dir": "/data/calamari_models",
                         "glyph_conf_cutoff": 0.001,
                         "textequiv_level": "word",
                         "voter": "confidence_voter_default_ctc"
@@ -58,7 +58,7 @@
                     "name": "ocrd-fileformat-transform",
                     "parameters": {
                         "from-to": "page alto",
-                        "script-args": "--region-order reading-order"
+                        "script-args": "--region-order reading-order --no-check-words --no-check-border"
                     }
                 }
             ]
@@ -90,7 +90,7 @@
                     "name": "ocrd-fileformat-transform",
                     "parameters": {
                         "from-to": "page alto",
-                        "script-args": "--region-order reading-order"
+                        "script-args": "--region-order reading-order --no-check-words --no-check-border"
                     }
                 }
             ]
@@ -153,7 +153,7 @@
                     "name": "ocrd-fileformat-transform",
                     "parameters": {
                         "from-to": "page alto",
-                        "script-args": "--region-order reading-order"
+                        "script-args": "--region-order reading-order --no-check-words --no-check-border"
                     }
                 }
             ]

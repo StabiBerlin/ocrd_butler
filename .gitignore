@@ -110,5 +110,11 @@ ENV/
 
 ocrd_butler/tmp
 ocrd_butler/flower.db
+ocrd_butler/production.db
 ocrd_butler/development.db
 flower.db
+
+test-reports/test-report.xml
+test-report.xml
+flower.dat
+flower.dir
