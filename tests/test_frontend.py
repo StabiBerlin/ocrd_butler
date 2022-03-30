@@ -25,6 +25,21 @@ from . import (
 COLUMN_COUNT = 10
 
 
+TASK_INFO = {
+    "ready": True,
+    "result": {
+        "ready": True,
+        "status": "SUCCESS",
+        "succeeded": 1,
+        "runtime": 42
+    },
+    "received": 23,
+    "started": 42,
+    "succeeded": 666,
+    "runtime": 451
+}
+
+
 class FrontendTests(TestCase):
     """Test our frontend."""
 
@@ -156,19 +171,7 @@ class FrontendTests(TestCase):
         task.results = { "result_dir": "/foobar" }
         task.status = "SUCCESS"
 
-        mock_task_information.return_value = {
-            "ready": True,
-            "result": {
-                "ready": True,
-                "status": "SUCCESS",
-                "succeeded": 1,
-                "runtime": 42
-            },
-            "received": 23,
-            "started": 42,
-            "succeeded": 666,
-            "runtime": 451
-        }
+        mock_task_information.return_value = TASK_INFO
 
         response = self.client.get("/tasks")
         self.assert200(response)
@@ -222,7 +225,8 @@ class FrontendTests(TestCase):
         # TODO: check if there are the defaults added by validation
 
     @responses.activate
-    def test_create_task(self):
+    @mock.patch("ocrd_butler.frontend.tasks.task_information")
+    def test_create_task(self, mock_task_information):
         """Check if task will be created."""
         self.client.post("/new-task", data=dict(
             task_id="foobar",
@@ -233,6 +237,7 @@ class FrontendTests(TestCase):
         ))
         task = models.Task.get()
 
+        mock_task_information.return_value = TASK_INFO
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
         assert len(html.find('table > tr > td')) == COLUMN_COUNT
@@ -243,7 +248,8 @@ class FrontendTests(TestCase):
         self.client.get(f"/task/delete/{ task.uid }")
 
     @responses.activate
-    def test_delete_task(self):
+    @mock.patch("ocrd_butler.frontend.tasks.task_information")
+    def test_delete_task(self, mock_task_information):
         """Check if task will be deleted."""
 
         self.client.post("/new-task", data=dict(
@@ -254,6 +260,7 @@ class FrontendTests(TestCase):
         ))
         task = models.Task.get()
 
+        mock_task_information.return_value = TASK_INFO
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
         assert len(html.find('table > tr > td')) == COLUMN_COUNT
