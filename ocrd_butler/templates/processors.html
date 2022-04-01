@@ -1,5 +1,19 @@
 {% extends "base.html" %}
 
+{% block scripts %}
+    {{super()}}
+    <script type="text/javascript">
+        //<![CDATA[
+        document.querySelector(".processor").addEventListener('click', (evt) => {
+            const processorName = evt.currentTarget.attributes.id.nodeValue;
+            const processorTable = document.querySelector(`.table-${processorName}`);
+            const collapseTable = new bootstrap.Collapse(processorTable)
+            collapseTable.toggle();
+        });
+        //]]>
+    </script>
+{% endblock scripts %}
+
 {% block app_content %}
     <div class="container processors">
 
@@ -19,8 +33,7 @@
 
         <div class="col-md-12">
             {% for processor in processors %}
-                <h2 id="processor-{{ processor.name }}">{{ processor.name }} <a name="table-{{ processor.name }}" style="cursor:nesw-resize;"
-                    onclick="javascript:;jQuery('.table-{{ processor.name }}').toggle('fast');window.location.hash='table-{{ processor.name }}';">
+                <h2 id="{{ processor.name }}" class="processor">{{ processor.name }} <a name="table-{{ processor.name }}" style="cursor:nesw-resize;">
                     +
                     </a>
                     <span>
@@ -31,7 +44,7 @@
                         </a>
                     </span>
                 </h2>
-                <table style="display:none;" class="table-{{ processor.name }} table">
+                <table class="table-{{ processor.name }} table collapse">
                     {% for key, value in processor.items() %}
                     <tr>
                         <td>{{ key.capitalize() }}</td>

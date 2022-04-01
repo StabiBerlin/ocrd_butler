@@ -9,9 +9,23 @@
 {% block scripts %}
     {{super()}}
     <script type="text/javascript" src="{{url_for('static', filename='jquery.multi-select.js')}}"></script>
-    <script src="{{url_for('static', filename='butler.js')}}"></script>
-{% endblock scripts %}
+    <script type="text/javascript">
+        //<![CDATA[
+        // document.querySelector("#new-workflow").addEventListener('click', () => {
+        //     const newWorkflowForm = document.getElementById('new-workflow-form');
+        //     const collapseForm = new bootstrap.Collapse(newWorkflowForm)
+        //     collapseForm.toggle();
+        // });
 
+        // let cp_select = document.querySelector('.container.workflows #processors');
+        // if (cp_select.length > 0) {
+        //     cp_select.multiSelect({
+        //         "keepOrder": true
+        //     });
+        // }
+        //]]>
+    </script>
+{% endblock scripts %}
 
 {% block app_content %}
     <div class="container workflows">

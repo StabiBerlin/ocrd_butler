@@ -2,7 +2,16 @@
 
 {% block scripts %}
     {{super()}}
-    <script src="{{url_for('static', filename='butler.js')}}"></script>
+    <script type="text/javascript">
+        //<![CDATA[
+        document.querySelector("#new-task").addEventListener('click', () => {
+            const newTaskForm = document.getElementById('new-task-form');
+            const collapseForm = new bootstrap.Collapse(newTaskForm)
+            collapseForm.toggle();
+        });
+        //]]>
+    </script>
+
 {% endblock scripts %}
 
 {% block app_content %}
@@ -76,7 +85,9 @@
                     <th>Parameters</th>
                     <th>Actions</th>
                     <th>Status</th>
-                    <th>Times</th>
+                    <th>Starttime</th>
+                    <th>Endtime</th>
+                    <th>Runtime</th>
                     <th>Results</th>
                     <th>Delete</th>
                 </tr>
@@ -117,15 +128,21 @@
                     <td>
                         {% if task.result %}
                             {% if task.result.started %}
-                                Started: {{ task.result.started | format_date }}
+                                {{ task.result.started | format_date }}
                             {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if task.result %}
                             {% if task.result.succeeded %}
-                                <br />
-                                Succeeded: {{ task.result.succeeded | format_date }}
+                                {{ task.result.succeeded | format_date }}
                             {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if task.result %}
                             {% if task.result.runtime %}
-                                <br />
-                                Runtime: {{ task.result.runtime | format_delta }}
+                                {{ task.result.runtime | format_delta }}
                             {% endif %}
                         {% endif %}
                     </td>
