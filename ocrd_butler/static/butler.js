@@ -1,20 +1,22 @@
-$(document).ready(function() {
+// window.addEventListener('load', () => {
 
-    console.log("foobar")
-    console.log($("#new-task"))
-    $("#new-task").click(() => {
-        console.log($(".new-task-form"))
-        $(".new-task-form").slideToggle({direction: 'right'});
+    document.querySelector("#new-task").addEventListener('click', () => {
+        const newTaskForm = document.getElementById('new-task-form');
+        const collapseForm = new bootstrap.Collapse(newTaskForm)
+        collapseForm.toggle();
     });
 
-    $("#new-workflow").click(() => {
-        $(".new-workflow-form").slideToggle({direction: 'right'});
-    });
+    // document.querySelector("#new-workflow").addEventListener('click', () => {
+    //     const newWorkflowForm = document.getElementById('new-workflow-form');
+    //     const collapseForm = new bootstrap.Collapse(newWorkflowForm)
+    //     collapseForm.toggle();
+    // });
 
-    let cp_select = $('.container.workflows #processors');
-    if (cp_select.length > 0) {
-        cp_select.multiSelect({
-            "keepOrder": true
-        });
-    }
-});
+    // let cp_select = document.querySelector('.container.workflows #processors');
+    // if (cp_select.length > 0) {
+    //     cp_select.multiSelect({
+    //         "keepOrder": true
+    //     });
+    // }
+
+// });

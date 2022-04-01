@@ -6,14 +6,16 @@
 {% endblock scripts %}
 
 {% block app_content %}
-   <div class="container">
-        <div class="jumbotron">
-            <div class="container">
-                <div class="col-md-10">
-                    <h1>Tasks</h1>
+    <div class="container">
+
+        <div class="jumbotron p-5 rounded-lg m-3">
+            <div class="row">
+                <div class="col-md-9">
+                    <h1 class="display-4">Workflows</h1>
+                    <hr class="my-4">
                     <p>Madam/Sir, please find the currently available tasks here.</p>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <img width="100%%" src="{{url_for('static', filename='butler_tasks.png')}}" />
                 </div>
             </div>
@@ -26,7 +28,7 @@
         </div>
 
         <div class="col-md-12">
-            <div class="new-task-form">
+            <div id="new-task-form" class="new-task-form collapse">
                 <form action="/new-task" method="post" enctype="multipart/form-data">
                   <div class="form-group">
                     {{ form.task_description.label }}

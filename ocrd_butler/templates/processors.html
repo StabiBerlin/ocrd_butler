@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-   <div class="container processors">
+    <div class="container processors">
 
-        <div class="jumbotron">
-            <div class="container">
-                <div class="col-md-10">
-                    <h1>Processors</h1>
+        <div class="jumbotron p-5 rounded-lg m-3">
+            <div class="row">
+                <div class="col-md-9">
+                    <h1 class="display-4">Processors</h1>
+                    <hr class="my-4">
                     <p>Madam/Sir, the following processors are currently implemented.
-                    <br/>You can expand every one to get more information.</p>
+                        <br/>You can expand every one to get more information.</p>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <img width="100%%" src="{{url_for('static', filename='butler_processors.png')}}" />
                 </div>
             </div>
