@@ -240,9 +240,10 @@ class FrontendTests(TestCase):
         mock_task_information.return_value = TASK_INFO
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
-        assert len(html.find('table > tr > td')) == COLUMN_COUNT
-        assert html.find('table > tr > td')[2].text == "file_grp"
-        status_col_txt = html.find('table > tr > td')[6].text
+        assert len(html.find('table > tbody > tr > td')) == COLUMN_COUNT
+
+        assert html.find('table > tbody > tr > td')[2].text == "file_grp"
+        status_col_txt = html.find('table > tbody > tr > td')[6].text
         assert status_col_txt.startswith("CREATED")
         assert "worker_task.id" in status_col_txt
         self.client.get(f"/task/delete/{ task.uid }")
@@ -263,9 +264,9 @@ class FrontendTests(TestCase):
         mock_task_information.return_value = TASK_INFO
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
-        assert len(html.find('table > tr > td')) == COLUMN_COUNT
+        assert len(html.find('table > tbody > tr > td')) == COLUMN_COUNT
 
-        delete_link = html.find('table > tr > td > a.delete-task')[0].attrs["href"]
+        delete_link = html.find('table > tbody > tr > td > a.delete-task')[0].attrs["href"]
         assert delete_link == f"/task/delete/uid"
         response = self.client.get(delete_link)
         assert response.status == '302 FOUND'
@@ -273,7 +274,7 @@ class FrontendTests(TestCase):
 
         response = self.client.get("/tasks")
         html = HTML(html=response.data)
-        assert len(html.find('table > tr > td')) == 0
+        assert len(html.find('table > tbody > tr > td')) == 0
 
     @responses.activate
     def test_frontend_run_task(self):
