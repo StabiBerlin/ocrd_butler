@@ -82,7 +82,12 @@ nav .navbar-nav .nav-link {
 }
 
 /* tables */
-.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+.table>tbody>tr>td,
+.table>tbody>tr>th,
+.table>tfoot>tr>td,
+.table>tfoot>tr>th,
+.table>thead>tr>td,
+.table>thead>tr>th {
     border-top: inherit;
 }
 
@@ -115,11 +120,18 @@ table thead {
     border-bottom: 2px solid #444444;
 }
 
-table thead th {
+table thead th,
+.sortable th {
     font-size: 15px;
     font-weight: bold;
     color: #FFFFFF;
     border-left: 2px solid #C3C3C3;
+    color: #000 !important;
+    background-color: #d9c677 !important;
+}
+
+th.no-sort {
+    pointer-events: none;
 }
 
 table thead th:first-child {

@@ -178,10 +178,10 @@ class FrontendTests(TestCase):
         self.assert_template_used("tasks.html")
         html = HTML(html=response.data)
 
-        assert len(html.find("table > tr > th")) == COLUMN_COUNT
-        assert len(html.find("table > tr > td")) == COLUMN_COUNT
+        assert len(html.find("table > thead > tr > th")) == COLUMN_COUNT
+        assert len(html.find("table > tbody > tr > td")) == COLUMN_COUNT
 
-        download_links = html.find("table > tr:nth-child(2) > td:nth-child(9) > a")
+        download_links = html.find("table > tbody > tr:nth-child(1) > td:nth-child(11) > a")
         assert download_links[0].links == {'/download/results/uid'}
         assert download_links[1].links == {'/download/page/uid'}
         assert download_links[2].links == {'/download/alto/uid'}
