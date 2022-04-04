@@ -6,7 +6,7 @@ import os
 from flask import Flask
 from flask import Blueprint
 
-from flask_bootstrap import Bootstrap
+from flask_bootstrap import Bootstrap5
 
 from ocrd_butler.api.workflows import workflow_namespace
 from ocrd_butler.api.tasks import task_namespace
@@ -18,7 +18,7 @@ from ocrd_butler.frontend.processors import processors_blueprint
 from ocrd_butler.frontend.workflows import workflows_blueprint
 from ocrd_butler.frontend.tasks import tasks_blueprint
 from ocrd_butler.frontend.compare import compare_blueprint
-from ocrd_butler.frontend.nav import nav
+
 
 PKG_NAME = os.path.dirname(os.path.realpath(__file__)).split("/")[-1]
 
@@ -66,8 +66,7 @@ def initialize_app(app):
     api.add_namespace(task_namespace)
     api.add_namespace(workflow_namespace)
 
-    Bootstrap(app)
-    nav.init_app(app)
+    Bootstrap5(app)
     app.register_blueprint(frontend_blueprint)
     app.register_blueprint(processors_blueprint)
     app.register_blueprint(workflows_blueprint)

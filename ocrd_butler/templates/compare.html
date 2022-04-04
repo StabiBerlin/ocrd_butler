@@ -2,47 +2,48 @@
 
 {% block content %}
     <div class="container">
-        <div class="container">
-            <div class="col-md-3">
-                <img width="100%%" src="{{url_for('static', filename='butler_two.png')}}" />
-            </div>
-            <div class="col-md-9">
-                <h1>Madam/Sir, please choose your tasks to compare!</h1>
 
-                <form action="/compare" method="POST">
-                    <div class="form-group">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    {{ form.task_from.label }}
-                                    <br />
-                                    {{ form.task_from() }}
-                                </div>
-                                <div class="col-md-6">
-                                    {{ form.task_to.label }}
-                                    <br />
-                                    {{ form.task_to() }}
-                                </div>
+        <div class="jumbotron p-5 rounded-lg m-3">
+            <div class="row">
+                <div class="col-md-9">
+                    <h1 class="display-4">Compare</h1>
+                    <hr class="my-4">
+                    <h1>Madam/Sir, please choose your tasks to compare!</h1>
+                </div>
+                <div class="col-md-3">
+                    <img width="100%%" src="{{url_for('static', filename='butler_two.png')}}" />
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <form action="/compare" method="POST">
+                <div class="form-group">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.task_from.label }}
+                                <br />
+                                {{ form.task_from() }}
                             </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <br />
-                                    <br />
-                                    <br />
-                                    {{ form.submit() }}
-                                </div>
+                            <div class="col-md-6">
+                                {{ form.task_to.label }}
+                                <br />
+                                {{ form.task_to() }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <br />
+                                <br />
+                                <br />
+                                {{ form.submit() }}
                             </div>
                         </div>
                     </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="container">
-                <div class="col-md-12">
                 </div>
+            </form>
         </div>
-
 
     </div>
 {% endblock %}

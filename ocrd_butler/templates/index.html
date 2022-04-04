@@ -2,22 +2,20 @@
 
 {% block app_content %}
 <div class="container">
-    <div class="jumbotron">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-9">
-                    <h1>Welcome Madam/Sir!</h1>
-                    <h2>How can I help you today?</h2>
-                    <p>With this tool you can process tasks in the ecosystem of the <a href="https://github.com/OCR-D" target="_blank">OCR-D</a> project.</p>
-                    <p>You can explore the currently installed <a href="/processors">ORCD processors</a> and take a look at the <a href="/workflows">Workflows</a> that were built with these processors.</p>
-                    <p>You can use the forms to create workflows and tasks directly in the UI. But you also can use the swagger interface of the <a href="/api" target="_blank">API</a> behind this site.</p>
-                </div>
-                <div class="col-md-3">
-                    <img width="100%%" src="{{url_for('static', filename='butler.png')}}" />
-                </div>
+    <div class="jumbotron p-5 rounded-lg m-3">
+        <div class="row">
+            <div class="col-md-9">
+                <h1 class="display-4">Welcome Madam/Sir!</h1>
+                <p class="lead">How can I help you today?</p>
+                <hr class="my-4">
+                <p>With this tool you can process tasks in the ecosystem of the <a href="https://github.com/OCR-D" target="_blank">OCR-D</a> project.</p>
+                        <p>You can explore the currently installed <a href="/processors">ORCD processors</a> and take a look at the <a href="/workflows">Workflows</a> that were built with these processors.</p>
+                        <p>You can use the forms to create workflows and tasks directly in the UI. But you also can use the swagger interface of the <a href="/api" target="_blank">API</a> behind this site.</p>
+            </div>
+            <div class="col-md-3">
+                <img width="100%%" src="{{url_for('static', filename='butler.png')}}" />
             </div>
         </div>
     </div>
-
 </div>
 {% endblock %}

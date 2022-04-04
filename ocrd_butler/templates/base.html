@@ -1,33 +1,63 @@
-{% extends 'bootstrap/base.html' %}
+<!doctype html>
+<html lang="en">
+    <head>
+        {% block head %}
+            <!-- Required meta tags -->
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-{% block styles %}
-    {{super()}}
-    <link rel="stylesheet"
-          href="{{url_for('static', filename='styles.css')}}">
-{% endblock %}
+            <link rel="shortcut icon" href="{{ url_for('static', filename='hero.gif') }}">
 
-{% block title %}
-    {% if title %}{{ title }} - OCR-D butler{% else %}OCR-D butler{% endif %}
-{% endblock %}
+            {% block styles %}
+                <!-- Bootstrap CSS -->
+                {{ bootstrap.load_css() }}
+                <link rel="stylesheet"
+                    href="{{url_for('static', filename='styles.css')}}">
+            {% endblock %}
 
-{% block content %}
-    <div class="container">
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-info" role="alert">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-        {% endwith %}
+            <title>{% if title %}{{ title }} - OCR-D butler{% else %}OCR-D butler{% endif %}</title>
+        {% endblock %}
+    </head>
+    <body>
 
-        {# application content needs to be provided in the app_content block #}
-        {% block app_content %}{% endblock %}
+        {% from 'bootstrap5/nav.html' import render_nav_item %}
 
-        {% include "footer.html" %}
-    </div>
-{% endblock %}
+        <nav class="navbar navbar-expand-lg">
+            <div class="navbar-nav mr-auto">
+                {{ render_nav_item('frontend_blueprint.index', 'Home') }}
+                {{ render_nav_item('processors_blueprint.processors', 'Processors') }}
+                {{ render_nav_item('workflows_blueprint.workflows', 'Workflows') }}
+                {{ render_nav_item('tasks_blueprint.tasks', 'Tasks') }}
+                {{ render_nav_item('compare_blueprint.compare', 'Compare') }}
+                <a class="nav-item nav-link" href="/api" target=""_blank>
+                    API
+                </a>
+                <a class="nav-item nav-link" href="/flower/" target=""_blank>
+                    Queue Backend
+                </a>
+            </div>
+        </nav>
 
-{# Finally, round things out with navigation #}
-{% block navbar %}
-    {{ nav.frontend_top.render() }}
-{% endblock %}
+        {% block content %}
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-info" role="alert">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {# application content needs to be provided in the app_content block #}
+            {% block app_content %}{% endblock %}
+
+            {% include "footer.html" %}
+
+        {% endblock %}
+
+        {% block scripts %}
+            <!-- Optional JavaScript -->
+            {{ bootstrap.load_js() }}
+        {% endblock %}
+    </body>
+</html>

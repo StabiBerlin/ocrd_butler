@@ -7,16 +7,16 @@
 
 {% block app_content %}
     <div class="container">
-        <div class="jumbotron">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-10">
-                        <h1>Tasks</h1>
-                        <p>Madam/Sir, you choose to see this task.</p>
-                    </div>
-                    <div class="col-md-2">
-                        <img width="100%%" src="{{url_for('static', filename='butler_tasks.png')}}" />
-                    </div>
+
+        <div class="jumbotron p-5 rounded-lg m-3">
+            <div class="row">
+                <div class="col-md-9">
+                    <h1 class="display-4">Workflows</h1>
+                    <hr class="my-4">
+                    <p>Madam/Sir, you choose to see this task.</p>
+                </div>
+                <div class="col-md-3">
+                    <img width="100%%" src="{{url_for('static', filename='butler_tasks.png')}}" />
                 </div>
             </div>
         </div>

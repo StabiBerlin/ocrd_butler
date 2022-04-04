@@ -50,6 +50,9 @@ tasks_blueprint = Blueprint("tasks_blueprint", __name__)
 def _jinja2_filter_format_date(date, fmt="%d.%m.%Y, %H:%M"):
     return date.strftime(fmt)
 
+@tasks_blueprint.app_template_filter('format_ts')
+def _jinja2_filter_format_date(date):
+    return date.timestamp()
 
 @tasks_blueprint.app_template_filter('format_delta')
 def _jinja2_filter_format_delta(delta):
