@@ -22,7 +22,7 @@ from . import (
 )
 
 
-COLUMN_COUNT = 10
+COLUMN_COUNT = 12
 
 
 TASK_INFO = {
